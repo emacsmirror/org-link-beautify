@@ -1,0 +1,15 @@
+* Intro
+
+Usually org links only have text, it's not very intuitive to recognize what type
+of link it is. Add some color and icon will help user read links.
+
+* Screenshots
+
+* Features
+
+- [ ] support colorize links
+- [ ] support display icons for link types
+
+* Install
+
+* Usage
