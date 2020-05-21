@@ -21,3 +21,34 @@ of link it is. Add some color and icon will help user read links.
 (add-hook 'org-mode-hook #'org-link-beautify-mode)
 #+end_src
 
+* Link examples
+
+*NOTE*: Because =all-the-icons= fonts has some issue on my system, so bellowing some
+icons might not correctly displayed. And some links are not beautified because I
+have not found suitable icons for them. If you have any idea, PR welcome.
+
+- file link [[file:babel-R.org][kkk]]
+- raw link [[file:babel-clojure.org]]
+- file link smart recognize file types [[file:~/Downloads/8-个税政治成本最高 对社会公平毫无帮助\[李稻葵\].pdf]]
+- directory link [[file:~/Downloads/][Downloads]]
+- URL link (use different icons based on url with smart all-the-icons) [[https://www.google.com]]
+- elisp link [[elisp:(print "hello, org-link-beautify!")]]
+- shell link [[shell:echo "hi"]]
+- eww link [[eww:https://www.baidu.com]]
+- A mu4e link [[mu4e:msgid:87mu62hfq1.fsf@nicolasgoaziou.fr][Re: [Suggestion] add an API function for getting link description]]
+- Git link [[git:/home/stardiviner/Code/Emacs/org-mode/lisp/org.el::master@{2017-06-24}::1]]
+- orgit link
+- orgit-rev link
+- orgit-log link
+- pdfview link [[pdfview:~/Downloads/社会网络 深度图查询.pdf]]
+- grep link [[grep:org-link-beautify]]
+- occur link [[occur:org-link-beautify]]
+- man link [[man:grep]]
+- info link [[info:emacs]]
+- help link [[help:man]]
+- rss link [[rss:https://www.gmail.com]]
+- elfeed link [[elfeed:Today's news]]
+- telnet link
+- wikipedia link [[wikipedia:Linux]]
+- mailto link [[mailto:numbchild@gmail.com]]
+- doi link [[doi:what?]]
