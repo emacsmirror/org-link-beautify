@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify org links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2020-05-21 22:10:29 stardiviner>
+;;; Time-stamp: <2020-05-21 22:19:09 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "25") (cl-lib "0.5") (all-the-icons "4.0.0"))
@@ -75,7 +75,8 @@
             (raw-link (org-element-property :raw-link link-element))
             ;; (debug1 (message raw-link))
             (type (org-element-property :type link-element))
-            (ext (file-name-extension (org-link-unescape path)))
+            (ext (or (file-name-extension (org-link-unescape path)) "txt"))
+            ;; (debug3 (message ext))
             (description (or (and (org-element-property :contents-begin link-element) ; in raw link case, it's nil
                                   (buffer-substring-no-properties
                                    (org-element-property :contents-begin link-element)
