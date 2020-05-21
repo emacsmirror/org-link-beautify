@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify org links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2020-05-21 13:03:53 stardiviner>
+;;; Time-stamp: <2020-05-21 17:15:24 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "25") (cl-lib "0.5") (all-the-icons "4.0.0"))
@@ -126,20 +126,29 @@
  "file"
  :activate-func #'org-link-beautify)
 
-(defun org-link-unset-parameters (type &rest parameters)
-  "Unset link parameters."
-  ;; TODO
-  )
+(defun org-link-beautify-toggle-overlays ()
+  "Toggle the display of org-link-beautify."
+  (let ((point (point-min))
+        (bmp (buffer-modified-p)))
+    (while (setq point (next-single-property-change point 'display))
+	    (when (and (get-text-property point 'display)
+		             (eq (get-text-property point 'face) 'org-link))
+	      (remove-text-properties
+	       point (setq point (next-single-property-change point 'display))
+	       '(display t))))
+    (set-buffer-modified-p bmp))
+  (org-restart-font-lock))
 
 (defun org-link-beautify-enable ()
   "Enable org-link-beautify."
   (dolist (link-type (mapcar 'car org-link-parameters))
-    (org-link-set-parameters link-type :activate-func #'org-link-beautify)))
+    (org-link-set-parameters link-type :activate-func #'org-link-beautify))
+  (org-link-beautify-toggle-overlays))
 
 (defun org-link-beautify-disable ()
-  (dolist (type (mapcar 'car org-link-parameters))
-    ;; FIXME
-    (org-link-unset-parameters type)))
+  (dolist (link-type (mapcar 'car org-link-parameters))
+    (org-link-set-parameters link-type :activate-func t))
+  (org-link-beautify-toggle-overlays))
 
 (define-minor-mode org-link-beautify-mode
   "A minor mode that beautify Org links with colors and icons."
