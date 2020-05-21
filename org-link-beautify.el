@@ -1,9 +1,9 @@
 ;;; org-link-beautify.el --- Beautify org links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2020-05-21 10:34:03 stardiviner>
+;;; Time-stamp: <2020-05-21 13:03:53 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
-;; Package-Requires: ((emacs "25") (cl-lib "0.5"))
+;; Package-Requires: ((emacs "25") (cl-lib "0.5") (all-the-icons "4.0.0"))
 ;; Package-Version: 0.1
 ;; Keywords: org link
 ;; homepage: https://github.com/stardiviner/org-link-beautify
@@ -28,6 +28,8 @@
 
 ;;; Code:
 
+(require 'all-the-icons)
+
 (defgroup org-link-beautify nil
   "Customize group of org-link-beautify-mode."
   :prefix "org-link-beautify-"
