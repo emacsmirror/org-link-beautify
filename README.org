@@ -57,3 +57,9 @@ have not found suitable icons for them. If you have any idea, PR welcome.
 - wikipedia link [[wikipedia:Linux]]
 - mailto link [[mailto:numbchild@gmail.com]]
 - doi link [[doi:what?]]
+
+* Contributions
+
+- Thanks to John Kitchin and Nicolas Goaziou help in Org Mode mailing list.
+- And [[https://emacs-china.org/t/icon-org-mode/13147][yuchen-lea's screenshot]] gives me design idea
+
