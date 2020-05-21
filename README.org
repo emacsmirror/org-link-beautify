@@ -9,8 +9,9 @@ of link it is. Add some color and icon will help user read links.
 
 * Features
 
-- [ ] support colorize links
-- [ ] support display icons for link types
+- [X] support colorize links
+- [X] support display icons for link types
+- [X] supported link types
 
 * Install
 
