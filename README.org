@@ -16,3 +16,8 @@ of link it is. Add some color and icon will help user read links.
 * Install
 
 * Usage
+
+#+begin_src emacs-lisp
+(add-hook 'org-mode-hook #'org-link-beautify-mode)
+#+end_src
+
