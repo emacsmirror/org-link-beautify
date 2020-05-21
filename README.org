@@ -13,11 +13,6 @@ of link it is. Add some color and icon will help user read links.
 - [X] support display icons for link types
 - [X] supported link types
 
-* Issues
-
-- [ ] links are not correctly beautified when org mode buffer first opened, or after Emacs startup
-- [ ] links can't edit with =[C-c C-l]= like original
-
 * Install
 
 * Usage
