@@ -5,6 +5,8 @@ of link it is. Add some color and icon will help user read links.
 
 * Screenshots
 
+[[file:Screenshot_20200521_104626.png]]
+
 * Features
 
 - [ ] support colorize links
