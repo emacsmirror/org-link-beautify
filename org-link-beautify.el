@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify org links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2020-05-22 08:23:52 stardiviner>
+;;; Time-stamp: <2020-05-22 08:31:45 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "25") (cl-lib "0.5") (all-the-icons "4.0.0"))
@@ -124,10 +124,6 @@
                     ("doi" )
                     )))
       (org-link-beautify--propertize start end description icon)))
-
-(org-link-set-parameters
- "file"
- :activate-func #'org-link-beautify)
 
 (defun org-link-beautify-toggle-overlays ()
   "Toggle the display of org-link-beautify."
