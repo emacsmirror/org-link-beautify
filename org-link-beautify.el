@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify org links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2020-05-21 22:19:09 stardiviner>
+;;; Time-stamp: <2020-05-22 08:23:52 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "25") (cl-lib "0.5") (all-the-icons "4.0.0"))
@@ -71,19 +71,19 @@
   ;; detect whether link is normal, jump other links in special places.
   (if-let* ((normal-link-p (eq (car (org-link-beautify--get-element start)) 'link))
             (link-element (org-link-beautify--get-element start))
-            ;; (debug0 (message link-element))
+            ;; (link-element-debug (message link-element))
             (raw-link (org-element-property :raw-link link-element))
-            ;; (debug1 (message raw-link))
+            ;; (raw-link-debug (message raw-link))
             (type (org-element-property :type link-element))
             (ext (or (file-name-extension (org-link-unescape path)) "txt"))
-            ;; (debug3 (message ext))
+            ;; (ext-debug (message ext))
             (description (or (and (org-element-property :contents-begin link-element) ; in raw link case, it's nil
                                   (buffer-substring-no-properties
                                    (org-element-property :contents-begin link-element)
                                    (org-element-property :contents-end link-element)))
                              ;; when description not exist, use raw link for raw link case.
                              raw-link))
-            ;; (debug2 (message description))
+            ;; (desc-debug (message description))
             (icon (pcase type
                     ("file"
                      (if (file-directory-p path)
