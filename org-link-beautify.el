@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify org links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2020-05-22 08:31:45 stardiviner>
+;;; Time-stamp: <2020-05-24 18:22:00 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "25") (cl-lib "0.5") (all-the-icons "4.0.0"))
@@ -95,11 +95,11 @@
                         (format ".%s" ext)
                         :face (org-link-beautify--warning path)
                         :v-adjust 0)))
-                    ("file+sys" (all-the-icons-material "apps"))
+                    ("file+sys" (all-the-icons-faicon "link"))
                     ("file+emacs" (all-the-icons-icon-for-mode 'emacs-lisp-mode))
                     ("http" (all-the-icons-icon-for-url (concat "http:" path)))
                     ("https" (all-the-icons-icon-for-url (concat "https:" path)))
-                    ("ftp" (all-the-icons-icon-for-url (concat "ftp:" path)))
+                    ("ftp" (all-the-icons-faicon "link"))
                     ("attachment" )
                     ("id" )
                     ("elisp" (all-the-icons-icon-for-mode 'emacs-lisp-mode))
