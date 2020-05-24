@@ -122,7 +122,7 @@
                     ("wikipedia" (all-the-icons-icon-for-file ".wiki"))
                     ("mailto" (all-the-icons-material "email"))
                     ("doi" )
-                    )))
+                    ("eaf" (all-the-icons-faicon "linux")))))
       (org-link-beautify--propertize start end description icon)))
 
 (defun org-link-beautify-toggle-overlays ()

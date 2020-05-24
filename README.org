@@ -52,6 +52,7 @@ have not found suitable icons for them. If you have any idea, PR welcome.
 - wikipedia link [[wikipedia:Linux]]
 - mailto link [[mailto:numbchild@gmail.com]]
 - doi link [[doi:what?]]
+- EAF link [[eaf:pdf-viewer::/home/stardiviner/Org/Wiki/Computer Technology/Programming/Programming Languages/Database/SQL/PostgresQL/Data/Books/PostgreSQL即学即用中文第2版.pdf::46][PostgreSQL即学即用中文第2版.pdf]]
 
 * Contributions
 
