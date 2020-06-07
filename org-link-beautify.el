@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify org links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2020-06-07 20:52:40 stardiviner>
+;;; Time-stamp: <2020-06-07 21:52:47 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "25") (cl-lib "0.5") (all-the-icons "4.0.0"))
@@ -100,8 +100,8 @@
                     ("http" (all-the-icons-icon-for-url (concat "http:" path) :v-adjust -0.05))
                     ("https" (all-the-icons-icon-for-url (concat "https:" path) :v-adjust -0.05))
                     ("ftp" (all-the-icons-faicon "link"))
-                    ("attachment" )
-                    ("id" )
+                    ("id" (all-the-icons-fileicon ""))
+                    ("attachment" (all-the-icons-faicon "puzzle-piece"))
                     ("elisp" (all-the-icons-icon-for-mode 'emacs-lisp-mode :v-adjust -0.05))
                     ("shell" (all-the-icons-icon-for-mode 'shell-mode))
                     ("eww" (all-the-icons-icon-for-mode 'eww-mode))
@@ -118,10 +118,10 @@
                     ("help" (all-the-icons-icon-for-mode 'Help-Mode))
                     ("rss" (all-the-icons-material "rss_feed"))
                     ("elfeed" (all-the-icons-material "rss_feed"))
-                    ("telnet")
-                    ("wikipedia" (all-the-icons-icon-for-file ".wiki"))
+                    ("telnet" (all-the-icons-faicon "compress"))
+                    ("wikipedia" (all-the-icons-faicon "wikipedia-w"))
                     ("mailto" (all-the-icons-material "email" :v-adjust -0.05))
-                    ("doi" )
+                    ("doi" (all-the-icons-fileicon "isabelle"))
                     ("eaf" (all-the-icons-faicon "linux" :v-adjust -0.05)))))
       (org-link-beautify--propertize start end description icon)))
 
