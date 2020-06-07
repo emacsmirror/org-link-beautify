@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify org links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2020-05-24 18:22:00 stardiviner>
+;;; Time-stamp: <2020-06-07 20:52:40 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "25") (cl-lib "0.5") (all-the-icons "4.0.0"))
@@ -97,15 +97,15 @@
                         :v-adjust 0)))
                     ("file+sys" (all-the-icons-faicon "link"))
                     ("file+emacs" (all-the-icons-icon-for-mode 'emacs-lisp-mode))
-                    ("http" (all-the-icons-icon-for-url (concat "http:" path)))
-                    ("https" (all-the-icons-icon-for-url (concat "https:" path)))
+                    ("http" (all-the-icons-icon-for-url (concat "http:" path) :v-adjust -0.05))
+                    ("https" (all-the-icons-icon-for-url (concat "https:" path) :v-adjust -0.05))
                     ("ftp" (all-the-icons-faicon "link"))
                     ("attachment" )
                     ("id" )
-                    ("elisp" (all-the-icons-icon-for-mode 'emacs-lisp-mode))
+                    ("elisp" (all-the-icons-icon-for-mode 'emacs-lisp-mode :v-adjust -0.05))
                     ("shell" (all-the-icons-icon-for-mode 'shell-mode))
                     ("eww" (all-the-icons-icon-for-mode 'eww-mode))
-                    ("mu4e" (all-the-icons-icon-for-mode 'mu4e-headers-mode))
+                    ("mu4e" (all-the-icons-icon-for-mode 'mu4e-headers-mode :v-adjust -0.05))
                     ("git" (all-the-icons-octicon "git-branch"))
                     ("orgit" (all-the-icons-octicon "git-branch"))
                     ("orgit-rev" (all-the-icons-octicon "git-commit"))
@@ -120,9 +120,9 @@
                     ("elfeed" (all-the-icons-material "rss_feed"))
                     ("telnet")
                     ("wikipedia" (all-the-icons-icon-for-file ".wiki"))
-                    ("mailto" (all-the-icons-material "email"))
+                    ("mailto" (all-the-icons-material "email" :v-adjust -0.05))
                     ("doi" )
-                    ("eaf" (all-the-icons-faicon "linux")))))
+                    ("eaf" (all-the-icons-faicon "linux" :v-adjust -0.05)))))
       (org-link-beautify--propertize start end description icon)))
 
 (defun org-link-beautify-toggle-overlays ()
