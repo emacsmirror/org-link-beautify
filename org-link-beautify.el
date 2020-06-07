@@ -138,17 +138,20 @@
     (set-buffer-modified-p bmp))
   (org-restart-font-lock))
 
+;;;###autoload
 (defun org-link-beautify-enable ()
   "Enable org-link-beautify."
   (dolist (link-type (mapcar 'car org-link-parameters))
     (org-link-set-parameters link-type :activate-func #'org-link-beautify))
   (org-link-beautify-toggle-overlays))
 
+;;;###autoload
 (defun org-link-beautify-disable ()
   (dolist (link-type (mapcar 'car org-link-parameters))
     (org-link-set-parameters link-type :activate-func t))
   (org-link-beautify-toggle-overlays))
 
+;;;###autoload
 (define-minor-mode org-link-beautify-mode
   "A minor mode that beautify Org links with colors and icons."
   :init-value nil
@@ -156,6 +159,7 @@
   :group 'org-link-beautify
   (if org-link-beautify-mode (org-link-beautify-enable) (org-link-beautify-disable)))
 
+;;;###autoload
 (define-global-minor-mode global-org-link-beautify-mode org-link-beautify-mode
   org-link-beautify-mode)
 
