@@ -105,7 +105,7 @@
                     ("elisp" (all-the-icons-icon-for-mode 'emacs-lisp-mode :v-adjust -0.05))
                     ("shell" (all-the-icons-icon-for-mode 'shell-mode))
                     ("eww" (all-the-icons-icon-for-mode 'eww-mode))
-                    ("mu4e" (all-the-icons-icon-for-mode 'mu4e-headers-mode :v-adjust -0.05))
+                    ("mu4e" (all-the-icons-faicon "envelope-o" :v-adjust -0.05))
                     ("git" (all-the-icons-octicon "git-branch"))
                     ("orgit" (all-the-icons-octicon "git-branch"))
                     ("orgit-rev" (all-the-icons-octicon "git-commit"))
