@@ -18,7 +18,7 @@ of link it is. Add some color and icon will help user read links.
 * Usage
 
 #+begin_src emacs-lisp
-(add-hook 'org-mode-hook #'org-link-beautify-mode)
+(org-link-beautify-mode 1) ; (ref:toggle org-link-beautify-mode)
 #+end_src
 
 * Link examples

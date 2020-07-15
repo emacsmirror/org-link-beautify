@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify org links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2020-06-07 21:52:47 stardiviner>
+;;; Time-stamp: <2020-07-18 13:04:16 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "25") (cl-lib "0.5") (all-the-icons "4.0.0"))
@@ -157,11 +157,10 @@
   :init-value nil
   :lighter nil
   :group 'org-link-beautify
-  (if org-link-beautify-mode (org-link-beautify-enable) (org-link-beautify-disable)))
-
-;;;###autoload
-(define-global-minor-mode global-org-link-beautify-mode org-link-beautify-mode
-  org-link-beautify-mode)
+  :global t
+  (if org-link-beautify-mode
+      (org-link-beautify-enable)
+    (org-link-beautify-disable)))
 
 
 
