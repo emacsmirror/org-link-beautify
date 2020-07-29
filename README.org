@@ -5,7 +5,7 @@ of link it is. Add some color and icon will help user read links.
 
 * Screenshots
 
-[[file:Screenshot_20200521_104626.png]]
+[[file:screenshot.png]]
 
 * Features
 
@@ -25,7 +25,8 @@ of link it is. Add some color and icon will help user read links.
 
 *NOTE*: Because =all-the-icons= fonts has some issue on my system, so bellowing some
 icons might not correctly displayed. And some links are not beautified because I
-have not found suitable icons for them. If you have any idea, PR welcome.
+have not found suitable icons for them. And if file: link type source file is
+not available, it will be colored. If you have any idea, PR welcome.
 
 - file link [[file:babel-R.org][kkk]]
 - raw link [[file:babel-clojure.org]]
