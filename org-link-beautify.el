@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify org links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2020-07-30 14:40:21 stardiviner>
+;;; Time-stamp: <2020-07-30 14:41:41 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "25") (cl-lib "0.5") (all-the-icons "4.0.0"))
@@ -56,20 +56,6 @@
   (save-excursion
     (goto-char position)
     (and (org-at-regexp-p org-link-bracket-re) (match-string 2))))
-
-(defun org-link-beautify--propertize (start end description icon)
-  "Construct link display with link description and icon."
-  (put-text-property
-   start end
-   'display
-   (propertize
-    (concat
-     (propertize "[" 'face '(:inherit nil :underline nil :foreground "orange"))
-     (propertize description 'face '(:underline t :foreground "dark cyan"))
-     (propertize "]" 'face '(:inherit nil :underline nil :foreground "orange"))
-     (propertize "(" 'face '(:inherit nil :underline nil :foreground "orange"))
-     (propertize (or icon "") 'face '(:inherit nil :underline nil :foreground "gray"))
-     (propertize ")" 'face '(:inherit nil :underline nil :foreground "orange"))))))
 
 (defun org-link-beautify--warning (path)
   (if (and (not (file-remote-p path))
@@ -155,7 +141,17 @@
            start end
            'display (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size))))
        ;; general icons
-       (t (org-link-beautify--propertize start end description icon)))))
+       (t (put-text-property
+           start end
+           'display
+           (propertize
+            (concat
+             (propertize "[" 'face '(:inherit nil :underline nil :foreground "orange"))
+             (propertize description 'face '(:underline t :foreground "dark cyan"))
+             (propertize "]" 'face '(:inherit nil :underline nil :foreground "orange"))
+             (propertize "(" 'face '(:inherit nil :underline nil :foreground "orange"))
+             (propertize icon 'face '(:inherit nil :underline nil :foreground "gray"))
+             (propertize ")" 'face '(:inherit nil :underline nil :foreground "orange")))))))))
 
 (defun org-link-beautify-toggle-overlays ()
   "Toggle the display of org-link-beautify."
