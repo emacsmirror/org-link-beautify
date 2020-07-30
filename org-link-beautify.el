@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify org links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2020-07-18 13:04:16 stardiviner>
+;;; Time-stamp: <2020-07-30 14:40:21 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "25") (cl-lib "0.5") (all-the-icons "4.0.0"))
@@ -35,6 +35,18 @@
   :prefix "org-link-beautify-"
   :group 'org)
 
+(defcustom org-link-beautify-thumbnails-dir "~/.cache/thumbnails/"
+  "The directory of generated thumbnails."
+  :type 'string
+  :safe #'stringp
+  :group 'org-link-beautify)
+
+(defcustom org-link-beautify-thumbnail-size 512
+  "The video thumbnail image size."
+  :type 'number
+  :safe #'numberp
+  :group 'org-link-beautify)
+
 (defun org-link-beautify--get-element (position)
   "Return the org element of link at the `POSITION'."
   (save-excursion (goto-char position) (org-element-context)))
@@ -45,7 +57,7 @@
     (goto-char position)
     (and (org-at-regexp-p org-link-bracket-re) (match-string 2))))
 
-(defun org-link-beautify--propertize (start end desc icon)
+(defun org-link-beautify--propertize (start end description icon)
   "Construct link display with link description and icon."
   (put-text-property
    start end
@@ -53,10 +65,10 @@
    (propertize
     (concat
      (propertize "[" 'face '(:inherit nil :underline nil :foreground "orange"))
-     (propertize desc 'face '(:underline t :foreground "dark cyan"))
+     (propertize description 'face '(:underline t :foreground "dark cyan"))
      (propertize "]" 'face '(:inherit nil :underline nil :foreground "orange"))
      (propertize "(" 'face '(:inherit nil :underline nil :foreground "orange"))
-     (propertize icon 'face '(:inherit nil :underline nil :foreground "gray"))
+     (propertize (or icon "") 'face '(:inherit nil :underline nil :foreground "gray"))
      (propertize ")" 'face '(:inherit nil :underline nil :foreground "orange"))))))
 
 (defun org-link-beautify--warning (path)
@@ -75,8 +87,8 @@
             (raw-link (org-element-property :raw-link link-element))
             ;; (raw-link-debug (message raw-link))
             (type (org-element-property :type link-element))
-            (ext (or (file-name-extension (org-link-unescape path)) "txt"))
-            ;; (ext-debug (message ext))
+            (extension (or (file-name-extension (org-link-unescape path)) "txt"))
+            ;; (ext-debug (message extension))
             (description (or (and (org-element-property :contents-begin link-element) ; in raw link case, it's nil
                                   (buffer-substring-no-properties
                                    (org-element-property :contents-begin link-element)
@@ -92,7 +104,7 @@
                           :face (org-link-beautify--warning path)
                           :v-adjust 0)
                        (all-the-icons-icon-for-file
-                        (format ".%s" ext)
+                        (format ".%s" extension)
                         :face (org-link-beautify--warning path)
                         :v-adjust 0)))
                     ("file+sys" (all-the-icons-faicon "link"))
@@ -123,7 +135,27 @@
                     ("mailto" (all-the-icons-material "email" :v-adjust -0.05))
                     ("doi" (all-the-icons-fileicon "isabelle"))
                     ("eaf" (all-the-icons-faicon "linux" :v-adjust -0.05)))))
-      (org-link-beautify--propertize start end description icon)))
+      (cond
+       ;; video thumbnails
+       ((and (equal type "file") (member extension '("avi" "rmvb" "ogg" "mp4" "mkv")))
+        (let* ((video (expand-file-name (org-link-unescape path)))
+               (thumbnails-dir (file-name-directory
+                                (or org-link-beautify-thumbnails-dir "~/.cache/thumbnails/")))
+               (thumbnail-size (or org-link-beautify-thumbnail-size 512))
+               
+               (thumbnail (expand-file-name (format "%s%s.jpg" thumbnails-dir (file-name-base video)))))
+          ;; (message (format "ffmpegthumbnailer -f -i %s -s %s -o %s"
+          ;;                  (shell-quote-argument video) thumbnail-size (shell-quote-argument thumbnail)))
+          (shell-command
+           (format "ffmpegthumbnailer -f -i %s -s %s -o %s"
+                   (shell-quote-argument video) thumbnail-size (shell-quote-argument thumbnail)))
+          ;; (message "start: %s, end: %s" start end)
+          ;; (message "%s" thumbnail)
+          (put-text-property
+           start end
+           'display (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size))))
+       ;; general icons
+       (t (org-link-beautify--propertize start end description icon)))))
 
 (defun org-link-beautify-toggle-overlays ()
   "Toggle the display of org-link-beautify."
