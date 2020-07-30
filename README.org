@@ -7,13 +7,26 @@ of link it is. Add some color and icon will help user read links.
 
 [[file:screenshot.png]]
 
+** video thumbnail
+
+[[file:video-thumbnail.png]]
+
 * Features
 
 - [X] support colorize links
 - [X] support display icons for link types
 - [X] supported link types
+- [X] display thumbnail for video file link
 
 * Install
+
+- video thumbnail feature needs package "=ffmpegthumbnailer="
+
+  For Arch Linux:
+
+  #+begin_src sh :dir /sudo:: :results none
+  sudo pacman -S --noconfirm ffmpegthumbnailer
+  #+end_src
 
 * Usage
 
@@ -29,6 +42,7 @@ have not found suitable icons for them. And if file: link type source file is
 not available, it will be colored. If you have any idea, PR welcome.
 
 - file link [[file:babel-R.org][kkk]]
+  + video thumbnail for video file link  [[file:~/Downloads/Neural Network Architectures-oJNHXPs0XDk.mkv]]
 - raw link [[file:babel-clojure.org]]
 - file link smart recognize file types [[file:~/Downloads/8-个税政治成本最高 对社会公平毫无帮助\[李稻葵\].pdf]]
 - directory link [[file:~/Downloads/][Downloads]]
