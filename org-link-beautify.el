@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify org links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2020-07-30 14:41:41 stardiviner>
+;;; Time-stamp: <2020-08-02 13:39:55 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "25") (cl-lib "0.5") (all-the-icons "4.0.0"))
@@ -35,7 +35,7 @@
   :prefix "org-link-beautify-"
   :group 'org)
 
-(defcustom org-link-beautify-thumbnails-dir "~/.cache/thumbnails/"
+(defcustom org-link-beautify-thumbnail-dir "~/.cache/thumbnails/"
   "The directory of generated thumbnails."
   :type 'string
   :safe #'stringp
@@ -132,7 +132,7 @@
        ((and (equal type "file") (member extension org-link-beautify-video-types-list))
         (let* ((video (expand-file-name (org-link-unescape path)))
                (thumbnails-dir (file-name-directory
-                                (or org-link-beautify-thumbnails-dir "~/.cache/thumbnails/")))
+                                (or org-link-beautify-thumbnail-dir "~/.cache/thumbnails/")))
                (thumbnail-size (or org-link-beautify-thumbnail-size 512))
                
                (thumbnail (expand-file-name (format "%s%s.jpg" thumbnails-dir (file-name-base video)))))
