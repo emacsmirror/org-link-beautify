@@ -47,6 +47,12 @@
   :safe #'numberp
   :group 'org-link-beautify)
 
+(defcustom org-link-beautify-video-types-list '("avi" "rmvb" "ogg" "mp4" "mkv" "flv")
+  "A list of video file types be supported with thumbnails."
+  :type 'list
+  :safe #'listp
+  :group 'org-link-beautify)
+
 (defun org-link-beautify--get-element (position)
   "Return the org element of link at the `POSITION'."
   (save-excursion (goto-char position) (org-element-context)))
@@ -123,7 +129,7 @@
                     ("eaf" (all-the-icons-faicon "linux" :v-adjust -0.05)))))
       (cond
        ;; video thumbnails
-       ((and (equal type "file") (member extension '("avi" "rmvb" "ogg" "mp4" "mkv")))
+       ((and (equal type "file") (member extension org-link-beautify-video-types-list))
         (let* ((video (expand-file-name (org-link-unescape path)))
                (thumbnails-dir (file-name-directory
                                 (or org-link-beautify-thumbnails-dir "~/.cache/thumbnails/")))
