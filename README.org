@@ -42,6 +42,8 @@ have not found suitable icons for them. And if file: link type source file is
 not available, it will be colored. If you have any idea, PR welcome.
 
 - file link [[file:babel-R.org][kkk]]
+  + remote file
+  + non-existing file
   + video thumbnail for video file link  [[file:~/Downloads/Neural Network Architectures-oJNHXPs0XDk.mkv]]
 - raw link [[file:babel-clojure.org]]
 - file link smart recognize file types [[file:~/Downloads/8-个税政治成本最高 对社会公平毫无帮助\[李稻葵\].pdf]]

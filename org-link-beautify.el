@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify org links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2020-08-02 13:39:55 stardiviner>
+;;; Time-stamp: <2020-08-07 18:33:57 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "25") (cl-lib "0.5") (all-the-icons "4.0.0"))
@@ -90,15 +90,20 @@
             ;; (desc-debug (message description))
             (icon (pcase type
                     ("file"
-                     (if (file-directory-p path)
-                         (all-the-icons-icon-for-dir
-                          "path"
-                          :face (org-link-beautify--warning path)
-                          :v-adjust 0)
-                       (all-the-icons-icon-for-file
-                        (format ".%s" extension)
+                     (cond
+                      ((file-remote-p path) ; remote file
+                       (all-the-icons-faicon "server" :face 'org-warning))
+                      ((not (file-exists-p (expand-file-name path))) ; not exist file
+                       (all-the-icons-faicon "exclamation-triangle" :face 'org-warning))
+                      ((file-directory-p path) ; directory
+                       (all-the-icons-icon-for-dir
+                        "path"
                         :face (org-link-beautify--warning path)
-                        :v-adjust 0)))
+                        :v-adjust 0))
+                      (t (all-the-icons-icon-for-file ; file
+                          (format ".%s" extension)
+                          :face (org-link-beautify--warning path)
+                          :v-adjust 0))))
                     ("file+sys" (all-the-icons-faicon "link"))
                     ("file+emacs" (all-the-icons-icon-for-mode 'emacs-lisp-mode))
                     ("http" (all-the-icons-icon-for-url (concat "http:" path) :v-adjust -0.05))
