@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2020-08-17 22:10:58 stardiviner>
+;;; Time-stamp: <2020-08-17 22:16:57 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -83,102 +83,102 @@
   "Display icon for the link type based on PATH from START to END."
   ;; (message
   ;;  (format "start: %s, end: %s, path: %s, bracket-p: %s" start end path bracket-p))
-  (unless (and (memq major-mode org-link-beautify-exclude-modes)
-               ;; detect whether link is normal, jump other links in special places.
-               (not (eq (car (org-link-beautify--get-element start)) 'link)))
-    (save-match-data
-      (let* ((link-element (org-link-beautify--get-element start))
-             ;; (link-element-debug (message link-element))
-             (raw-link (org-element-property :raw-link link-element))
-             ;; (raw-link-debug (message raw-link))
-             (type (org-element-property :type link-element))
-             (extension (or (file-name-extension (org-link-unescape path)) "txt"))
-             ;; (ext-debug (message extension))
-             (description (or (and (org-element-property :contents-begin link-element) ; in raw link case, it's nil
-                                   (buffer-substring-no-properties
-                                    (org-element-property :contents-begin link-element)
-                                    (org-element-property :contents-end link-element)))
-                              ;; when description not exist, use raw link for raw link case.
-                              raw-link))
-             ;; (desc-debug (message description))
-             (icon (pcase type
-                     ("file"
-                      (cond
-                       ((file-remote-p path) ; remote file
-                        (all-the-icons-faicon "server" :face 'org-warning))
-                       ((not (file-exists-p (expand-file-name path))) ; not exist file
-                        (all-the-icons-faicon "exclamation-triangle" :face 'org-warning))
-                       ((file-directory-p path) ; directory
-                        (all-the-icons-icon-for-dir
-                         "path"
-                         :face (org-link-beautify--warning path)
-                         :v-adjust 0))
-                       (t (all-the-icons-icon-for-file ; file
-                           (format ".%s" extension)
+  (unless (memq major-mode org-link-beautify-exclude-modes)
+    ;; detect whether link is normal, jump other links in special places.
+    (when (eq (car (org-link-beautify--get-element start)) 'link)
+      (save-match-data
+        (let* ((link-element (org-link-beautify--get-element start))
+               ;; (link-element-debug (message link-element))
+               (raw-link (org-element-property :raw-link link-element))
+               ;; (raw-link-debug (message raw-link))
+               (type (org-element-property :type link-element))
+               (extension (or (file-name-extension (org-link-unescape path)) "txt"))
+               ;; (ext-debug (message extension))
+               (description (or (and (org-element-property :contents-begin link-element) ; in raw link case, it's nil
+                                     (buffer-substring-no-properties
+                                      (org-element-property :contents-begin link-element)
+                                      (org-element-property :contents-end link-element)))
+                                ;; when description not exist, use raw link for raw link case.
+                                raw-link))
+               ;; (desc-debug (message description))
+               (icon (pcase type
+                       ("file"
+                        (cond
+                         ((file-remote-p path) ; remote file
+                          (all-the-icons-faicon "server" :face 'org-warning))
+                         ((not (file-exists-p (expand-file-name path))) ; not exist file
+                          (all-the-icons-faicon "exclamation-triangle" :face 'org-warning))
+                         ((file-directory-p path) ; directory
+                          (all-the-icons-icon-for-dir
+                           "path"
                            :face (org-link-beautify--warning path)
-                           :v-adjust 0))))
-                     ("file+sys" (all-the-icons-faicon "link"))
-                     ("file+emacs" (all-the-icons-icon-for-mode 'emacs-lisp-mode))
-                     ("http" (all-the-icons-icon-for-url (concat "http:" path) :v-adjust -0.05))
-                     ("https" (all-the-icons-icon-for-url (concat "https:" path) :v-adjust -0.05))
-                     ("ftp" (all-the-icons-faicon "link"))
-                     ("custom-id" (all-the-icons-faicon "hashtag"))
-                     ("coderef" (all-the-icons-faicon "code"))
-                     ("id" (all-the-icons-fileicon ""))
-                     ("attachment" (all-the-icons-faicon "puzzle-piece"))
-                     ("elisp" (all-the-icons-icon-for-mode 'emacs-lisp-mode :v-adjust -0.05))
-                     ("shell" (all-the-icons-icon-for-mode 'shell-mode))
-                     ("eww" (all-the-icons-icon-for-mode 'eww-mode))
-                     ("mu4e" (all-the-icons-faicon "envelope-o" :v-adjust -0.05))
-                     ("git" (all-the-icons-octicon "git-branch"))
-                     ("orgit" (all-the-icons-octicon "git-branch"))
-                     ("orgit-rev" (all-the-icons-octicon "git-commit"))
-                     ("orgit-log" (all-the-icons-icon-for-mode 'magit-log-mode))
-                     ("pdfview" (all-the-icons-icon-for-file ".pdf"))
-                     ("grep" (all-the-icons-icon-for-mode 'grep-mode))
-                     ("occur" (all-the-icons-icon-for-mode 'occur-mode))
-                     ("man" (all-the-icons-icon-for-mode 'Man-mode))
-                     ("info" (all-the-icons-icon-for-mode 'Info-mode))
-                     ("help" (all-the-icons-icon-for-mode 'Help-Mode))
-                     ("rss" (all-the-icons-material "rss_feed"))
-                     ("elfeed" (all-the-icons-material "rss_feed"))
-                     ("telnet" (all-the-icons-faicon "compress"))
-                     ("wikipedia" (all-the-icons-faicon "wikipedia-w"))
-                     ("mailto" (all-the-icons-material "email" :v-adjust -0.05))
-                     ("doi" (all-the-icons-fileicon "isabelle"))
-                     ("eaf" (all-the-icons-faicon "linux" :v-adjust -0.05)))))
-        (when bracket-p (ignore))
-        (cond
-         ;; video thumbnails
-         ((and (equal type "file") (member extension org-link-beautify-video-types-list))
-          (let* ((video (expand-file-name (org-link-unescape path)))
-                 (thumbnails-dir (file-name-directory
-                                  (or org-link-beautify-thumbnail-dir "~/.cache/thumbnails/")))
-                 (thumbnail-size (or org-link-beautify-thumbnail-size 512))
-                 
-                 (thumbnail (expand-file-name (format "%s%s.jpg" thumbnails-dir (file-name-base video)))))
-            ;; (message (format "ffmpegthumbnailer -f -i %s -s %s -o %s"
-            ;;                  (shell-quote-argument video) thumbnail-size (shell-quote-argument thumbnail)))
-            (shell-command
-             (format "ffmpegthumbnailer -f -i %s -s %s -o %s"
-                     (shell-quote-argument video) thumbnail-size (shell-quote-argument thumbnail)))
-            ;; (message "start: %s, end: %s" start end)
-            ;; (message "%s" thumbnail)
-            (put-text-property
-             start end
-             'display (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size))))
-         ;; general icons
-         (t (put-text-property
-             start end
-             'display
-             (propertize
-              (concat
-               (propertize "[" 'face '(:inherit nil :underline nil :foreground "orange"))
-               (propertize description 'face '(:underline t :foreground "dark cyan"))
-               (propertize "]" 'face '(:inherit nil :underline nil :foreground "orange"))
-               (propertize "(" 'face '(:inherit nil :underline nil :foreground "orange"))
-               (propertize icon 'face '(:inherit nil :underline nil :foreground "gray"))
-               (propertize ")" 'face '(:inherit nil :underline nil :foreground "orange")))))))))))
+                           :v-adjust 0))
+                         (t (all-the-icons-icon-for-file ; file
+                             (format ".%s" extension)
+                             :face (org-link-beautify--warning path)
+                             :v-adjust 0))))
+                       ("file+sys" (all-the-icons-faicon "link"))
+                       ("file+emacs" (all-the-icons-icon-for-mode 'emacs-lisp-mode))
+                       ("http" (all-the-icons-icon-for-url (concat "http:" path) :v-adjust -0.05))
+                       ("https" (all-the-icons-icon-for-url (concat "https:" path) :v-adjust -0.05))
+                       ("ftp" (all-the-icons-faicon "link"))
+                       ("custom-id" (all-the-icons-faicon "hashtag"))
+                       ("coderef" (all-the-icons-faicon "code"))
+                       ("id" (all-the-icons-fileicon ""))
+                       ("attachment" (all-the-icons-faicon "puzzle-piece"))
+                       ("elisp" (all-the-icons-icon-for-mode 'emacs-lisp-mode :v-adjust -0.05))
+                       ("shell" (all-the-icons-icon-for-mode 'shell-mode))
+                       ("eww" (all-the-icons-icon-for-mode 'eww-mode))
+                       ("mu4e" (all-the-icons-faicon "envelope-o" :v-adjust -0.05))
+                       ("git" (all-the-icons-octicon "git-branch"))
+                       ("orgit" (all-the-icons-octicon "git-branch"))
+                       ("orgit-rev" (all-the-icons-octicon "git-commit"))
+                       ("orgit-log" (all-the-icons-icon-for-mode 'magit-log-mode))
+                       ("pdfview" (all-the-icons-icon-for-file ".pdf"))
+                       ("grep" (all-the-icons-icon-for-mode 'grep-mode))
+                       ("occur" (all-the-icons-icon-for-mode 'occur-mode))
+                       ("man" (all-the-icons-icon-for-mode 'Man-mode))
+                       ("info" (all-the-icons-icon-for-mode 'Info-mode))
+                       ("help" (all-the-icons-icon-for-mode 'Help-Mode))
+                       ("rss" (all-the-icons-material "rss_feed"))
+                       ("elfeed" (all-the-icons-material "rss_feed"))
+                       ("telnet" (all-the-icons-faicon "compress"))
+                       ("wikipedia" (all-the-icons-faicon "wikipedia-w"))
+                       ("mailto" (all-the-icons-material "email" :v-adjust -0.05))
+                       ("doi" (all-the-icons-fileicon "isabelle"))
+                       ("eaf" (all-the-icons-faicon "linux" :v-adjust -0.05)))))
+          (when bracket-p (ignore))
+          (cond
+           ;; video thumbnails
+           ((and (equal type "file") (member extension org-link-beautify-video-types-list))
+            (let* ((video (expand-file-name (org-link-unescape path)))
+                   (thumbnails-dir (file-name-directory
+                                    (or org-link-beautify-thumbnail-dir "~/.cache/thumbnails/")))
+                   (thumbnail-size (or org-link-beautify-thumbnail-size 512))
+                   
+                   (thumbnail (expand-file-name (format "%s%s.jpg" thumbnails-dir (file-name-base video)))))
+              ;; (message (format "ffmpegthumbnailer -f -i %s -s %s -o %s"
+              ;;                  (shell-quote-argument video) thumbnail-size (shell-quote-argument thumbnail)))
+              (shell-command
+               (format "ffmpegthumbnailer -f -i %s -s %s -o %s"
+                       (shell-quote-argument video) thumbnail-size (shell-quote-argument thumbnail)))
+              ;; (message "start: %s, end: %s" start end)
+              ;; (message "%s" thumbnail)
+              (put-text-property
+               start end
+               'display (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size))))
+           ;; general icons
+           (t (put-text-property
+               start end
+               'display
+               (propertize
+                (concat
+                 (propertize "[" 'face '(:inherit nil :underline nil :foreground "orange"))
+                 (propertize description 'face '(:underline t :foreground "dark cyan"))
+                 (propertize "]" 'face '(:inherit nil :underline nil :foreground "orange"))
+                 (propertize "(" 'face '(:inherit nil :underline nil :foreground "orange"))
+                 (propertize icon 'face '(:inherit nil :underline nil :foreground "gray"))
+                 (propertize ")" 'face '(:inherit nil :underline nil :foreground "orange"))))))))))))
 
 (defun org-link-beautify-toggle-overlays ()
   "Toggle the display of `org-link-beautify'."
