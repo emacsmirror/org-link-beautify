@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify org links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2020-08-17 08:43:44 stardiviner>
+;;; Time-stamp: <2020-08-17 11:09:37 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "25") (cl-lib "0.5") (all-the-icons "4.0.0"))
@@ -80,35 +80,32 @@
   ;;  (format "start: %s, end: %s, path: %s, bracketp: %s" start end path bracketp))
   ;; detect whether link is normal, jump other links in special places.
   (unless (memq major-mode org-link-beautify-exclude-modes)
-    (if-let* ((normal-link-p (eq (car (org-link-beautify--get-element start)) 'link))
-              (link-element (org-link-beautify--get-element start))
-              ;; (link-element-debug (message link-element))
-              (raw-link (org-element-property :raw-link link-element))
-              ;; (raw-link-debug (message raw-link))
-              (type (org-element-property :type link-element))
-              (extension (or (file-name-extension (org-link-unescape path)) "txt"))
-              ;; (ext-debug (message extension))
-              (description (or (and (org-element-property :contents-begin link-element) ; in raw link case, it's nil
-                                    (buffer-substring-no-properties
-                                     (org-element-property :contents-begin link-element)
-                                     (org-element-property :contents-end link-element)))
-                               ;; when description not exist, use raw link for raw link case.
-                               raw-link))
-              ;; (desc-debug (message description))
-              (icon (pcase type
-                      ("file"
-                       (cond
-                        ((file-remote-p path) ; remote file
-                         (all-the-icons-faicon "server" :face 'org-warning))
-                        ((not (file-exists-p (expand-file-name path))) ; not exist file
-                         (all-the-icons-faicon "exclamation-triangle" :face 'org-warning))
-                        ((file-directory-p path) ; directory
-                         (all-the-icons-icon-for-dir
-                          "path"
-                          :face (org-link-beautify--warning path)
-                          :v-adjust 0))
-                        (t (all-the-icons-icon-for-file ; file
-                            (format ".%s" extension)
+    (save-match-data
+      (if-let* ((normal-link-p (eq (car (org-link-beautify--get-element start)) 'link))
+                (link-element (org-link-beautify--get-element start))
+                ;; (link-element-debug (message link-element))
+                (raw-link (org-element-property :raw-link link-element))
+                ;; (raw-link-debug (message raw-link))
+                (type (org-element-property :type link-element))
+                (extension (or (file-name-extension (org-link-unescape path)) "txt"))
+                ;; (ext-debug (message extension))
+                (description (or (and (org-element-property :contents-begin link-element) ; in raw link case, it's nil
+                                      (buffer-substring-no-properties
+                                       (org-element-property :contents-begin link-element)
+                                       (org-element-property :contents-end link-element)))
+                                 ;; when description not exist, use raw link for raw link case.
+                                 raw-link))
+                ;; (desc-debug (message description))
+                (icon (pcase type
+                        ("file"
+                         (cond
+                          ((file-remote-p path) ; remote file
+                           (all-the-icons-faicon "server" :face 'org-warning))
+                          ((not (file-exists-p (expand-file-name path))) ; not exist file
+                           (all-the-icons-faicon "exclamation-triangle" :face 'org-warning))
+                          ((file-directory-p path) ; directory
+                           (all-the-icons-icon-for-dir
+                            "path"
                             :face (org-link-beautify--warning path)
                             :v-adjust 0))))
                       ("file+sys" (all-the-icons-faicon "link"))
