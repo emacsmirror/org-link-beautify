@@ -1,11 +1,11 @@
-;;; org-link-beautify.el --- Beautify org links -*- lexical-binding: t; -*-
+;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2020-08-17 11:09:37 stardiviner>
+;;; Time-stamp: <2020-08-17 21:12:06 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
-;; Package-Requires: ((emacs "25") (cl-lib "0.5") (all-the-icons "4.0.0"))
+;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
 ;; Package-Version: 0.1
-;; Keywords: org link
+;; Keywords: hypermedia
 ;; homepage: https://github.com/stardiviner/org-link-beautify
 
 ;; org-link-beautify is free software; you can redistribute it and/or modify it
@@ -24,10 +24,14 @@
 
 ;;; Commentary:
 
-
+;; Usage:
+;;
+;; (org-link-beautify-mode 1)
 
 ;;; Code:
 
+(require 'ol)
+(require 'org-element)
 (require 'all-the-icons)
 
 (defgroup org-link-beautify nil
@@ -36,7 +40,7 @@
   :group 'org)
 
 (defcustom org-link-beautify-exclude-modes '(org-agenda-mode)
-  "A list of excluded major modes which wouldn't enable org-link-beautify."
+  "A list of excluded major modes which wouldn't enable `org-link-beautify'."
   :type 'list
   :safe #'listp
   :group 'org-link-beautify)
@@ -67,77 +71,83 @@
   "Get the link description at `POSITION' (fuzzy but faster version)."
   (save-excursion
     (goto-char position)
-    (and (org-at-regexp-p org-link-bracket-re) (match-string 2))))
+    (and (org-in-regexp org-link-bracket-re) (match-string 2))))
 
 (defun org-link-beautify--warning (path)
+  "Use `org-warning' face if link PATH does not exist."
   (if (and (not (file-remote-p path))
            (file-exists-p (expand-file-name path)))
       'org-link 'org-warning))
 
-(defun org-link-beautify (start end path bracketp)
-  "Display icon for the Org link type."
+(defun org-link-beautify (start end path bracket-p)
+  "Display icon for the link type based on PATH from START to END."
   ;; (message
-  ;;  (format "start: %s, end: %s, path: %s, bracketp: %s" start end path bracketp))
-  ;; detect whether link is normal, jump other links in special places.
-  (unless (memq major-mode org-link-beautify-exclude-modes)
+  ;;  (format "start: %s, end: %s, path: %s, bracket-p: %s" start end path bracket-p))
+  (unless (and (memq major-mode org-link-beautify-exclude-modes)
+               ;; detect whether link is normal, jump other links in special places.
+               (not (eq (car (org-link-beautify--get-element start)) 'link)))
     (save-match-data
-      (if-let* ((normal-link-p (eq (car (org-link-beautify--get-element start)) 'link))
-                (link-element (org-link-beautify--get-element start))
-                ;; (link-element-debug (message link-element))
-                (raw-link (org-element-property :raw-link link-element))
-                ;; (raw-link-debug (message raw-link))
-                (type (org-element-property :type link-element))
-                (extension (or (file-name-extension (org-link-unescape path)) "txt"))
-                ;; (ext-debug (message extension))
-                (description (or (and (org-element-property :contents-begin link-element) ; in raw link case, it's nil
-                                      (buffer-substring-no-properties
-                                       (org-element-property :contents-begin link-element)
-                                       (org-element-property :contents-end link-element)))
-                                 ;; when description not exist, use raw link for raw link case.
-                                 raw-link))
-                ;; (desc-debug (message description))
-                (icon (pcase type
-                        ("file"
-                         (cond
-                          ((file-remote-p path) ; remote file
-                           (all-the-icons-faicon "server" :face 'org-warning))
-                          ((not (file-exists-p (expand-file-name path))) ; not exist file
-                           (all-the-icons-faicon "exclamation-triangle" :face 'org-warning))
-                          ((file-directory-p path) ; directory
-                           (all-the-icons-icon-for-dir
-                            "path"
-                            :face (org-link-beautify--warning path)
-                            :v-adjust 0))))
-                      ("file+sys" (all-the-icons-faicon "link"))
-                      ("file+emacs" (all-the-icons-icon-for-mode 'emacs-lisp-mode))
-                      ("http" (all-the-icons-icon-for-url (concat "http:" path) :v-adjust -0.05))
-                      ("https" (all-the-icons-icon-for-url (concat "https:" path) :v-adjust -0.05))
-                      ("ftp" (all-the-icons-faicon "link"))
-                      ("custom-id" (all-the-icons-faicon "hashtag"))
-                      ("coderef" (all-the-icons-faicon "code"))
-                      ("id" (all-the-icons-fileicon ""))
-                      ("attachment" (all-the-icons-faicon "puzzle-piece"))
-                      ("elisp" (all-the-icons-icon-for-mode 'emacs-lisp-mode :v-adjust -0.05))
-                      ("shell" (all-the-icons-icon-for-mode 'shell-mode))
-                      ("eww" (all-the-icons-icon-for-mode 'eww-mode))
-                      ("mu4e" (all-the-icons-faicon "envelope-o" :v-adjust -0.05))
-                      ("git" (all-the-icons-octicon "git-branch"))
-                      ("orgit" (all-the-icons-octicon "git-branch"))
-                      ("orgit-rev" (all-the-icons-octicon "git-commit"))
-                      ("orgit-log" (all-the-icons-icon-for-mode 'magit-log-mode))
-                      ("pdfview" (all-the-icons-icon-for-file ".pdf"))
-                      ("grep" (all-the-icons-icon-for-mode 'grep-mode))
-                      ("occur" (all-the-icons-icon-for-mode 'occur-mode))
-                      ("man" (all-the-icons-icon-for-mode 'Man-mode))
-                      ("info" (all-the-icons-icon-for-mode 'Info-mode))
-                      ("help" (all-the-icons-icon-for-mode 'Help-Mode))
-                      ("rss" (all-the-icons-material "rss_feed"))
-                      ("elfeed" (all-the-icons-material "rss_feed"))
-                      ("telnet" (all-the-icons-faicon "compress"))
-                      ("wikipedia" (all-the-icons-faicon "wikipedia-w"))
-                      ("mailto" (all-the-icons-material "email" :v-adjust -0.05))
-                      ("doi" (all-the-icons-fileicon "isabelle"))
-                      ("eaf" (all-the-icons-faicon "linux" :v-adjust -0.05)))))
+      (let* ((link-element (org-link-beautify--get-element start))
+             ;; (link-element-debug (message link-element))
+             (raw-link (org-element-property :raw-link link-element))
+             ;; (raw-link-debug (message raw-link))
+             (type (org-element-property :type link-element))
+             (extension (or (file-name-extension (org-link-unescape path)) "txt"))
+             ;; (ext-debug (message extension))
+             (description (or (and (org-element-property :contents-begin link-element) ; in raw link case, it's nil
+                                   (buffer-substring-no-properties
+                                    (org-element-property :contents-begin link-element)
+                                    (org-element-property :contents-end link-element)))
+                              ;; when description not exist, use raw link for raw link case.
+                              raw-link))
+             ;; (desc-debug (message description))
+             (icon (pcase type
+                     ("file"
+                      (cond
+                       ((file-remote-p path) ; remote file
+                        (all-the-icons-faicon "server" :face 'org-warning))
+                       ((not (file-exists-p (expand-file-name path))) ; not exist file
+                        (all-the-icons-faicon "exclamation-triangle" :face 'org-warning))
+                       ((file-directory-p path) ; directory
+                        (all-the-icons-icon-for-dir
+                         "path"
+                         :face (org-link-beautify--warning path)
+                         :v-adjust 0))
+                       (t (all-the-icons-icon-for-file ; file
+                           (format ".%s" extension)
+                           :face (org-link-beautify--warning path)
+                           :v-adjust 0))))
+                     ("file+sys" (all-the-icons-faicon "link"))
+                     ("file+emacs" (all-the-icons-icon-for-mode 'emacs-lisp-mode))
+                     ("http" (all-the-icons-icon-for-url (concat "http:" path) :v-adjust -0.05))
+                     ("https" (all-the-icons-icon-for-url (concat "https:" path) :v-adjust -0.05))
+                     ("ftp" (all-the-icons-faicon "link"))
+                     ("custom-id" (all-the-icons-faicon "hashtag"))
+                     ("coderef" (all-the-icons-faicon "code"))
+                     ("id" (all-the-icons-fileicon ""))
+                     ("attachment" (all-the-icons-faicon "puzzle-piece"))
+                     ("elisp" (all-the-icons-icon-for-mode 'emacs-lisp-mode :v-adjust -0.05))
+                     ("shell" (all-the-icons-icon-for-mode 'shell-mode))
+                     ("eww" (all-the-icons-icon-for-mode 'eww-mode))
+                     ("mu4e" (all-the-icons-faicon "envelope-o" :v-adjust -0.05))
+                     ("git" (all-the-icons-octicon "git-branch"))
+                     ("orgit" (all-the-icons-octicon "git-branch"))
+                     ("orgit-rev" (all-the-icons-octicon "git-commit"))
+                     ("orgit-log" (all-the-icons-icon-for-mode 'magit-log-mode))
+                     ("pdfview" (all-the-icons-icon-for-file ".pdf"))
+                     ("grep" (all-the-icons-icon-for-mode 'grep-mode))
+                     ("occur" (all-the-icons-icon-for-mode 'occur-mode))
+                     ("man" (all-the-icons-icon-for-mode 'Man-mode))
+                     ("info" (all-the-icons-icon-for-mode 'Info-mode))
+                     ("help" (all-the-icons-icon-for-mode 'Help-Mode))
+                     ("rss" (all-the-icons-material "rss_feed"))
+                     ("elfeed" (all-the-icons-material "rss_feed"))
+                     ("telnet" (all-the-icons-faicon "compress"))
+                     ("wikipedia" (all-the-icons-faicon "wikipedia-w"))
+                     ("mailto" (all-the-icons-material "email" :v-adjust -0.05))
+                     ("doi" (all-the-icons-fileicon "isabelle"))
+                     ("eaf" (all-the-icons-faicon "linux" :v-adjust -0.05)))))
+        (when bracket-p (ignore))
         (cond
          ;; video thumbnails
          ((and (equal type "file") (member extension org-link-beautify-video-types-list))
@@ -168,10 +178,10 @@
                (propertize "]" 'face '(:inherit nil :underline nil :foreground "orange"))
                (propertize "(" 'face '(:inherit nil :underline nil :foreground "orange"))
                (propertize icon 'face '(:inherit nil :underline nil :foreground "gray"))
-               (propertize ")" 'face '(:inherit nil :underline nil :foreground "orange"))))))))))
+               (propertize ")" 'face '(:inherit nil :underline nil :foreground "orange")))))))))))
 
 (defun org-link-beautify-toggle-overlays ()
-  "Toggle the display of org-link-beautify."
+  "Toggle the display of `org-link-beautify'."
   (let ((point (point-min))
         (bmp (buffer-modified-p)))
     (while (setq point (next-single-property-change point 'display))
@@ -185,13 +195,14 @@
 
 ;;;###autoload
 (defun org-link-beautify-enable ()
-  "Enable org-link-beautify."
+  "Enable `org-link-beautify'."
   (dolist (link-type (mapcar 'car org-link-parameters))
     (org-link-set-parameters link-type :activate-func #'org-link-beautify))
   (org-link-beautify-toggle-overlays))
 
 ;;;###autoload
 (defun org-link-beautify-disable ()
+  "Disable `org-link-beautify'."
   (dolist (link-type (mapcar 'car org-link-parameters))
     (org-link-set-parameters link-type :activate-func t))
   (org-link-beautify-toggle-overlays))
