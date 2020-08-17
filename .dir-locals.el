@@ -1,0 +1,1 @@
+((nil . ((flycheck-mode . t))))
