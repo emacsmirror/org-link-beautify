@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2020-08-17 22:16:57 stardiviner>
+;;; Time-stamp: <2020-08-23 05:53:42 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -196,14 +196,14 @@
 ;;;###autoload
 (defun org-link-beautify-enable ()
   "Enable `org-link-beautify'."
-  (dolist (link-type (mapcar 'car org-link-parameters))
+  (dolist (link-type (mapcar #'car org-link-parameters))
     (org-link-set-parameters link-type :activate-func #'org-link-beautify))
   (org-link-beautify-toggle-overlays))
 
 ;;;###autoload
 (defun org-link-beautify-disable ()
   "Disable `org-link-beautify'."
-  (dolist (link-type (mapcar 'car org-link-parameters))
+  (dolist (link-type (mapcar #'car org-link-parameters))
     (org-link-set-parameters link-type :activate-func t))
   (org-link-beautify-toggle-overlays))
 
