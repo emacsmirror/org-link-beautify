@@ -139,7 +139,7 @@
                        ("occur" (all-the-icons-icon-for-mode 'occur-mode))
                        ("man" (all-the-icons-icon-for-mode 'Man-mode))
                        ("info" (all-the-icons-icon-for-mode 'Info-mode))
-                       ("help" (all-the-icons-icon-for-mode 'Help-Mode))
+                       ("help" (all-the-icons-icon-for-mode 'Info-mode))
                        ("rss" (all-the-icons-material "rss_feed"))
                        ("elfeed" (all-the-icons-material "rss_feed"))
                        ("telnet" (all-the-icons-faicon "compress"))
