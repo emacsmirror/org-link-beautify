@@ -57,7 +57,7 @@
   :safe #'numberp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-video-types-list '("avi" "rmvb" "ogg" "ogv" "mp4" "mkv" "flv")
+(defcustom org-link-beautify-video-types-list '("avi" "rmvb" "ogg" "ogv" "mp4" "mkv" "webm" "flv")
   "A list of video file types be supported with thumbnails."
   :type 'list
   :safe #'listp
