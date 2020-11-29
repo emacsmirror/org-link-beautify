@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2020-11-29 13:07:51 stardiviner>
+;;; Time-stamp: <2020-11-29 13:10:23 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -130,7 +130,7 @@
                        ("elisp" (all-the-icons-icon-for-mode 'emacs-lisp-mode :v-adjust -0.05))
                        ("shell" (all-the-icons-icon-for-mode 'shell-mode))
                        ("eww" (all-the-icons-icon-for-mode 'eww-mode))
-                       ("mu4e" (all-the-icons-faicon "envelope-o" :v-adjust -0.05))
+                       ("mu4e" (all-the-icons-faicon "envelope-square" :v-adjust -0.05))
                        ("git" (all-the-icons-octicon "git-branch"))
                        ("orgit" (all-the-icons-octicon "git-branch"))
                        ("orgit-rev" (all-the-icons-octicon "git-commit"))
