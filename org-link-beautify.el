@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2020-11-07 13:19:04 stardiviner>
+;;; Time-stamp: <2020-11-29 13:07:51 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -122,6 +122,7 @@
                        ("http" (all-the-icons-icon-for-url (concat "http:" path) :v-adjust -0.05))
                        ("https" (all-the-icons-icon-for-url (concat "https:" path) :v-adjust -0.05))
                        ("ftp" (all-the-icons-faicon "link"))
+                       ("eaf" (all-the-icons-faicon "linux" :v-adjust -0.05)) ; emacs-application-framework
                        ("custom-id" (all-the-icons-faicon "hashtag"))
                        ("coderef" (all-the-icons-faicon "code"))
                        ("id" (all-the-icons-fileicon ""))
@@ -145,8 +146,7 @@
                        ("telnet" (all-the-icons-faicon "compress"))
                        ("wikipedia" (all-the-icons-faicon "wikipedia-w"))
                        ("mailto" (all-the-icons-material "email" :v-adjust -0.05))
-                       ("doi" (all-the-icons-fileicon "isabelle"))
-                       ("eaf" (all-the-icons-faicon "linux" :v-adjust -0.05)))))
+                       ("doi" (all-the-icons-fileicon "isabelle")))))
           (when bracket-p (ignore))
           (cond
            ;; video thumbnails
