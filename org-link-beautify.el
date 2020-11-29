@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2020-11-29 13:10:23 stardiviner>
+;;; Time-stamp: <2020-11-29 15:02:52 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -45,19 +45,19 @@
   :safe #'listp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-thumbnail-dir "~/.cache/thumbnails/"
+(defcustom org-link-beautify-video-preview-dir "~/.cache/thumbnails/"
   "The directory of generated thumbnails."
   :type 'string
   :safe #'stringp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-thumbnail-size 512
+(defcustom org-link-beautify-video-preview-size 512
   "The video thumbnail image size."
   :type 'number
   :safe #'numberp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-video-types-list '("avi" "rmvb" "ogg" "ogv" "mp4" "mkv" "mov" "webm" "flv")
+(defcustom org-link-beautify-video-preview-list '("avi" "rmvb" "ogg" "ogv" "mp4" "mkv" "mov" "webm" "flv")
   "A list of video file types be supported with thumbnails."
   :type 'list
   :safe #'listp
@@ -149,12 +149,12 @@
                        ("doi" (all-the-icons-fileicon "isabelle")))))
           (when bracket-p (ignore))
           (cond
-           ;; video thumbnails
-           ((and (equal type "file") (member extension org-link-beautify-video-types-list))
+           ;; video thumbnail preview
+           ((and (equal type "file") (member extension org-link-beautify-video-preview-list))
             (let* ((video (expand-file-name (org-link-unescape path)))
                    (thumbnails-dir (file-name-directory
-                                    (or org-link-beautify-thumbnail-dir "~/.cache/thumbnails/")))
-                   (thumbnail-size (or org-link-beautify-thumbnail-size 512))
+                                    (or org-link-beautify-video-preview-dir "~/.cache/thumbnails/")))
+                   (thumbnail-size (or org-link-beautify-video-preview-size 512))
                    
                    (thumbnail (expand-file-name (format "%s%s.jpg" thumbnails-dir (file-name-base video)))))
               ;; (message (format "ffmpegthumbnailer -f -i %s -s %s -o %s"
