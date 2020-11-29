@@ -45,6 +45,12 @@
   :safe #'listp
   :group 'org-link-beautify)
 
+(defcustom org-link-beautify-video-preview (executable-find "ffmpegthumbnailer")
+  "Whether enable video files thumbnail preview?"
+  :type 'boolean
+  :safe #'booleanp
+  :group 'org-link-beautify)
+
 (defcustom org-link-beautify-video-preview-dir "~/.cache/thumbnails/"
   "The directory of generated thumbnails."
   :type 'string
@@ -150,7 +156,9 @@
           (when bracket-p (ignore))
           (cond
            ;; video thumbnail preview
-           ((and (equal type "file") (member extension org-link-beautify-video-preview-list))
+           ((and (equal type "file")
+                 (member extension org-link-beautify-video-preview-list)
+                 org-link-beautify-video-preview)
             (let* ((video (expand-file-name (org-link-unescape path)))
                    (thumbnails-dir (file-name-directory
                                     (or org-link-beautify-video-preview-dir "~/.cache/thumbnails/")))
