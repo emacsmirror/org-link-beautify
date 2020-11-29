@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2020-11-29 15:02:52 stardiviner>
+;;; Time-stamp: <2020-11-29 15:43:30 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -69,6 +69,23 @@
   :safe #'listp
   :group 'org-link-beautify)
 
+(defcustom org-link-beautify-text-preview nil
+  "Whether enable text files content preview?"
+  :type 'boolean
+  :safe #'booleanp
+  :group 'org-link-beautify)
+
+(defcustom org-link-beautify-text-preview-list
+  '("org" "txt" "markdown" "md"
+    "lisp" "scm" "clj" "cljs"
+    "py" "rb" "pl"
+    "c" "cpp" "h" "hpp" "cs" "java"
+    "r" "jl")
+  "A list of link types supports text preview below the link."
+  :type 'list
+  :safe #'listp
+  :group 'org-link-beautify)
+
 (defun org-link-beautify--get-element (position)
   "Return the org element of link at the `POSITION'."
   (save-excursion (goto-char position) (org-element-context)))
@@ -84,6 +101,17 @@
   (if (and (not (file-remote-p path))
            (file-exists-p (expand-file-name path)))
       'org-link 'org-warning))
+
+(defun org-link-beautify--preview-text-file (file lines)
+  "Return first N lines of FILE."
+  (with-temp-buffer
+    (insert-file-contents-literally file)
+    (cl-loop repeat lines
+             unless (eobp)
+             collect (prog1 (buffer-substring-no-properties
+                             (line-beginning-position)
+                             (line-end-position))
+                       (forward-line 1)))))
 
 (defun org-link-beautify (start end path bracket-p)
   "Display icon for the link type based on PATH from START to END."
@@ -155,6 +183,7 @@
                        ("doi" (all-the-icons-fileicon "isabelle")))))
           (when bracket-p (ignore))
           (cond
+           ;; NOTE: preview link content will break links inside of sentence.
            ;; video thumbnail preview
            ((and (equal type "file")
                  (member extension org-link-beautify-video-preview-list)
@@ -175,6 +204,19 @@
               (put-text-property
                start end
                'display (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size))))
+           ;; text content preview
+           ((and (equal type "file")
+                 (member extension org-link-beautify-text-preview-list)
+                 org-link-beautify-text-preview)
+            (let* ((text-file (expand-file-name (org-link-unescape path)))
+                   (preview-lines 10)
+                   (preview-content (org-link-beautify--preview-text-file text-file preview-lines)))
+              (put-text-property
+               (1+ end) (+ end 2)
+               'display (propertize preview-content)
+               'face '(:inherit nil :slant 'italic
+                                :foreground nil
+                                :background (color-darken-name (face-background 'default) 5)))))
            ;; general icons
            (t (put-text-property
                start end
