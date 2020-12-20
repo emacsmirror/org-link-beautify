@@ -147,6 +147,9 @@
                            "path"
                            :face (org-link-beautify--warning path)
                            :v-adjust 0))
+                         ;; MindMap files
+                         ((member (file-name-extension path) '("mm" "xmind"))
+                          (all-the-icons-fileicon "brain" :face '(:foreground "BlueViolet")))
                          (t (all-the-icons-icon-for-file ; file
                              (format ".%s" extension)
                              :face (org-link-beautify--warning path)
@@ -244,9 +247,15 @@
     (set-buffer-modified-p bmp))
   (org-restart-font-lock))
 
+(defun org-link-beautify--add-more-icons-support ()
+  "Add more icons for file types."
+  (add-to-list 'all-the-icons-icon-alist '("\\.mm" all-the-icons-fileicon "brain" :face all-the-icons-lpink))
+  (add-to-list 'all-the-icons-icon-alist '("\\.xmind" all-the-icons-fileicon "brain" :face all-the-icons-lpink)))
+
 ;;;###autoload
 (defun org-link-beautify-enable ()
   "Enable `org-link-beautify'."
+  (org-link-beautify--add-more-icons-support)
   (dolist (link-type (mapcar #'car org-link-parameters))
     (org-link-set-parameters link-type :activate-func #'org-link-beautify))
   (org-link-beautify-toggle-overlays))
