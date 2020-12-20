@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2020-12-17 19:40:25 stardiviner>
+;;; Time-stamp: <2020-12-20 12:58:51 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -239,11 +239,11 @@
   (let ((point (point-min))
         (bmp (buffer-modified-p)))
     (while (setq point (next-single-property-change point 'display))
-	    (when (and (get-text-property point 'display)
-		             (eq (get-text-property point 'face) 'org-link))
-	      (remove-text-properties
-	       point (setq point (next-single-property-change point 'display))
-	       '(display t))))
+	  (when (and (get-text-property point 'display)
+		         (eq (get-text-property point 'face) 'org-link))
+	    (remove-text-properties
+	     point (setq point (next-single-property-change point 'display))
+	     '(display t))))
     (set-buffer-modified-p bmp))
   (org-restart-font-lock))
 
