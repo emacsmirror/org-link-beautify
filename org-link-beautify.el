@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2020-12-20 12:58:51 stardiviner>
+;;; Time-stamp: <2020-12-23 10:25:56 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -205,6 +205,7 @@
                        (shell-quote-argument video) thumbnail-size (shell-quote-argument thumbnail)))
               ;; (message "start: %s, end: %s" start end)
               ;; (message "%s" thumbnail)
+              (put-text-property start end 'type 'org-link-beautify)
               (put-text-property
                start end
                'display (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size))))
@@ -215,6 +216,7 @@
             (let* ((text-file (expand-file-name (org-link-unescape path)))
                    (preview-lines 10)
                    (preview-content (org-link-beautify--preview-text-file text-file preview-lines)))
+              (put-text-property (1+ end) (+ end 2) 'type 'org-link-beautify)
               (put-text-property
                (1+ end) (+ end 2)
                'display (propertize preview-content)
@@ -222,17 +224,19 @@
                                 :foreground nil
                                 :background (color-darken-name (face-background 'default) 5)))))
            ;; general icons
-           (t (put-text-property
-               start end
-               'display
-               (propertize
-                (concat
-                 (propertize "[" 'face '(:inherit nil :underline nil :foreground "orange"))
-                 (propertize description 'face '(:underline t :foreground "dark cyan"))
-                 (propertize "]" 'face '(:inherit nil :underline nil :foreground "orange"))
-                 (propertize "(" 'face '(:inherit nil :underline nil :foreground "orange"))
-                 (propertize icon 'face '(:inherit nil :underline nil :foreground "gray"))
-                 (propertize ")" 'face '(:inherit nil :underline nil :foreground "orange"))))))))))))
+           (t
+            (put-text-property start end 'type 'org-link-beautify)
+            (put-text-property
+             start end
+             'display
+             (propertize
+              (concat
+               (propertize "[" 'face '(:inherit nil :underline nil :foreground "orange"))
+               (propertize description 'face '(:underline t :foreground "dark cyan"))
+               (propertize "]" 'face '(:inherit nil :underline nil :foreground "orange"))
+               (propertize "(" 'face '(:inherit nil :underline nil :foreground "orange"))
+               (propertize icon 'face '(:inherit nil :underline nil :foreground "gray"))
+               (propertize ")" 'face '(:inherit nil :underline nil :foreground "orange"))))))))))))
 
 (defun org-link-beautify-toggle-overlays ()
   "Toggle the display of `org-link-beautify'."
@@ -240,7 +244,7 @@
         (bmp (buffer-modified-p)))
     (while (setq point (next-single-property-change point 'display))
 	  (when (and (get-text-property point 'display)
-		         (eq (get-text-property point 'face) 'org-link))
+		         (eq (get-text-property point 'type) 'org-link-beautify))
 	    (remove-text-properties
 	     point (setq point (next-single-property-change point 'display))
 	     '(display t))))
