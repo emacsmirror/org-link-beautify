@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2020-12-23 10:25:56 stardiviner>
+;;; Time-stamp: <2020-12-27 09:46:24 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -183,6 +183,7 @@
                        ("telnet" (all-the-icons-faicon "compress"))
                        ("wikipedia" (all-the-icons-faicon "wikipedia-w"))
                        ("mailto" (all-the-icons-material "email" :v-adjust -0.05))
+                       ("irc" (all-the-icons-faicon "comment-o"))
                        ("doi" (all-the-icons-fileicon "isabelle"))
                        ("org-contact" (all-the-icons-material "account_box")))))
           (when bracket-p (ignore))
