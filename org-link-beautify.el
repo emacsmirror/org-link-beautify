@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2020-12-27 09:46:24 stardiviner>
+;;; Time-stamp: <2020-12-27 19:28:23 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -218,9 +218,9 @@
                    (preview-lines 10)
                    (preview-content (org-link-beautify--preview-text-file text-file preview-lines)))
               (put-text-property (1+ end) (+ end 2) 'type 'org-link-beautify)
+              (put-text-property (1+ end) (+ end 2) 'display (propertize preview-content))
               (put-text-property
                (1+ end) (+ end 2)
-               'display (propertize preview-content)
                'face '(:inherit nil :slant 'italic
                                 :foreground nil
                                 :background (color-darken-name (face-background 'default) 5)))))
