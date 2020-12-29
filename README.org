@@ -1,21 +1,31 @@
-* Intro
+* Motivation
 
-Usually org links only have text, it's not very intuitive to recognize what type
-of link it is. Add some color and icon will help user read links.
+Usually Org links only have text, it's not very intuitive to recognize what type
+of link it is. Add some color and icon, even image preview will help user read links.
 
 * Screenshots
 
+Annotate link with icon to indicate link type. And use color to indicate link file exist or not?
+
+#+ATTR_ORG: :width 600
+#+ATTR_LATEX: :width 6.0in
+#+ATTR_HTML: :width 600px
 [[file:screenshot.png]]
 
-** video thumbnail
+Supports video file link preview with thumbnail.
 
+#+ATTR_ORG: :width 600
+#+ATTR_LATEX: :width 6.0in
+#+ATTR_HTML: :width 600px
 [[file:video-thumbnail.png]]
 
 * Features
 
-- [X] support colorize links
-- [X] support display icons for link types
-- [X] supported link types
+- [X] support colorize links if file: target file does not exist
+- [X] support display icons for link types (currently already supported many link types)
+- [X] supported many different link types (If you found not supported link type, PR welcome!)
+- [X] display image for previewing image file
+- [X] display image for previewing PDF file
 - [X] display thumbnail for video file link
 
 * Install
@@ -41,11 +51,13 @@ icons might not correctly displayed. And some links are not beautified because I
 have not found suitable icons for them. And if file: link type source file is
 not available, it will be colored. If you have any idea, PR welcome.
 
+#+begin_src org
 - file link [[file:babel-R.org][kkk]]
   + remote file
   + non-existing file
   + video thumbnail for video file link  [[file:~/Downloads/Neural Network Architectures-oJNHXPs0XDk.mkv]]
 - raw link [[file:babel-clojure.org]]
+- file+sys link [[file+sys:README.org]]
 - file link smart recognize file types [[file:~/Downloads/8-个税政治成本最高 对社会公平毫无帮助\[李稻葵\].pdf]]
 - directory link [[file:~/Downloads/][Downloads]]
 - URL link (use different icons based on url with smart all-the-icons) [[https://www.google.com]]
@@ -70,6 +82,7 @@ not available, it will be colored. If you have any idea, PR welcome.
 - mailto link [[mailto:numbchild@gmail.com]]
 - doi link [[doi:what?]]
 - EAF link [[eaf:pdf-viewer::/home/stardiviner/Org/Wiki/Computer Technology/Programming/Programming Languages/Database/SQL/PostgresQL/Data/Books/PostgreSQL即学即用中文第2版.pdf::46][PostgreSQL即学即用中文第2版.pdf]]
+#+end_src
 
 * Contributions
 
