@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2020-12-27 19:28:23 stardiviner>
+;;; Time-stamp: <2020-12-29 20:23:01 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -51,7 +51,7 @@
   :safe #'booleanp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-video-preview-dir "~/.cache/thumbnails/"
+(defcustom org-link-beautify-thumbnails-dir "~/.cache/thumbnails/"
   "The directory of generated thumbnails."
   :type 'string
   :safe #'stringp
@@ -67,6 +67,24 @@
   "A list of video file types be supported with thumbnails."
   :type 'list
   :safe #'listp
+  :group 'org-link-beautify)
+
+(defcustom org-link-beautify-pdf-preview (executable-find "pdf2svg")
+  "Whether enable PDF files image preview?"
+  :type 'boolean
+  :safe #'booleanp
+  :group 'org-link-beautify)
+
+(defcustom org-link-beautify-pdf-preview-size 512
+  "The PDF preview image size."
+  :type 'number
+  :safe #'numberp
+  :group 'org-link-beautify)
+
+(defcustom org-link-beautify-pdf-preview-default-page-number 1
+  "The default PDF preview page number."
+  :type 'number
+  :safe #'numberp
   :group 'org-link-beautify)
 
 (defcustom org-link-beautify-text-preview nil
@@ -195,17 +213,30 @@
                  org-link-beautify-video-preview)
             (let* ((video (expand-file-name (org-link-unescape path)))
                    (thumbnails-dir (file-name-directory
-                                    (or org-link-beautify-video-preview-dir "~/.cache/thumbnails/")))
+                                    (or org-link-beautify-thumbnails-dir "~/.cache/thumbnails/")))
                    (thumbnail-size (or org-link-beautify-video-preview-size 512))
-                   
-                   (thumbnail (expand-file-name (format "%s%s.jpg" thumbnails-dir (file-name-base video)))))
-              ;; (message (format "ffmpegthumbnailer -f -i %s -s %s -o %s"
-              ;;                  (shell-quote-argument video) thumbnail-size (shell-quote-argument thumbnail)))
+                   (thumbnail (expand-file-name
+                               (format "%s%s.jpg" thumbnails-dir (file-name-base video)))))
               (shell-command
                (format "ffmpegthumbnailer -f -i %s -s %s -o %s"
                        (shell-quote-argument video) thumbnail-size (shell-quote-argument thumbnail)))
-              ;; (message "start: %s, end: %s" start end)
-              ;; (message "%s" thumbnail)
+              (put-text-property start end 'type 'org-link-beautify)
+              (put-text-property
+               start end
+               'display
+               (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size))))
+           ((and (equal type "file") (string= extension "pdf") org-link-beautify-pdf-preview)
+            (let* ((pdf (expand-file-name (org-link-unescape path)))
+                   (thumbnails-dir (file-name-directory
+                                    (or org-link-beautify-thumbnails-dir "~/.cache/thumbnails/")))
+                   (thumbnail-size (or org-link-beautify-pdf-preview-size 512))
+                   (pdf-page-number (or org-link-beautify-pdf-preview-default-page-number 3))
+                   (thumbnail (expand-file-name
+                               (format "%s%s.svg" thumbnails-dir (file-name-base pdf)))))
+              (shell-command
+               (format
+                "pdf2svg %s %s %s"
+                (shell-quote-argument pdf) (shell-quote-argument thumbnail)  pdf-page-number))
               (put-text-property start end 'type 'org-link-beautify)
               (put-text-property
                start end

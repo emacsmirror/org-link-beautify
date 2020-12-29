@@ -38,6 +38,14 @@ Supports video file link preview with thumbnail.
   sudo pacman -S --noconfirm ffmpegthumbnailer
   #+end_src
 
+- PDF file preview need package "=pdf2svg="
+
+  For Arch Linux:
+
+  #+begin_src sh :dir /sudo:: :results none
+  sudo pacman -S --noconfirm pdf2svg
+  #+end_src
+
 * Usage
 
 #+begin_src emacs-lisp
@@ -88,4 +96,5 @@ not available, it will be colored. If you have any idea, PR welcome.
 
 - Thanks to John Kitchin and Nicolas Goaziou help in Org Mode mailing list.
 - And [[https://emacs-china.org/t/icon-org-mode/13147][yuchen-lea's screenshot]] gives me design idea
+- pdf file link preview inspired from [[https://github.com/shg/org-inline-pdf.el][org-inline-pdf.el]]
 
