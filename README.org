@@ -30,6 +30,9 @@ Supports video file link preview with thumbnail.
 
 * Install
 
+- all-the-icons :: This Emacs package icons use "[[https://github.com/domtronn/all-the-icons.el][all-the-icons]]". If you got icon
+  problem. You need to make sure all-the-icons *AND FONTS* installed correctly.
+
 - video thumbnail feature needs package "=ffmpegthumbnailer="
 
   For Arch Linux:
@@ -91,6 +94,11 @@ not available, it will be colored. If you have any idea, PR welcome.
 - doi link [[doi:what?]]
 - EAF link [[eaf:pdf-viewer::/home/stardiviner/Org/Wiki/Computer Technology/Programming/Programming Languages/Database/SQL/PostgresQL/Data/Books/PostgreSQL即学即用中文第2版.pdf::46][PostgreSQL即学即用中文第2版.pdf]]
 #+end_src
+
+* FAQ
+
+*NOTE*: This Emacs package icons use "[[https://github.com/domtronn/all-the-icons.el][all-the-icons]]". If you got icon problem. You
+need to make sure all-the-icons and fonts installed correctly.
 
 * Contributions
 
