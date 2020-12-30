@@ -25,7 +25,13 @@ Supports video file link preview with thumbnail.
 - [X] support display icons for link types (currently already supported many link types)
 - [X] supported many different link types (If you found not supported link type, PR welcome!)
 - [X] display image for previewing image file
-- [X] display image for previewing PDF file
+- [X] display image for previewing PDF file and preview of specific PDF page number. Like this:
+  #+begin_src org
+  [[file:/path/to/filename.pdf]]
+  #+end_src
+  #+begin_src org
+  [[pdfview:/path/to/filename.pdf::15]]
+  #+end_src
 - [X] display thumbnail for video file link
 
 * Install

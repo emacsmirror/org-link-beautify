@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2020-12-29 20:23:01 stardiviner>
+;;; Time-stamp: <2020-12-30 17:53:18 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -208,6 +208,7 @@
           (cond
            ;; NOTE: preview link content will break links inside of sentence.
            ;; video thumbnail preview
+           ;; [[file:/path/to/video.mp4]]
            ((and (equal type "file")
                  (member extension org-link-beautify-video-preview-list)
                  org-link-beautify-video-preview)
@@ -225,22 +226,30 @@
                start end
                'display
                (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size))))
-           ((and (equal type "file") (string= extension "pdf") org-link-beautify-pdf-preview)
-            (let* ((pdf (expand-file-name (org-link-unescape path)))
-                   (thumbnails-dir (file-name-directory
-                                    (or org-link-beautify-thumbnails-dir "~/.cache/thumbnails/")))
-                   (thumbnail-size (or org-link-beautify-pdf-preview-size 512))
-                   (pdf-page-number (or org-link-beautify-pdf-preview-default-page-number 3))
-                   (thumbnail (expand-file-name
-                               (format "%s%s.svg" thumbnails-dir (file-name-base pdf)))))
-              (shell-command
-               (format
-                "pdf2svg %s %s %s"
-                (shell-quote-argument pdf) (shell-quote-argument thumbnail)  pdf-page-number))
-              (put-text-property start end 'type 'org-link-beautify)
-              (put-text-property
-               start end
-               'display (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size))))
+           ;; [[file:/path/to/filename.pdf]]
+           ;; [[pdfview:/path/to/filename.pdf::15]]
+           ((and org-link-beautify-pdf-preview
+                 (or (and (equal type "file") (string= extension "pdf"))
+                     (equal type "pdfview")))
+            (if (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
+                (let* ((file-path (match-string 1 path))
+                       (pdf-page-number (or (match-string 2 path)
+                                            org-link-beautify-pdf-preview-default-page-number))
+                       (pdf-file (expand-file-name (org-link-unescape file-path)))
+                       (thumbnails-dir (file-name-directory
+                                        (or org-link-beautify-thumbnails-dir "~/.cache/thumbnails/")))
+                       (thumbnail-size (or org-link-beautify-pdf-preview-size 512))
+                       (thumbnail (expand-file-name
+                                   (format "%s%s%s.svg"
+                                           thumbnails-dir (file-name-base pdf-file) pdf-page-number))))
+                  (shell-command
+                   (format
+                    "pdf2svg %s %s %s"
+                    (shell-quote-argument pdf-file) (shell-quote-argument thumbnail) pdf-page-number))
+                  (put-text-property start end 'type 'org-link-beautify)
+                  (put-text-property
+                   start end
+                   'display (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size)))))
            ;; text content preview
            ((and (equal type "file")
                  (member extension org-link-beautify-text-preview-list)
