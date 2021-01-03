@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2020-12-30 20:43:16 stardiviner>
+;;; Time-stamp: <2021-01-03 10:16:13 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -51,10 +51,13 @@
   :safe #'booleanp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-thumbnails-dir "~/.cache/thumbnails/"
-  "The directory of generated thumbnails."
-  :type 'string
-  :safe #'stringp
+(defcustom org-link-beautify-thumbnails-dir 'source-path
+  "The directory of generated thumbnails.
+By default the thumbnails are generated in source file path’s .thumbnails directory.
+This is better for avoiding re-generate preview thumbnails.
+Or you can set this option to ‘'user-home’ which represent to ~/.cache/thumbnails/."
+  :type 'symbol
+  :safe #'symbol
   :group 'org-link-beautify)
 
 (defcustom org-link-beautify-video-preview-size 512
@@ -213,11 +216,16 @@
                  (member extension org-link-beautify-video-preview-list)
                  org-link-beautify-video-preview)
             (let* ((video (expand-file-name (org-link-unescape path)))
-                   (thumbnails-dir (file-name-directory
-                                    (or org-link-beautify-thumbnails-dir "~/.cache/thumbnails/")))
-                   (thumbnail-size (or org-link-beautify-video-preview-size 512))
+                   (thumbnails-dir (pcase org-link-beautify-thumbnails-dir
+                                     ('source-path
+                                      (concat (file-name-directory video) ".thumbnails/"))
+                                     ('user-home
+                                      (expand-file-name "~/.cache/thumbnails/"))))
                    (thumbnail (expand-file-name
-                               (format "%s%s.jpg" thumbnails-dir (file-name-base video)))))
+                               (format "%s%s.jpg" thumbnails-dir (file-name-base video))))
+                   (thumbnail-size (or org-link-beautify-video-preview-size 512)))
+              (unless (file-directory-p thumbnails-dir)
+                (make-directory thumbnails-dir))
               (shell-command
                (format "ffmpegthumbnailer -f -i %s -s %s -o %s"
                        (shell-quote-argument video) thumbnail-size (shell-quote-argument thumbnail)))
@@ -236,12 +244,17 @@
                        (pdf-page-number (or (match-string 2 path)
                                             org-link-beautify-pdf-preview-default-page-number))
                        (pdf-file (expand-file-name (org-link-unescape file-path)))
-                       (thumbnails-dir (file-name-directory
-                                        (or org-link-beautify-thumbnails-dir "~/.cache/thumbnails/")))
-                       (thumbnail-size (or org-link-beautify-pdf-preview-size 512))
+                       (thumbnails-dir (pcase org-link-beautify-thumbnails-dir
+                                         ('source-path
+                                          (concat (file-name-directory pdf-file) ".thumbnails/"))
+                                         ('user-home
+                                          (expand-file-name "~/.cache/thumbnails/"))))
                        (thumbnail (expand-file-name
-                                   (format "%s%s%s.svg"
-                                           thumbnails-dir (file-name-base pdf-file) pdf-page-number))))
+                                   (format "%s%s-P%s.svg"
+                                           thumbnails-dir (file-name-base pdf-file) pdf-page-number)))
+                       (thumbnail-size (or org-link-beautify-pdf-preview-size 512)))
+                  (unless (file-directory-p thumbnails-dir)
+                    (make-directory thumbnails-dir))
                   (shell-command
                    (format
                     "pdf2svg %s %s %s"
