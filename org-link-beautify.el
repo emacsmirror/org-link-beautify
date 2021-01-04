@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-05 00:45:30 stardiviner>
+;;; Time-stamp: <2021-01-05 00:53:21 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -177,6 +177,67 @@ You can set this option to `nil' to disable EPUB preview."
   "Add 'org-link-beautify on link text-property. between START and END."
   (put-text-property start end 'type 'org-link-beautify))
 
+(defun org-link-beautify--preview-pdf (path start end)
+  "Preview PDF file PATH and display on link between START and END."
+  (if (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
+      (let* ((file-path (match-string 1 path))
+             ;; DEBUG: (_ (lambda (message "--> HERE")))
+             (pdf-page-number (or (match-string 2 path)
+                                  org-link-beautify-pdf-preview-default-page-number))
+             (pdf-file (expand-file-name (org-link-unescape file-path)))
+             (thumbnails-dir (pcase org-link-beautify-thumbnails-dir
+                               ('source-path
+                                (concat (file-name-directory pdf-file) ".thumbnails/"))
+                               ('user-home
+                                (expand-file-name "~/.cache/thumbnails/"))))
+             (thumbnail (expand-file-name
+                         (concat
+                          (if (= pdf-page-number 1)
+                              (format "%s%s.%s"
+                                      thumbnails-dir (file-name-base pdf-file)
+                                      (symbol-name org-link-beautify-pdf-preview-image-format))
+                            (format "%s%s-P%s.%s"
+                                    thumbnails-dir (file-name-base pdf-file) pdf-page-number
+                                    (symbol-name org-link-beautify-pdf-preview-image-format))))))
+             (thumbnail-size (or org-link-beautify-pdf-preview-size 512)))
+        (unless (file-directory-p thumbnails-dir)
+          (make-directory thumbnails-dir))
+        (unless (file-exists-p thumbnail)
+          (pcase org-link-beautify-pdf-preview-command
+            ('pdftocairo
+             ;; DEBUG:
+             ;; (message
+             ;;  "org-link-beautify: page-number %s, pdf-file %s, thumbnail %s"
+             ;;  pdf-page-number pdf-file thumbnail)
+             (start-process
+              "org-link-beautify--pdf-preview"
+              " *org-link-beautify pdf-preview*"
+              "pdftocairo"
+              (pcase org-link-beautify-pdf-preview-image-format
+                ('png "-png")
+                ('jpeg "-jpeg")
+                ('svg "-svg"))
+              "-singlefile"
+              "-f" (number-to-string pdf-page-number)
+              pdf-file (file-name-sans-extension thumbnail)))
+            ('pdf2svg
+             (unless (eq org-link-beautify-pdf-preview-image-format 'svg)
+               (warn "The pdf2svg only supports convert PDF to SVG format.
+Please adjust `org-link-beautify-pdf-preview-command' to `pdftocairo' or
+Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
+
+             (start-process
+              "org-link-beautify--pdf-preview"
+              " *org-link-beautify pdf-preview*"
+              "pdf2svg"
+              pdf-file thumbnail (number-to-string pdf-page-number)))))
+        (org-link-beautify--add-overlay-marker start end)
+        ;; display thumbnail only when it exist.
+        (when (file-exists-p thumbnail)
+          (put-text-property
+           start end
+           'display (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size))))))
+
 (defun org-link-beautify--preview-epub (path start end)
   "Preview EPUB file PATH and display on link between START and END."
   (if (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
@@ -345,64 +406,7 @@ You can set this option to `nil' to disable EPUB preview."
                  (or (and (equal type "file") (string= extension "pdf"))
                      (equal type "pdfview")))
             ;; DEBUG: (message "-> here")
-            (if (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
-                (let* ((file-path (match-string 1 path))
-                       ;; DEBUG: (_ (lambda (message "--> HERE")))
-                       (pdf-page-number (or (match-string 2 path)
-                                            org-link-beautify-pdf-preview-default-page-number))
-                       (pdf-file (expand-file-name (org-link-unescape file-path)))
-                       (thumbnails-dir (pcase org-link-beautify-thumbnails-dir
-                                         ('source-path
-                                          (concat (file-name-directory pdf-file) ".thumbnails/"))
-                                         ('user-home
-                                          (expand-file-name "~/.cache/thumbnails/"))))
-                       (thumbnail (expand-file-name
-                                   (concat
-                                    (if (= pdf-page-number 1)
-                                        (format "%s%s.%s"
-                                                thumbnails-dir (file-name-base pdf-file)
-                                                (symbol-name org-link-beautify-pdf-preview-image-format))
-                                      (format "%s%s-P%s.%s"
-                                              thumbnails-dir (file-name-base pdf-file) pdf-page-number
-                                              (symbol-name org-link-beautify-pdf-preview-image-format))))))
-                       (thumbnail-size (or org-link-beautify-pdf-preview-size 512)))
-                  (unless (file-directory-p thumbnails-dir)
-                    (make-directory thumbnails-dir))
-                  (unless (file-exists-p thumbnail)
-                    (pcase org-link-beautify-pdf-preview-command
-                      ('pdftocairo
-                       ;; DEBUG:
-                       ;; (message
-                       ;;  "org-link-beautify: page-number %s, pdf-file %s, thumbnail %s"
-                       ;;  pdf-page-number pdf-file thumbnail)
-                       (start-process
-                        "org-link-beautify--pdf-preview"
-                        " *org-link-beautify pdf-preview*"
-                        "pdftocairo"
-                        (pcase org-link-beautify-pdf-preview-image-format
-                          ('png "-png")
-                          ('jpeg "-jpeg")
-                          ('svg "-svg"))
-                        "-singlefile"
-                        "-f" (number-to-string pdf-page-number)
-                        pdf-file (file-name-sans-extension thumbnail)))
-                      ('pdf2svg
-                       (unless (eq org-link-beautify-pdf-preview-image-format 'svg)
-                         (warn "The pdf2svg only supports convert PDF to SVG format.
-Please adjust `org-link-beautify-pdf-preview-command' to `pdftocairo' or
-Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
-
-                       (start-process
-                        "org-link-beautify--pdf-preview"
-                        " *org-link-beautify pdf-preview*"
-                        "pdf2svg"
-                        pdf-file thumbnail (number-to-string pdf-page-number)))))
-                  (org-link-beautify--add-overlay-marker start end)
-                  ;; display thumbnail only when it exist.
-                  (when (file-exists-p thumbnail)
-                    (put-text-property
-                     start end
-                     'display (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size))))))
+            (org-link-beautify--preview-pdf path start end))
 
            ;; EPUB file cover preview
            ((and org-link-beautify-epub-preview
