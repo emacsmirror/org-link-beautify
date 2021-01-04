@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-04 14:36:29 stardiviner>
+;;; Time-stamp: <2021-01-04 14:57:52 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -101,6 +101,16 @@ You can set this option to `nil' to disable PDF preview."
   "The default PDF preview page number."
   :type 'number
   :safe #'numberp
+  :group 'org-link-beautify)
+
+(defcustom org-link-beautify-pdf-preview-image-format 'png
+  "The format of PDF file preview image."
+  :type '(choice
+          :tag "The format of PDF file preview image."
+          (const :tag "PNG" png)
+          (const :tag "JPEG" jpeg)
+          (const :tag "SVG" svg))
+  :safe #'symbolp
   :group 'org-link-beautify)
 
 (defcustom org-link-beautify-text-preview nil
@@ -266,8 +276,15 @@ You can set this option to `nil' to disable PDF preview."
                                          ('user-home
                                           (expand-file-name "~/.cache/thumbnails/"))))
                        (thumbnail (expand-file-name
-                                   (format "%s%s-P%s.svg"
-                                           thumbnails-dir (file-name-base pdf-file) pdf-page-number)))
+                                   (if (= pdf-page-number 1)
+                                       (format
+                                        "%s%s.%s"
+                                        thumbnails-dir (file-name-base pdf-file)
+                                        (symbol-name org-link-beautify-pdf-preview-image-format))
+                                     (format
+                                      "%s%s-P%s.%s"
+                                      thumbnails-dir (file-name-base pdf-file) pdf-page-number
+                                      (symbol-name org-link-beautify-pdf-preview-image-format)))))
                        (thumbnail-size (or org-link-beautify-pdf-preview-size 512)))
                   (unless (file-directory-p thumbnails-dir)
                     (make-directory thumbnails-dir))
@@ -277,9 +294,17 @@ You can set this option to `nil' to disable PDF preview."
                       "org-link-beautify--pdf-preview"
                       " *org-link-beautify pdf-preview*"
                       "pdftocairo"
-                      "-png" "-f" pdf-page-number
+                      (pcase org-link-beautify-pdf-preview-image-format
+                        ('png "-png")
+                        ('jpeg "-jpeg")
+                        ('svg "-svg"))
+                      "-f" pdf-page-number
                       pdf-file thumbnail))
                     ('pdf2svg
+                     (unless (eq org-link-beautify-pdf-preview-image-format 'svg)
+                       (warn "The pdf2svg only supports convert PDF to SVG format.
+Please adjust `org-link-beautify-pdf-preview-command' to `pdftocairo' or
+Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                      (start-process
                       "org-link-beautify--pdf-preview"
                       " *org-link-beautify pdf-preview*"
