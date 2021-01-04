@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-05 01:01:31 stardiviner>
+;;; Time-stamp: <2021-01-05 01:05:08 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -164,17 +164,6 @@ EPUB preview."
            (file-exists-p (expand-file-name path)))
       'org-link 'org-warning))
 
-(defun org-link-beautify--preview-text-file (file lines)
-  "Return first LINES of FILE."
-  (with-temp-buffer
-    (insert-file-contents-literally file)
-    (cl-loop repeat lines
-             unless (eobp)
-             collect (prog1 (buffer-substring-no-properties
-                             (line-beginning-position)
-                             (line-end-position))
-                       (forward-line 1)))))
-
 (defun org-link-beautify--add-overlay-marker (start end)
   "Add 'org-link-beautify on link text-property. between START and END."
   (put-text-property start end 'type 'org-link-beautify))
@@ -280,6 +269,17 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
           (put-text-property
            start end
            'display (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size))))))
+
+(defun org-link-beautify--preview-text-file (file lines)
+  "Return first LINES of FILE."
+  (with-temp-buffer
+    (insert-file-contents-literally file)
+    (cl-loop repeat lines
+             unless (eobp)
+             collect (prog1 (buffer-substring-no-properties
+                             (line-beginning-position)
+                             (line-end-position))
+                       (forward-line 1)))))
 
 (defun org-link-beautify--preview-text (path start end)
   "Preview TEXT file PATH and display on link between START and END."
