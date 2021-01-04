@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-04 14:57:52 stardiviner>
+;;; Time-stamp: <2021-01-04 15:25:24 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -267,8 +267,10 @@ You can set this option to `nil' to disable PDF preview."
            ((and org-link-beautify-pdf-preview
                  (or (and (equal type "file") (string= extension "pdf"))
                      (equal type "pdfview")))
+            ;; DEBUG: (message "-> here")
             (if (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
                 (let* ((file-path (match-string 1 path))
+                       ;; DEBUG: (_ (lambda (message "--> HERE")))
                        (pdf-page-number (or (match-string 2 path)
                                             org-link-beautify-pdf-preview-default-page-number))
                        (pdf-file (expand-file-name (org-link-unescape file-path)))
@@ -292,6 +294,10 @@ You can set this option to `nil' to disable PDF preview."
                     (make-directory thumbnails-dir))
                   (pcase org-link-beautify-pdf-preview-command
                     ('pdftocairo
+                     ;; DEBUG:
+                     ;; (message
+                     ;;  "org-link-beautify: page-number %s, pdf-file %s, thumbnail %s"
+                     ;;  pdf-page-number pdf-file thumbnail)
                      (start-process
                       "org-link-beautify--pdf-preview"
                       " *org-link-beautify pdf-preview*"
@@ -308,6 +314,7 @@ You can set this option to `nil' to disable PDF preview."
                        (warn "The pdf2svg only supports convert PDF to SVG format.
 Please adjust `org-link-beautify-pdf-preview-command' to `pdftocairo' or
 Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
+
                      (start-process
                       "org-link-beautify--pdf-preview"
                       " *org-link-beautify pdf-preview*"
