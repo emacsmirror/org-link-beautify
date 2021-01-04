@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-05 00:53:21 stardiviner>
+;;; Time-stamp: <2021-01-05 00:54:43 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -279,6 +279,33 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
            start end
            'display (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size))))))
 
+(defun org-link-beautify--preview-video (path start end)
+  "Preview video file PATH and display on link between START and END."
+  (let* ((video (expand-file-name (org-link-unescape path)))
+         (thumbnails-dir (pcase org-link-beautify-thumbnails-dir
+                           ('source-path
+                            (concat (file-name-directory video) ".thumbnails/"))
+                           ('user-home
+                            (expand-file-name "~/.cache/thumbnails/"))))
+         (thumbnail (expand-file-name
+                     (format "%s%s.jpg" thumbnails-dir (file-name-base video))))
+         (thumbnail-size (or org-link-beautify-video-preview-size 512)))
+    (unless (file-directory-p thumbnails-dir)
+      (make-directory thumbnails-dir))
+    (unless (file-exists-p thumbnail)
+      (start-process
+       "org-link-beautify--video-preview"
+       " *org-link-beautify video-preview*"
+       "ffmpegthumbnailer"
+       "-f" "-i" video "-s" thumbnail-size
+       "-o" thumbnail))
+    (org-link-beautify--add-overlay-marker start end)
+    (when (file-exists-p thumbnail)
+      (put-text-property
+       start end
+       'display
+       (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size)))))
+
 (defun org-link-beautify--display-icon (start end description icon)
   "Display ICON for link on START and END with DESCRIPTION."
   (put-text-property
@@ -374,30 +401,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
            ((and (equal type "file")
                  (member extension org-link-beautify-video-preview-list)
                  org-link-beautify-video-preview)
-            (let* ((video (expand-file-name (org-link-unescape path)))
-                   (thumbnails-dir (pcase org-link-beautify-thumbnails-dir
-                                     ('source-path
-                                      (concat (file-name-directory video) ".thumbnails/"))
-                                     ('user-home
-                                      (expand-file-name "~/.cache/thumbnails/"))))
-                   (thumbnail (expand-file-name
-                               (format "%s%s.jpg" thumbnails-dir (file-name-base video))))
-                   (thumbnail-size (or org-link-beautify-video-preview-size 512)))
-              (unless (file-directory-p thumbnails-dir)
-                (make-directory thumbnails-dir))
-              (unless (file-exists-p thumbnail)
-                (start-process
-                 "org-link-beautify--video-preview"
-                 " *org-link-beautify video-preview*"
-                 "ffmpegthumbnailer"
-                 "-f" "-i" video "-s" thumbnail-size
-                 "-o" thumbnail))
-              (org-link-beautify--add-overlay-marker start end)
-              (when (file-exists-p thumbnail)
-                (put-text-property
-                 start end
-                 'display
-                 (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size)))))
+            (org-link-beautify--preview-video path start end))
 
            ;; PDF file preview
            ;; [[file:/path/to/filename.pdf]]
