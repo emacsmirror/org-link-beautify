@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-04 16:23:56 stardiviner>
+;;; Time-stamp: <2021-01-04 17:32:59 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -265,7 +265,7 @@ You can set this option to `nil' to disable EPUB preview."
                    (thumbnail-size (or org-link-beautify-video-preview-size 512)))
               (unless (file-directory-p thumbnails-dir)
                 (make-directory thumbnails-dir))
-              (unless (not (file-exists-p thumbnail))
+              (unless (file-exists-p thumbnail)
                 (start-process
                  "org-link-beautify--video-preview"
                  " *org-link-beautify video-preview*"
@@ -273,7 +273,7 @@ You can set this option to `nil' to disable EPUB preview."
                  "-f" "-i" video "-s" thumbnail-size
                  "-o" thumbnail))
               (put-text-property start end 'type 'org-link-beautify)
-              (while (file-exists-p thumbnail)
+              (when (file-exists-p thumbnail)
                 (put-text-property
                  start end
                  'display
@@ -309,7 +309,7 @@ You can set this option to `nil' to disable EPUB preview."
                        (thumbnail-size (or org-link-beautify-pdf-preview-size 512)))
                   (unless (file-directory-p thumbnails-dir)
                     (make-directory thumbnails-dir))
-                  (unless (not (file-exists-p thumbnail))
+                  (unless (file-exists-p thumbnail)
                     (pcase org-link-beautify-pdf-preview-command
                       ('pdftocairo
                        ;; DEBUG:
@@ -340,7 +340,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                         pdf-file thumbnail (number-to-string pdf-page-number)))))
                   (put-text-property start end 'type 'org-link-beautify)
                   ;; display thumbnail only when it exist.
-                  (while (file-exists-p thumbnail)
+                  (when (file-exists-p thumbnail)
                     (put-text-property
                      start end
                      'display (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size))))))
@@ -365,7 +365,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                        (thumbnail-size (or org-link-beautify-epub-preview-size 600)))
                   (unless (file-directory-p thumbnails-dir)
                     (make-directory thumbnails-dir))
-                  (unless (not (file-exists-p thumbnail))
+                  (unless (file-exists-p thumbnail)
                     ;; DEBUG:
                     ;; (message
                     ;;  "org-link-beautify: epub-file %s, thumbnail %s"
@@ -382,7 +382,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                      ))
                   (put-text-property start end 'type 'org-link-beautify)
                   ;; display thumbnail only when it exist.
-                  (while (file-exists-p thumbnail)
+                  (when (file-exists-p thumbnail)
                     (put-text-property
                      start end
                      'display (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size))))))
