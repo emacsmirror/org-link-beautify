@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-04 15:25:24 stardiviner>
+;;; Time-stamp: <2021-01-04 15:29:47 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -280,15 +280,14 @@ You can set this option to `nil' to disable PDF preview."
                                          ('user-home
                                           (expand-file-name "~/.cache/thumbnails/"))))
                        (thumbnail (expand-file-name
-                                   (if (= pdf-page-number 1)
-                                       (format
-                                        "%s%s.%s"
-                                        thumbnails-dir (file-name-base pdf-file)
-                                        (symbol-name org-link-beautify-pdf-preview-image-format))
-                                     (format
-                                      "%s%s-P%s.%s"
-                                      thumbnails-dir (file-name-base pdf-file) pdf-page-number
-                                      (symbol-name org-link-beautify-pdf-preview-image-format)))))
+                                   (concat
+                                    (if (= pdf-page-number 1)
+                                        (format "%s%s.%s"
+                                                thumbnails-dir (file-name-base pdf-file)
+                                                (symbol-name org-link-beautify-pdf-preview-image-format))
+                                      (format "%s%s-P%s.%s"
+                                              thumbnails-dir (file-name-base pdf-file) pdf-page-number
+                                              (symbol-name org-link-beautify-pdf-preview-image-format))))))
                        (thumbnail-size (or org-link-beautify-pdf-preview-size 512)))
                   (unless (file-directory-p thumbnails-dir)
                     (make-directory thumbnails-dir))
@@ -308,7 +307,7 @@ You can set this option to `nil' to disable PDF preview."
                         ('svg "-svg"))
                       "-singlefile"
                       "-f" (number-to-string pdf-page-number)
-                      pdf-file thumbnail))
+                      pdf-file (file-name-sans-extension thumbnail)))
                     ('pdf2svg
                      (unless (eq org-link-beautify-pdf-preview-image-format 'svg)
                        (warn "The pdf2svg only supports convert PDF to SVG format.
