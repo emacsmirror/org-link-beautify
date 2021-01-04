@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-04 17:32:59 stardiviner>
+;;; Time-stamp: <2021-01-05 00:45:30 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -173,6 +173,10 @@ You can set this option to `nil' to disable EPUB preview."
                              (line-end-position))
                        (forward-line 1)))))
 
+(defun org-link-beautify--add-overlay-marker (start end)
+  "Add 'org-link-beautify on link text-property. between START and END."
+  (put-text-property start end 'type 'org-link-beautify))
+
 (defun org-link-beautify (start end path bracket-p)
   "Display icon for the link type based on PATH from START to END."
   ;; (message
@@ -272,7 +276,7 @@ You can set this option to `nil' to disable EPUB preview."
                  "ffmpegthumbnailer"
                  "-f" "-i" video "-s" thumbnail-size
                  "-o" thumbnail))
-              (put-text-property start end 'type 'org-link-beautify)
+              (org-link-beautify--add-overlay-marker start end)
               (when (file-exists-p thumbnail)
                 (put-text-property
                  start end
@@ -338,7 +342,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                         " *org-link-beautify pdf-preview*"
                         "pdf2svg"
                         pdf-file thumbnail (number-to-string pdf-page-number)))))
-                  (put-text-property start end 'type 'org-link-beautify)
+                  (org-link-beautify--add-overlay-marker start end)
                   ;; display thumbnail only when it exist.
                   (when (file-exists-p thumbnail)
                     (put-text-property
@@ -380,7 +384,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                      ;; (when org-link-beautify-epub-preview-size
                      ;;   '("--size" thumbnail-size))
                      ))
-                  (put-text-property start end 'type 'org-link-beautify)
+                  (org-link-beautify--add-overlay-marker start end)
                   ;; display thumbnail only when it exist.
                   (when (file-exists-p thumbnail)
                     (put-text-property
@@ -394,7 +398,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
             (let* ((text-file (expand-file-name (org-link-unescape path)))
                    (preview-lines 10)
                    (preview-content (org-link-beautify--preview-text-file text-file preview-lines)))
-              (put-text-property (1+ end) (+ end 2) 'type 'org-link-beautify)
+              (org-link-beautify--add-overlay-marker (1+ end) (+ end 2))
               (put-text-property (1+ end) (+ end 2) 'display (propertize preview-content))
               (put-text-property
                (1+ end) (+ end 2)
@@ -403,18 +407,8 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                                 :background (color-darken-name (face-background 'default) 5)))))
            ;; general icons
            (t
-            (put-text-property start end 'type 'org-link-beautify)
-            (put-text-property
-             start end
-             'display
-             (propertize
-              (concat
-               (propertize "[" 'face '(:inherit nil :underline nil :foreground "orange"))
-               (propertize description 'face '(:underline t :foreground "dark cyan"))
-               (propertize "]" 'face '(:inherit nil :underline nil :foreground "orange"))
-               (propertize "(" 'face '(:inherit nil :underline nil :foreground "orange"))
-               (propertize icon 'face '(:inherit nil :underline nil :foreground "gray"))
-               (propertize ")" 'face '(:inherit nil :underline nil :foreground "orange"))))))))))))
+            (org-link-beautify--add-overlay-marker start end)
+            (org-link-beautify--display-icon start end description icon))))))))
 
 (defun org-link-beautify-toggle-overlays ()
   "Toggle the display of `org-link-beautify'."
