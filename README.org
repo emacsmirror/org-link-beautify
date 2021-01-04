@@ -47,12 +47,13 @@ Supports video file link preview with thumbnail.
   sudo pacman -S --noconfirm ffmpegthumbnailer
   #+end_src
 
-- PDF file preview need package "=pdf2svg="
+- PDF file preview with command "=pdftocairo=" or "=pdf2svg="
 
   For Arch Linux:
 
   #+begin_src sh :dir /sudo:: :results none
-  sudo pacman -S --noconfirm pdf2svg
+  sudo pacman -S --noconfirm poppler # command pdftocairo
+  sudo pacman -S --noconfirm pdf2svg # command pdf2svg
   #+end_src
 
 * Usage

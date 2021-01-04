@@ -72,12 +72,25 @@ Or you can set this option to ‘'user-home’ which represent to ~/.cache/thumb
   :safe #'listp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-pdf-preview (executable-find "pdf2svg")
-  "Whether enable PDF files image preview?"
+(defcustom org-link-beautify-pdf-preview (or (executable-find "pdftocairo")
+                                             (executable-find "pdf2svg"))
+  "Whether enable PDF files image preview?
+If command \"pdftocairo\" or \"pdf2svg\" is available, enable PDF preview by default.
+You can set this option to `nil' to disable PDF preview."
   :type 'boolean
   :safe #'booleanp
   :group 'org-link-beautify)
 
+(defcustom org-link-beautify-pdf-preview-command 'pdftocairo
+  "The command used to preview PDF file cover."
+  :type '(choice
+          :tag "The command used to preview PDF cover."
+          (const :tag "pdftocairo" pdftocairo)
+          (const :tag "pdf2svg" pdf2svg))
+  :safe #'symbolp
+  :group 'org-link-beautify)
+
+;;; TODO: smarter value decided based on screen size.
 (defcustom org-link-beautify-pdf-preview-size 512
   "The PDF preview image size."
   :type 'number
@@ -255,10 +268,20 @@ Or you can set this option to ‘'user-home’ which represent to ~/.cache/thumb
                        (thumbnail-size (or org-link-beautify-pdf-preview-size 512)))
                   (unless (file-directory-p thumbnails-dir)
                     (make-directory thumbnails-dir))
-                  (shell-command
-                   (format
-                    "pdf2svg %s %s %s"
-                    (shell-quote-argument pdf-file) (shell-quote-argument thumbnail) pdf-page-number))
+                  (pcase org-link-beautify-pdf-preview-command
+                    ('pdftocairo
+                     (start-process
+                      "org-link-beautify--pdf-preview"
+                      " *org-link-beautify pdf-preview*"
+                      "pdftocairo"
+                      "-png" "-f" pdf-page-number
+                      pdf-file thumbnail))
+                    ('pdf2svg
+                     (start-process
+                      "org-link-beautify--pdf-preview"
+                      " *org-link-beautify pdf-preview*"
+                      "pdf2svg"
+                      pdf-file thumbnail pdf-page-number)))
                   (put-text-property start end 'type 'org-link-beautify)
                   (put-text-property
                    start end
