@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-03 10:16:13 stardiviner>
+;;; Time-stamp: <2021-01-04 14:36:29 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -239,9 +239,12 @@ You can set this option to `nil' to disable PDF preview."
                    (thumbnail-size (or org-link-beautify-video-preview-size 512)))
               (unless (file-directory-p thumbnails-dir)
                 (make-directory thumbnails-dir))
-              (shell-command
-               (format "ffmpegthumbnailer -f -i %s -s %s -o %s"
-                       (shell-quote-argument video) thumbnail-size (shell-quote-argument thumbnail)))
+              (start-process
+               "org-link-beautify--video-preview"
+               " *org-link-beautify video-preview*"
+               "ffmpegthumbnailer"
+               "-f" "-i" video "-s" thumbnail-size
+               "-o" thumbnail)
               (put-text-property start end 'type 'org-link-beautify)
               (put-text-property
                start end
