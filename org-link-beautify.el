@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-04 15:29:47 stardiviner>
+;;; Time-stamp: <2021-01-04 15:39:50 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -251,12 +251,13 @@ You can set this option to `nil' to disable PDF preview."
                    (thumbnail-size (or org-link-beautify-video-preview-size 512)))
               (unless (file-directory-p thumbnails-dir)
                 (make-directory thumbnails-dir))
-              (start-process
-               "org-link-beautify--video-preview"
-               " *org-link-beautify video-preview*"
-               "ffmpegthumbnailer"
-               "-f" "-i" video "-s" thumbnail-size
-               "-o" thumbnail)
+              (unless (not (file-exists-p thumbnail))
+                (start-process
+                 "org-link-beautify--video-preview"
+                 " *org-link-beautify video-preview*"
+                 "ffmpegthumbnailer"
+                 "-f" "-i" video "-s" thumbnail-size
+                 "-o" thumbnail))
               (put-text-property start end 'type 'org-link-beautify)
               (put-text-property
                start end
@@ -291,34 +292,35 @@ You can set this option to `nil' to disable PDF preview."
                        (thumbnail-size (or org-link-beautify-pdf-preview-size 512)))
                   (unless (file-directory-p thumbnails-dir)
                     (make-directory thumbnails-dir))
-                  (pcase org-link-beautify-pdf-preview-command
-                    ('pdftocairo
-                     ;; DEBUG:
-                     ;; (message
-                     ;;  "org-link-beautify: page-number %s, pdf-file %s, thumbnail %s"
-                     ;;  pdf-page-number pdf-file thumbnail)
-                     (start-process
-                      "org-link-beautify--pdf-preview"
-                      " *org-link-beautify pdf-preview*"
-                      "pdftocairo"
-                      (pcase org-link-beautify-pdf-preview-image-format
-                        ('png "-png")
-                        ('jpeg "-jpeg")
-                        ('svg "-svg"))
-                      "-singlefile"
-                      "-f" (number-to-string pdf-page-number)
-                      pdf-file (file-name-sans-extension thumbnail)))
-                    ('pdf2svg
-                     (unless (eq org-link-beautify-pdf-preview-image-format 'svg)
-                       (warn "The pdf2svg only supports convert PDF to SVG format.
+                  (unless (not (file-exists-p thumbnail))
+                    (pcase org-link-beautify-pdf-preview-command
+                      ('pdftocairo
+                       ;; DEBUG:
+                       ;; (message
+                       ;;  "org-link-beautify: page-number %s, pdf-file %s, thumbnail %s"
+                       ;;  pdf-page-number pdf-file thumbnail)
+                       (start-process
+                        "org-link-beautify--pdf-preview"
+                        " *org-link-beautify pdf-preview*"
+                        "pdftocairo"
+                        (pcase org-link-beautify-pdf-preview-image-format
+                          ('png "-png")
+                          ('jpeg "-jpeg")
+                          ('svg "-svg"))
+                        "-singlefile"
+                        "-f" (number-to-string pdf-page-number)
+                        pdf-file (file-name-sans-extension thumbnail)))
+                      ('pdf2svg
+                       (unless (eq org-link-beautify-pdf-preview-image-format 'svg)
+                         (warn "The pdf2svg only supports convert PDF to SVG format.
 Please adjust `org-link-beautify-pdf-preview-command' to `pdftocairo' or
 Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
 
-                     (start-process
-                      "org-link-beautify--pdf-preview"
-                      " *org-link-beautify pdf-preview*"
-                      "pdf2svg"
-                      pdf-file thumbnail (number-to-string pdf-page-number))))
+                       (start-process
+                        "org-link-beautify--pdf-preview"
+                        " *org-link-beautify pdf-preview*"
+                        "pdf2svg"
+                        pdf-file thumbnail (number-to-string pdf-page-number)))))
                   (put-text-property start end 'type 'org-link-beautify)
                   (put-text-property
                    start end
