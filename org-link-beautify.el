@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-04 16:06:10 stardiviner>
+;;; Time-stamp: <2021-01-04 16:16:21 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -369,6 +369,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                     ;;  epub-file thumbnail)
                     (start-process
                      "org-link-beautify--epub-preview"
+                     ;; DEBUG: check out this output buffer
                      " *org-link-beautify epub-preview*"
                      "gnome-epub-thumbnailer"
                      epub-file thumbnail
