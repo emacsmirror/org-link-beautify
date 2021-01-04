@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-05 01:05:08 stardiviner>
+;;; Time-stamp: <2021-01-05 01:08:49 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -168,6 +168,13 @@ EPUB preview."
   "Add 'org-link-beautify on link text-property. between START and END."
   (put-text-property start end 'type 'org-link-beautify))
 
+(defun org-link-beautify--display-thumbnail (thumbnail thumbnail-size start end)
+  "Display THUMBNAIL between START and END in size of THUMBNAIL-SIZE only when it exist."
+  (when (file-exists-p thumbnail)
+    (put-text-property
+     start end
+     'display (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size))))
+
 (defun org-link-beautify--preview-pdf (path start end)
   "Preview PDF file PATH and display on link between START and END."
   (if (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
@@ -224,10 +231,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
               pdf-file thumbnail (number-to-string pdf-page-number)))))
         (org-link-beautify--add-overlay-marker start end)
         ;; display thumbnail only when it exist.
-        (when (file-exists-p thumbnail)
-          (put-text-property
-           start end
-           'display (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size))))))
+        (org-link-beautify--display-thumbnail thumbnail thumbnail-size start end))))
 
 (defun org-link-beautify--preview-epub (path start end)
   "Preview EPUB file PATH and display on link between START and END."
@@ -263,12 +267,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
            ;;   '("--size" thumbnail-size))
            ))
         (org-link-beautify--add-overlay-marker start end)
-        ;; display thumbnail only when it exist.
-        ;; TODO: extract into function
-        (when (file-exists-p thumbnail)
-          (put-text-property
-           start end
-           'display (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size))))))
+        (org-link-beautify--display-thumbnail thumbnail thumbnail-size start end))))
 
 (defun org-link-beautify--preview-text-file (file lines)
   "Return first LINES of FILE."
@@ -315,11 +314,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
        "-f" "-i" video "-s" thumbnail-size
        "-o" thumbnail))
     (org-link-beautify--add-overlay-marker start end)
-    (when (file-exists-p thumbnail)
-      (put-text-property
-       start end
-       'display
-       (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size)))))
+    (org-link-beautify--display-thumbnail thumbnail thumbnail-size start end)))
 
 (defun org-link-beautify--return-icon (path type extension)
   "Return the corresponding icon for link PATH smartly based on TYPE, EXTENSION, etc."
