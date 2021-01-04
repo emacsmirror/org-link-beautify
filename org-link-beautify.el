@@ -300,6 +300,7 @@ You can set this option to `nil' to disable PDF preview."
                         ('png "-png")
                         ('jpeg "-jpeg")
                         ('svg "-svg"))
+                      "-singlefile"
                       "-f" (number-to-string pdf-page-number)
                       pdf-file thumbnail))
                     ('pdf2svg
