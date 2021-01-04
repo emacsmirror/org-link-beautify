@@ -300,7 +300,7 @@ You can set this option to `nil' to disable PDF preview."
                         ('png "-png")
                         ('jpeg "-jpeg")
                         ('svg "-svg"))
-                      "-f" pdf-page-number
+                      "-f" (number-to-string pdf-page-number)
                       pdf-file thumbnail))
                     ('pdf2svg
                      (unless (eq org-link-beautify-pdf-preview-image-format 'svg)
@@ -311,7 +311,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                       "org-link-beautify--pdf-preview"
                       " *org-link-beautify pdf-preview*"
                       "pdf2svg"
-                      pdf-file thumbnail pdf-page-number)))
+                      pdf-file thumbnail (number-to-string pdf-page-number))))
                   (put-text-property start end 'type 'org-link-beautify)
                   (put-text-property
                    start end
