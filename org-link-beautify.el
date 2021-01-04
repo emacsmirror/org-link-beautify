@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-04 15:39:50 stardiviner>
+;;; Time-stamp: <2021-01-04 16:06:10 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -113,6 +113,20 @@ You can set this option to `nil' to disable PDF preview."
           (const :tag "JPEG" jpeg)
           (const :tag "SVG" svg))
   :safe #'symbolp
+  :group 'org-link-beautify)
+
+(defcustom org-link-beautify-epub-preview (executable-find "gnome-epub-thumbnailer")
+  "Whether enable EPUB files cover preview?
+If command \"gnome-epub-thumbnailer\" is available, enable EPUB preview by default.
+You can set this option to `nil' to disable EPUB preview."
+  :type 'boolean
+  :safe #'booleanp
+  :group 'org-link-beautify)
+
+(defcustom org-link-beautify-epub-preview-size 400
+  "The EPUB cover preview image size."
+  :type 'number
+  :safe #'numberp
   :group 'org-link-beautify)
 
 (defcustom org-link-beautify-text-preview nil
@@ -263,6 +277,8 @@ You can set this option to `nil' to disable PDF preview."
                start end
                'display
                (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size))))
+
+           ;; PDF file preview
            ;; [[file:/path/to/filename.pdf]]
            ;; [[pdfview:/path/to/filename.pdf::15]]
            ((and org-link-beautify-pdf-preview
@@ -325,6 +341,46 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                   (put-text-property
                    start end
                    'display (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size)))))
+
+           ;; EPUB file cover preview
+           ((and org-link-beautify-epub-preview
+                 (and (equal type "file") (string= extension "epub")))
+            ;; DEBUG: (message "-> here")
+            (if (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
+                (let* ((file-path (match-string 1 path))
+                       ;; DEBUG: (_ (lambda (message "--> HERE")))
+                       (_epub-page-number (or (match-string 2 path) 1))
+                       (epub-file (expand-file-name (org-link-unescape file-path)))
+                       (thumbnails-dir (pcase org-link-beautify-thumbnails-dir
+                                         ('source-path
+                                          (concat (file-name-directory epub-file) ".thumbnails/"))
+                                         ('user-home
+                                          (expand-file-name "~/.cache/thumbnails/"))))
+                       (thumbnail (expand-file-name
+                                   (format "%s%s.png"
+                                           thumbnails-dir (file-name-base epub-file))))
+                       (thumbnail-size (or org-link-beautify-epub-preview-size 600)))
+                  (unless (file-directory-p thumbnails-dir)
+                    (make-directory thumbnails-dir))
+                  (unless (not (file-exists-p thumbnail))
+                    ;; DEBUG:
+                    ;; (message
+                    ;;  "org-link-beautify: epub-file %s, thumbnail %s"
+                    ;;  epub-file thumbnail)
+                    (start-process
+                     "org-link-beautify--epub-preview"
+                     " *org-link-beautify epub-preview*"
+                     "gnome-epub-thumbnailer"
+                     epub-file thumbnail
+                     ;; FIXME:
+                     ;; (when org-link-beautify-epub-preview-size
+                     ;;   '("--size" thumbnail-size))
+                     ))
+                  (put-text-property start end 'type 'org-link-beautify)
+                  (put-text-property
+                   start end
+                   'display (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size)))))
+           
            ;; text content preview
            ((and (equal type "file")
                  (member extension org-link-beautify-text-preview-list)
