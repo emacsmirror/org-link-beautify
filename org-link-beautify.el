@@ -279,6 +279,19 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
            start end
            'display (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size))))))
 
+(defun org-link-beautify--preview-text (path start end)
+  "Preview TEXT file PATH and display on link between START and END."
+  (let* ((text-file (expand-file-name (org-link-unescape path)))
+         (preview-lines 10)
+         (preview-content (org-link-beautify--preview-text-file text-file preview-lines)))
+    (org-link-beautify--add-overlay-marker (1+ end) (+ end 2))
+    (put-text-property (1+ end) (+ end 2) 'display (propertize preview-content))
+    (put-text-property
+     (1+ end) (+ end 2)
+     'face '(:inherit nil :slant 'italic
+                      :foreground nil
+                      :background (color-darken-name (face-background 'default) 5)))))
+
 (defun org-link-beautify--preview-video (path start end)
   "Preview video file PATH and display on link between START and END."
   (let* ((video (expand-file-name (org-link-unescape path)))
@@ -423,16 +436,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
            ((and (equal type "file")
                  (member extension org-link-beautify-text-preview-list)
                  org-link-beautify-text-preview)
-            (let* ((text-file (expand-file-name (org-link-unescape path)))
-                   (preview-lines 10)
-                   (preview-content (org-link-beautify--preview-text-file text-file preview-lines)))
-              (org-link-beautify--add-overlay-marker (1+ end) (+ end 2))
-              (put-text-property (1+ end) (+ end 2) 'display (propertize preview-content))
-              (put-text-property
-               (1+ end) (+ end 2)
-               'face '(:inherit nil :slant 'italic
-                                :foreground nil
-                                :background (color-darken-name (face-background 'default) 5)))))
+            (org-link-beautify--preview-text path start end))
            ;; general icons
            (t
             (org-link-beautify--add-overlay-marker start end)
