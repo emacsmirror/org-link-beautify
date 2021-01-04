@@ -177,6 +177,47 @@ You can set this option to `nil' to disable EPUB preview."
   "Add 'org-link-beautify on link text-property. between START and END."
   (put-text-property start end 'type 'org-link-beautify))
 
+(defun org-link-beautify--preview-epub (path start end)
+  "Preview EPUB file PATH and display on link between START and END."
+  (if (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
+      (let* ((file-path (match-string 1 path))
+             ;; DEBUG: (_ (lambda (message "--> HERE")))
+             (_epub-page-number (or (match-string 2 path) 1))
+             (epub-file (expand-file-name (org-link-unescape file-path)))
+             (thumbnails-dir (pcase org-link-beautify-thumbnails-dir
+                               ('source-path
+                                (concat (file-name-directory epub-file) ".thumbnails/"))
+                               ('user-home
+                                (expand-file-name "~/.cache/thumbnails/"))))
+             (thumbnail (expand-file-name
+                         (format "%s%s.png"
+                                 thumbnails-dir (file-name-base epub-file))))
+             (thumbnail-size (or org-link-beautify-epub-preview-size 600)))
+        (unless (file-directory-p thumbnails-dir)
+          (make-directory thumbnails-dir))
+        (unless (file-exists-p thumbnail)
+          ;; DEBUG:
+          ;; (message
+          ;;  "org-link-beautify: epub-file %s, thumbnail %s"
+          ;;  epub-file thumbnail)
+          (start-process
+           "org-link-beautify--epub-preview"
+           ;; DEBUG: check out this output buffer
+           " *org-link-beautify epub-preview*"
+           "gnome-epub-thumbnailer"
+           epub-file thumbnail
+           ;; FIXME:
+           ;; (when org-link-beautify-epub-preview-size
+           ;;   '("--size" thumbnail-size))
+           ))
+        (org-link-beautify--add-overlay-marker start end)
+        ;; display thumbnail only when it exist.
+        ;; TODO: extract into function
+        (when (file-exists-p thumbnail)
+          (put-text-property
+           start end
+           'display (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size))))))
+
 (defun org-link-beautify--display-icon (start end description icon)
   "Display ICON for link on START and END with DESCRIPTION."
   (put-text-property
@@ -366,44 +407,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
            ;; EPUB file cover preview
            ((and org-link-beautify-epub-preview
                  (and (equal type "file") (string= extension "epub")))
-            ;; DEBUG: (message "-> here")
-            (if (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
-                (let* ((file-path (match-string 1 path))
-                       ;; DEBUG: (_ (lambda (message "--> HERE")))
-                       (_epub-page-number (or (match-string 2 path) 1))
-                       (epub-file (expand-file-name (org-link-unescape file-path)))
-                       (thumbnails-dir (pcase org-link-beautify-thumbnails-dir
-                                         ('source-path
-                                          (concat (file-name-directory epub-file) ".thumbnails/"))
-                                         ('user-home
-                                          (expand-file-name "~/.cache/thumbnails/"))))
-                       (thumbnail (expand-file-name
-                                   (format "%s%s.png"
-                                           thumbnails-dir (file-name-base epub-file))))
-                       (thumbnail-size (or org-link-beautify-epub-preview-size 600)))
-                  (unless (file-directory-p thumbnails-dir)
-                    (make-directory thumbnails-dir))
-                  (unless (file-exists-p thumbnail)
-                    ;; DEBUG:
-                    ;; (message
-                    ;;  "org-link-beautify: epub-file %s, thumbnail %s"
-                    ;;  epub-file thumbnail)
-                    (start-process
-                     "org-link-beautify--epub-preview"
-                     ;; DEBUG: check out this output buffer
-                     " *org-link-beautify epub-preview*"
-                     "gnome-epub-thumbnailer"
-                     epub-file thumbnail
-                     ;; FIXME:
-                     ;; (when org-link-beautify-epub-preview-size
-                     ;;   '("--size" thumbnail-size))
-                     ))
-                  (org-link-beautify--add-overlay-marker start end)
-                  ;; display thumbnail only when it exist.
-                  (when (file-exists-p thumbnail)
-                    (put-text-property
-                     start end
-                     'display (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size))))))
+            (org-link-beautify--preview-epub path start end))
            
            ;; text content preview
            ((and (equal type "file")
