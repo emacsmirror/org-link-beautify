@@ -53,9 +53,11 @@
 
 (defcustom org-link-beautify-thumbnails-dir 'source-path
   "The directory of generated thumbnails.
-By default the thumbnails are generated in source file path’s .thumbnails directory.
-This is better for avoiding re-generate preview thumbnails.
-Or you can set this option to ‘'user-home’ which represent to ~/.cache/thumbnails/."
+
+By default the thumbnails are generated in source file path’s
+.thumbnails directory. This is better for avoiding re-generate
+preview thumbnails. Or you can set this option to ‘'user-home’
+which represent to ~/.cache/thumbnails/."
   :type 'symbol
   :safe #'symbol
   :group 'org-link-beautify)
