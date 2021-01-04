@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-05 01:00:02 stardiviner>
+;;; Time-stamp: <2021-01-05 01:01:31 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -418,7 +418,6 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                  (member extension org-link-beautify-video-preview-list)
                  org-link-beautify-video-preview)
             (org-link-beautify--preview-video path start end))
-           
            ;; PDF file preview
            ;; [[file:/path/to/filename.pdf]]
            ;; [[pdfview:/path/to/filename.pdf::15]]
@@ -426,12 +425,10 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                  (or (and (equal type "file") (string= extension "pdf"))
                      (equal type "pdfview")))
             (org-link-beautify--preview-pdf path start end))
-           
            ;; EPUB file cover preview
            ((and org-link-beautify-epub-preview
                  (and (equal type "file") (string= extension "epub")))
             (org-link-beautify--preview-epub path start end))
-           
            ;; text content preview
            ((and (equal type "file")
                  (member extension org-link-beautify-text-preview-list)
