@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-04 16:16:21 stardiviner>
+;;; Time-stamp: <2021-01-04 16:23:56 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -273,10 +273,11 @@ You can set this option to `nil' to disable EPUB preview."
                  "-f" "-i" video "-s" thumbnail-size
                  "-o" thumbnail))
               (put-text-property start end 'type 'org-link-beautify)
-              (put-text-property
-               start end
-               'display
-               (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size))))
+              (while (file-exists-p thumbnail)
+                (put-text-property
+                 start end
+                 'display
+                 (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size)))))
 
            ;; PDF file preview
            ;; [[file:/path/to/filename.pdf]]
@@ -338,9 +339,11 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                         "pdf2svg"
                         pdf-file thumbnail (number-to-string pdf-page-number)))))
                   (put-text-property start end 'type 'org-link-beautify)
-                  (put-text-property
-                   start end
-                   'display (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size)))))
+                  ;; display thumbnail only when it exist.
+                  (while (file-exists-p thumbnail)
+                    (put-text-property
+                     start end
+                     'display (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size))))))
 
            ;; EPUB file cover preview
            ((and org-link-beautify-epub-preview
@@ -378,9 +381,11 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                      ;;   '("--size" thumbnail-size))
                      ))
                   (put-text-property start end 'type 'org-link-beautify)
-                  (put-text-property
-                   start end
-                   'display (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size)))))
+                  ;; display thumbnail only when it exist.
+                  (while (file-exists-p thumbnail)
+                    (put-text-property
+                     start end
+                     'display (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size))))))
            
            ;; text content preview
            ((and (equal type "file")
