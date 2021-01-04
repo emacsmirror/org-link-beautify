@@ -77,8 +77,9 @@ which represent to ~/.cache/thumbnails/."
 (defcustom org-link-beautify-pdf-preview (or (executable-find "pdftocairo")
                                              (executable-find "pdf2svg"))
   "Whether enable PDF files image preview?
-If command \"pdftocairo\" or \"pdf2svg\" is available, enable PDF preview by default.
-You can set this option to `nil' to disable PDF preview."
+If command \"pdftocairo\" or \"pdf2svg\" is available, enable PDF
+preview by default. You can set this option to nil to disable
+PDF preview."
   :type 'boolean
   :safe #'booleanp
   :group 'org-link-beautify)
@@ -117,8 +118,9 @@ You can set this option to `nil' to disable PDF preview."
 
 (defcustom org-link-beautify-epub-preview (executable-find "gnome-epub-thumbnailer")
   "Whether enable EPUB files cover preview?
-If command \"gnome-epub-thumbnailer\" is available, enable EPUB preview by default.
-You can set this option to `nil' to disable EPUB preview."
+If command \"gnome-epub-thumbnailer\" is available, enable EPUB
+preview by default. You can set this option to nil to disable
+EPUB preview."
   :type 'boolean
   :safe #'booleanp
   :group 'org-link-beautify)
