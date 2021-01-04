@@ -177,6 +177,20 @@ You can set this option to `nil' to disable EPUB preview."
   "Add 'org-link-beautify on link text-property. between START and END."
   (put-text-property start end 'type 'org-link-beautify))
 
+(defun org-link-beautify--display-icon (start end description icon)
+  "Display ICON for link on START and END with DESCRIPTION."
+  (put-text-property
+   start end
+   'display
+   (propertize
+    (concat
+     (propertize "[" 'face '(:inherit nil :underline nil :foreground "orange"))
+     (propertize description 'face '(:underline t :foreground "dark cyan"))
+     (propertize "]" 'face '(:inherit nil :underline nil :foreground "orange"))
+     (propertize "(" 'face '(:inherit nil :underline nil :foreground "orange"))
+     (propertize icon 'face '(:inherit nil :underline nil :foreground "gray"))
+     (propertize ")" 'face '(:inherit nil :underline nil :foreground "orange"))))))
+
 (defun org-link-beautify (start end path bracket-p)
   "Display icon for the link type based on PATH from START to END."
   ;; (message
