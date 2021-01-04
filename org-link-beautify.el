@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-05 00:54:43 stardiviner>
+;;; Time-stamp: <2021-01-05 01:00:02 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -163,7 +163,7 @@ You can set this option to `nil' to disable EPUB preview."
       'org-link 'org-warning))
 
 (defun org-link-beautify--preview-text-file (file lines)
-  "Return first N lines of FILE."
+  "Return first LINES of FILE."
   (with-temp-buffer
     (insert-file-contents-literally file)
     (cl-loop repeat lines
@@ -306,6 +306,60 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
        'display
        (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size)))))
 
+(defun org-link-beautify--return-icon (path type extension)
+  "Return the corresponding icon for link PATH smartly based on TYPE, EXTENSION, etc."
+  (pcase type
+    ("file"
+     (cond
+      ((file-remote-p path) ; remote file
+       (all-the-icons-faicon "server" :face 'org-warning))
+      ((not (file-exists-p (expand-file-name path))) ; not exist file
+       (all-the-icons-faicon "exclamation-triangle" :face 'org-warning))
+      ((file-directory-p path) ; directory
+       (all-the-icons-icon-for-dir
+        "path"
+        :face (org-link-beautify--warning path)
+        :v-adjust 0))
+      ;; MindMap files
+      ((member (file-name-extension path) '("mm" "xmind"))
+       (all-the-icons-fileicon "brain" :face '(:foreground "BlueViolet")))
+      (t (all-the-icons-icon-for-file ; file
+          (format ".%s" extension)
+          :face (org-link-beautify--warning path)
+          :v-adjust 0))))
+    ("file+sys" (all-the-icons-faicon "link"))
+    ("file+emacs" (all-the-icons-icon-for-mode 'emacs-lisp-mode))
+    ("http" (all-the-icons-icon-for-url (concat "http:" path) :v-adjust -0.05))
+    ("https" (all-the-icons-icon-for-url (concat "https:" path) :v-adjust -0.05))
+    ("ftp" (all-the-icons-faicon "link"))
+    ("eaf" (all-the-icons-faicon "linux" :v-adjust -0.05)) ; emacs-application-framework
+    ("custom-id" (all-the-icons-faicon "hashtag"))
+    ("coderef" (all-the-icons-faicon "code"))
+    ("id" (all-the-icons-fileicon ""))
+    ("attachment" (all-the-icons-faicon "puzzle-piece"))
+    ("elisp" (all-the-icons-icon-for-mode 'emacs-lisp-mode :v-adjust -0.05))
+    ("shell" (all-the-icons-icon-for-mode 'shell-mode))
+    ("eww" (all-the-icons-icon-for-mode 'eww-mode))
+    ("mu4e" (all-the-icons-faicon "envelope-square" :v-adjust -0.05))
+    ("git" (all-the-icons-octicon "git-branch"))
+    ("orgit" (all-the-icons-octicon "git-branch"))
+    ("orgit-rev" (all-the-icons-octicon "git-commit"))
+    ("orgit-log" (all-the-icons-icon-for-mode 'magit-log-mode))
+    ("pdfview" (all-the-icons-icon-for-file ".pdf"))
+    ("grep" (all-the-icons-icon-for-mode 'grep-mode))
+    ("occur" (all-the-icons-icon-for-mode 'occur-mode))
+    ("man" (all-the-icons-icon-for-mode 'Man-mode))
+    ("info" (all-the-icons-icon-for-mode 'Info-mode))
+    ("help" (all-the-icons-icon-for-mode 'Info-mode))
+    ("rss" (all-the-icons-material "rss_feed"))
+    ("elfeed" (all-the-icons-material "rss_feed"))
+    ("telnet" (all-the-icons-faicon "compress"))
+    ("wikipedia" (all-the-icons-faicon "wikipedia-w"))
+    ("mailto" (all-the-icons-material "email" :v-adjust -0.05))
+    ("irc" (all-the-icons-faicon "comment-o"))
+    ("doi" (all-the-icons-fileicon "isabelle"))
+    ("org-contact" (all-the-icons-material "account_box"))))
+
 (defun org-link-beautify--display-icon (start end description icon)
   "Display ICON for link on START and END with DESCRIPTION."
   (put-text-property
@@ -342,76 +396,24 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                                 ;; when description not exist, use raw link for raw link case.
                                 raw-link))
                ;; (desc-debug (message description))
-               (icon (pcase type
-                       ("file"
-                        (cond
-                         ((file-remote-p path) ; remote file
-                          (all-the-icons-faicon "server" :face 'org-warning))
-                         ((not (file-exists-p (expand-file-name path))) ; not exist file
-                          (all-the-icons-faicon "exclamation-triangle" :face 'org-warning))
-                         ((file-directory-p path) ; directory
-                          (all-the-icons-icon-for-dir
-                           "path"
-                           :face (org-link-beautify--warning path)
-                           :v-adjust 0))
-                         ;; MindMap files
-                         ((member (file-name-extension path) '("mm" "xmind"))
-                          (all-the-icons-fileicon "brain" :face '(:foreground "BlueViolet")))
-                         (t (all-the-icons-icon-for-file ; file
-                             (format ".%s" extension)
-                             :face (org-link-beautify--warning path)
-                             :v-adjust 0))))
-                       ("file+sys" (all-the-icons-faicon "link"))
-                       ("file+emacs" (all-the-icons-icon-for-mode 'emacs-lisp-mode))
-                       ("http" (all-the-icons-icon-for-url (concat "http:" path) :v-adjust -0.05))
-                       ("https" (all-the-icons-icon-for-url (concat "https:" path) :v-adjust -0.05))
-                       ("ftp" (all-the-icons-faicon "link"))
-                       ("eaf" (all-the-icons-faicon "linux" :v-adjust -0.05)) ; emacs-application-framework
-                       ("custom-id" (all-the-icons-faicon "hashtag"))
-                       ("coderef" (all-the-icons-faicon "code"))
-                       ("id" (all-the-icons-fileicon ""))
-                       ("attachment" (all-the-icons-faicon "puzzle-piece"))
-                       ("elisp" (all-the-icons-icon-for-mode 'emacs-lisp-mode :v-adjust -0.05))
-                       ("shell" (all-the-icons-icon-for-mode 'shell-mode))
-                       ("eww" (all-the-icons-icon-for-mode 'eww-mode))
-                       ("mu4e" (all-the-icons-faicon "envelope-square" :v-adjust -0.05))
-                       ("git" (all-the-icons-octicon "git-branch"))
-                       ("orgit" (all-the-icons-octicon "git-branch"))
-                       ("orgit-rev" (all-the-icons-octicon "git-commit"))
-                       ("orgit-log" (all-the-icons-icon-for-mode 'magit-log-mode))
-                       ("pdfview" (all-the-icons-icon-for-file ".pdf"))
-                       ("grep" (all-the-icons-icon-for-mode 'grep-mode))
-                       ("occur" (all-the-icons-icon-for-mode 'occur-mode))
-                       ("man" (all-the-icons-icon-for-mode 'Man-mode))
-                       ("info" (all-the-icons-icon-for-mode 'Info-mode))
-                       ("help" (all-the-icons-icon-for-mode 'Info-mode))
-                       ("rss" (all-the-icons-material "rss_feed"))
-                       ("elfeed" (all-the-icons-material "rss_feed"))
-                       ("telnet" (all-the-icons-faicon "compress"))
-                       ("wikipedia" (all-the-icons-faicon "wikipedia-w"))
-                       ("mailto" (all-the-icons-material "email" :v-adjust -0.05))
-                       ("irc" (all-the-icons-faicon "comment-o"))
-                       ("doi" (all-the-icons-fileicon "isabelle"))
-                       ("org-contact" (all-the-icons-material "account_box")))))
+               (icon (org-link-beautify--return-icon path type extension)))
           (when bracket-p (ignore))
           (cond
-           ;; NOTE: preview link content will break links inside of sentence.
            ;; video thumbnail preview
            ;; [[file:/path/to/video.mp4]]
            ((and (equal type "file")
                  (member extension org-link-beautify-video-preview-list)
                  org-link-beautify-video-preview)
             (org-link-beautify--preview-video path start end))
-
+           
            ;; PDF file preview
            ;; [[file:/path/to/filename.pdf]]
            ;; [[pdfview:/path/to/filename.pdf::15]]
            ((and org-link-beautify-pdf-preview
                  (or (and (equal type "file") (string= extension "pdf"))
                      (equal type "pdfview")))
-            ;; DEBUG: (message "-> here")
             (org-link-beautify--preview-pdf path start end))
-
+           
            ;; EPUB file cover preview
            ((and org-link-beautify-epub-preview
                  (and (equal type "file") (string= extension "epub")))
