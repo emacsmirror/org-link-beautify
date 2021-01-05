@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-05 22:12:13 stardiviner>
+;;; Time-stamp: <2021-01-05 22:15:30 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -125,7 +125,7 @@ EPUB preview."
   :safe #'booleanp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-epub-preview-size 400
+(defcustom org-link-beautify-epub-preview-size nil
   "The EPUB cover preview image size."
   :type 'number
   :safe #'numberp
@@ -248,7 +248,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
              (thumbnail (expand-file-name
                          (format "%s%s.png"
                                  thumbnails-dir (file-name-base epub-file))))
-             (thumbnail-size (or org-link-beautify-epub-preview-size 600)))
+             (thumbnail-size org-link-beautify-epub-preview-size))
         (unless (file-directory-p thumbnails-dir)
           (make-directory thumbnails-dir))
         (unless (file-exists-p thumbnail)
@@ -262,10 +262,10 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
            " *org-link-beautify epub-preview*"
            "gnome-epub-thumbnailer"
            epub-file thumbnail
-           ;; FIXME:
-           ;; (when org-link-beautify-epub-preview-size
-           ;;   '("--size" thumbnail-size))
-           ))
+           (when org-link-beautify-epub-preview-size
+             ("--size"))
+           (when org-link-beautify-epub-preview-size
+             thumbnail-size)))
         (org-link-beautify--add-overlay-marker start end)
         (org-link-beautify--display-thumbnail thumbnail thumbnail-size start end))))
 
