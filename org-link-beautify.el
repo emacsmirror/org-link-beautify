@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-05 22:38:45 stardiviner>
+;;; Time-stamp: <2021-01-05 22:45:22 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -168,6 +168,11 @@ EPUB preview."
   "Add 'org-link-beautify on link text-property. between START and END."
   (put-text-property start end 'type 'org-link-beautify))
 
+(defun org-link-beautify--ensure-thumbnails-dir (thumbnails-dir)
+  "Ensure THUMBNAILS-DIRECTORY exist, if not ,create it."
+  (unless (file-directory-p thumbnails-dir)
+    (make-directory thumbnails-dir)))
+
 (defun org-link-beautify--display-thumbnail (thumbnail thumbnail-size start end)
   "Display THUMBNAIL between START and END in size of THUMBNAIL-SIZE only when it exist."
   (when (file-exists-p thumbnail)
@@ -198,8 +203,7 @@ EPUB preview."
                                     thumbnails-dir (file-name-base pdf-file) pdf-page-number
                                     (symbol-name org-link-beautify-pdf-preview-image-format))))))
              (thumbnail-size (or org-link-beautify-pdf-preview-size 512)))
-        (unless (file-directory-p thumbnails-dir)
-          (make-directory thumbnails-dir))
+        (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
         (unless (file-exists-p thumbnail)
           (pcase org-link-beautify-pdf-preview-command
             ('pdftocairo
@@ -250,8 +254,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                          (format "%s%s.png"
                                  thumbnails-dir (file-name-base epub-file))))
              (thumbnail-size org-link-beautify-epub-preview-size))
-        (unless (file-directory-p thumbnails-dir)
-          (make-directory thumbnails-dir))
+        (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
         (unless (file-exists-p thumbnail)
           ;; DEBUG:
           ;; (message
@@ -307,8 +310,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
          (thumbnail (expand-file-name
                      (format "%s%s.jpg" thumbnails-dir (file-name-base video-file))))
          (thumbnail-size (or org-link-beautify-video-preview-size 512)))
-    (unless (file-directory-p thumbnails-dir)
-      (make-directory thumbnails-dir))
+    (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
     (unless (file-exists-p thumbnail)
       (start-process
        "org-link-beautify--video-preview"
