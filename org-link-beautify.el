@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-05 22:15:30 stardiviner>
+;;; Time-stamp: <2021-01-05 22:18:18 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -265,7 +265,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
            (when org-link-beautify-epub-preview-size
              ("--size"))
            (when org-link-beautify-epub-preview-size
-             thumbnail-size)))
+             (number-to-string thumbnail-size))))
         (org-link-beautify--add-overlay-marker start end)
         (org-link-beautify--display-thumbnail thumbnail thumbnail-size start end))))
 
@@ -312,7 +312,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
        " *org-link-beautify video-preview*"
        "ffmpegthumbnailer"
        "-f" "-i" video-file
-       "-s" thumbnail-size
+       "-s" (number-to-string thumbnail-size)
        "-o" thumbnail))
     (org-link-beautify--add-overlay-marker start end)
     (org-link-beautify--display-thumbnail thumbnail thumbnail-size start end)))
