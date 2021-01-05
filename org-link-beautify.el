@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-05 22:18:18 stardiviner>
+;;; Time-stamp: <2021-01-05 22:35:26 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -230,6 +230,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
               "pdf2svg"
               pdf-file thumbnail (number-to-string pdf-page-number)))))
         (org-link-beautify--add-overlay-marker start end)
+        (org-link-beautify--add-keymap start end)
         ;; display thumbnail only when it exist.
         (org-link-beautify--display-thumbnail thumbnail thumbnail-size start end))))
 
@@ -267,6 +268,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
            (when org-link-beautify-epub-preview-size
              (number-to-string thumbnail-size))))
         (org-link-beautify--add-overlay-marker start end)
+        (org-link-beautify--add-keymap start end)
         (org-link-beautify--display-thumbnail thumbnail thumbnail-size start end))))
 
 (defun org-link-beautify--preview-text-file (file lines)
@@ -286,6 +288,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
          (preview-lines 10)
          (preview-content (org-link-beautify--preview-text-file text-file preview-lines)))
     (org-link-beautify--add-overlay-marker (1+ end) (+ end 2))
+    (org-link-beautify--add-keymap (1+ end) (+ end 2))
     (put-text-property (1+ end) (+ end 2) 'display (propertize preview-content))
     (put-text-property
      (1+ end) (+ end 2)
@@ -315,6 +318,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
        "-s" (number-to-string thumbnail-size)
        "-o" thumbnail))
     (org-link-beautify--add-overlay-marker start end)
+    (org-link-beautify--add-keymap start end)
     (org-link-beautify--display-thumbnail thumbnail thumbnail-size start end)))
 
 (defun org-link-beautify--return-icon (path type extension)
@@ -435,6 +439,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
            ;; general icons
            (t
             (org-link-beautify--add-overlay-marker start end)
+            (org-link-beautify--add-keymap start end)
             (org-link-beautify--display-icon start end description icon))))))))
 
 (defun org-link-beautify-toggle-overlays ()
@@ -454,6 +459,14 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
   "Add more icons for file types."
   (add-to-list 'all-the-icons-icon-alist '("\\.mm" all-the-icons-fileicon "brain" :face all-the-icons-lpink))
   (add-to-list 'all-the-icons-icon-alist '("\\.xmind" all-the-icons-fileicon "brain" :face all-the-icons-lpink)))
+
+(defvar org-link-beautify-keymap (make-sparse-keymap))
+
+(defun org-link-beautify--add-keymap (start end)
+  "Add keymap on link text-property. between START and END."
+  (put-text-property start end 'keymap org-link-beautify-keymap))
+
+(define-key org-link-beautify-keymap (kbd "RET") 'org-open-at-point)
 
 ;;;###autoload
 (defun org-link-beautify-enable ()

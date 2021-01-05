@@ -33,6 +33,14 @@ Supports video file link preview with thumbnail.
   [[pdfview:/path/to/filename.pdf::15]]
   #+end_src
 - [X] display thumbnail for video file link
+- [X] add keymap on link text-property, available keybindings:
+  + =[Enter]= :: =org-open-at-point=, so you can press =[Enter]= to open link.
+
+  You can add more keybindings with following similar config:
+
+  #+begin_src emacs-lisp :eval no
+  (define-key org-link-beautify-keymap (kbd "RET") 'org-open-at-point)
+  #+end_src
 
 * Install
 
