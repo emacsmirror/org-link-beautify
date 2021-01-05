@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-05 22:45:22 stardiviner>
+;;; Time-stamp: <2021-01-05 22:48:42 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -256,10 +256,6 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
              (thumbnail-size org-link-beautify-epub-preview-size))
         (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
         (unless (file-exists-p thumbnail)
-          ;; DEBUG:
-          ;; (message
-          ;;  "org-link-beautify: epub-file %s, thumbnail %s"
-          ;;  epub-file thumbnail)
           (start-process
            "org-link-beautify--epub-preview"
            ;; DEBUG: check out this output buffer
@@ -267,7 +263,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
            "gnome-epub-thumbnailer"
            epub-file thumbnail
            (when org-link-beautify-epub-preview-size
-             ("--size"))
+             "--size")
            (when org-link-beautify-epub-preview-size
              (number-to-string thumbnail-size))))
         (org-link-beautify--add-overlay-marker start end)
