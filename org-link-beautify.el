@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-05 01:08:49 stardiviner>
+;;; Time-stamp: <2021-01-05 22:12:13 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -295,14 +295,14 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
 
 (defun org-link-beautify--preview-video (path start end)
   "Preview video file PATH and display on link between START and END."
-  (let* ((video (expand-file-name (org-link-unescape path)))
+  (let* ((video-file (expand-file-name (org-link-unescape path)))
          (thumbnails-dir (pcase org-link-beautify-thumbnails-dir
                            ('source-path
-                            (concat (file-name-directory video) ".thumbnails/"))
+                            (concat (file-name-directory video-file) ".thumbnails/"))
                            ('user-home
                             (expand-file-name "~/.cache/thumbnails/"))))
          (thumbnail (expand-file-name
-                     (format "%s%s.jpg" thumbnails-dir (file-name-base video))))
+                     (format "%s%s.jpg" thumbnails-dir (file-name-base video-file))))
          (thumbnail-size (or org-link-beautify-video-preview-size 512)))
     (unless (file-directory-p thumbnails-dir)
       (make-directory thumbnails-dir))
@@ -311,7 +311,8 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
        "org-link-beautify--video-preview"
        " *org-link-beautify video-preview*"
        "ffmpegthumbnailer"
-       "-f" "-i" video "-s" thumbnail-size
+       "-f" "-i" video-file
+       "-s" thumbnail-size
        "-o" thumbnail))
     (org-link-beautify--add-overlay-marker start end)
     (org-link-beautify--display-thumbnail thumbnail thumbnail-size start end)))
