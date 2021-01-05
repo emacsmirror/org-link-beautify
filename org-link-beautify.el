@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-05 22:35:26 stardiviner>
+;;; Time-stamp: <2021-01-05 22:38:45 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -355,7 +355,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     ("elisp" (all-the-icons-icon-for-mode 'emacs-lisp-mode :v-adjust -0.05))
     ("shell" (all-the-icons-icon-for-mode 'shell-mode))
     ("eww" (all-the-icons-icon-for-mode 'eww-mode))
-    ("mu4e" (all-the-icons-faicon "envelope-square" :v-adjust -0.05))
+    ("mu4e" (all-the-icons-material "mail_outline"))
     ("git" (all-the-icons-octicon "git-branch"))
     ("orgit" (all-the-icons-octicon "git-branch"))
     ("orgit-rev" (all-the-icons-octicon "git-commit"))
