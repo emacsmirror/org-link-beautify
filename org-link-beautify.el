@@ -368,10 +368,10 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     ("elfeed" (all-the-icons-material "rss_feed"))
     ("telnet" (all-the-icons-faicon "compress"))
     ("wikipedia" (all-the-icons-faicon "wikipedia-w"))
-    ("mailto" (all-the-icons-material "email" :v-adjust -0.05))
+    ("mailto" (all-the-icons-material "contact_mail" :v-adjust -0.05))
     ("irc" (all-the-icons-faicon "comment-o"))
     ("doi" (all-the-icons-fileicon "isabelle"))
-    ("org-contact" (all-the-icons-material "account_box"))))
+    ("org-contact" (all-the-icons-material "contacts"))))
 
 (defun org-link-beautify--display-icon (start end description icon)
   "Display ICON for link on START and END with DESCRIPTION."
