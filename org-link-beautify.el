@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-07 14:28:22 stardiviner>
+;;; Time-stamp: <2021-01-07 22:18:44 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -68,7 +68,7 @@ which represent to ~/.cache/thumbnails/."
   :safe #'numberp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-video-preview-list '("avi" "rmvb" "ogg" "ogv" "mp4" "mkv" "mov" "webm" "flv")
+(defcustom org-link-beautify-video-preview-list '("avi" "rmvb" "ogg" "ogv" "mp4" "mkv" "mov" "m4v" "webm" "flv")
   "A list of video file types be supported with thumbnails."
   :type 'list
   :safe #'listp
