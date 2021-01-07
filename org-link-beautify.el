@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-06 16:54:01 stardiviner>
+;;; Time-stamp: <2021-01-07 14:28:22 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -326,9 +326,9 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     ("file"
      (cond
       ((file-remote-p path) ; remote file
-       (all-the-icons-faicon "server" :face 'org-warning))
+       (all-the-icons-material "dns" :face 'org-warning))
       ((not (file-exists-p (expand-file-name path))) ; not exist file
-       (all-the-icons-faicon "exclamation-triangle" :face 'org-warning))
+       (all-the-icons-material "priority_high" :face 'org-warning))
       ((file-directory-p path) ; directory
        (all-the-icons-icon-for-dir
         "path"
@@ -341,16 +341,17 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
           (format ".%s" extension)
           :face (org-link-beautify--warning path)
           :v-adjust 0))))
-    ("file+sys" (all-the-icons-faicon "link"))
+    ("file+sys" (all-the-icons-material "link"))
     ("file+emacs" (all-the-icons-icon-for-mode 'emacs-lisp-mode))
     ("http" (all-the-icons-icon-for-url (concat "http:" path) :v-adjust -0.05))
     ("https" (all-the-icons-icon-for-url (concat "https:" path) :v-adjust -0.05))
-    ("ftp" (all-the-icons-faicon "link"))
-    ("eaf" (all-the-icons-faicon "linux" :v-adjust -0.05)) ; emacs-application-framework
-    ("custom-id" (all-the-icons-faicon "hashtag"))
-    ("coderef" (all-the-icons-faicon "code"))
-    ("id" (all-the-icons-fileicon ""))
-    ("attachment" (all-the-icons-faicon "puzzle-piece"))
+    ("ftp" (all-the-icons-material "link"))
+    ("telnet" (all-the-icons-material "settings_ethernet"))
+    ("eaf" (all-the-icons-material "apps" :v-adjust -0.05)) ; emacs-application-framework
+    ("custom-id" (all-the-icons-material "location_searching"))
+    ("coderef" (all-the-icons-material "code"))
+    ("id" (all-the-icons-material "link"))
+    ("attachment" (all-the-icons-material "attachment"))
     ("elisp" (all-the-icons-icon-for-mode 'emacs-lisp-mode :v-adjust -0.05))
     ("shell" (all-the-icons-icon-for-mode 'shell-mode))
     ("eww" (all-the-icons-icon-for-mode 'eww-mode))
@@ -367,12 +368,11 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     ("help" (all-the-icons-icon-for-mode 'Info-mode))
     ("rss" (all-the-icons-material "rss_feed"))
     ("elfeed" (all-the-icons-material "rss_feed"))
-    ("telnet" (all-the-icons-faicon "compress"))
     ("wikipedia" (all-the-icons-faicon "wikipedia-w"))
     ("mailto" (all-the-icons-material "contact_mail" :v-adjust -0.05))
-    ("irc" (all-the-icons-faicon "comment-o"))
-    ("doi" (all-the-icons-fileicon "isabelle"))
-    ("org-contact" (all-the-icons-material "contacts"))))
+    ("irc" (all-the-icons-material "comment"))
+    ("doi" (all-the-icons-material "link"))
+    ("org-contact" (all-the-icons-material "account_box"))))
 
 (defun org-link-beautify--display-icon (start end description icon)
   "Display ICON for link on START and END with DESCRIPTION."
