@@ -390,6 +390,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
 
 (defun org-link-beautify (start end path bracket-p)
   "Display icon for the link type based on PATH from START to END."
+  ;; DEBUG:
   ;; (message
   ;;  (format "start: %s, end: %s, path: %s, bracket-p: %s" start end path bracket-p))
   (unless (memq major-mode org-link-beautify-exclude-modes)
@@ -397,19 +398,19 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     (when (eq (car (org-link-beautify--get-element start)) 'link)
       (save-match-data
         (let* ((link-element (org-link-beautify--get-element start))
-               ;; (link-element-debug (message link-element))
+               ;; DEBUG: (link-element-debug (message link-element))
                (raw-link (org-element-property :raw-link link-element))
-               ;; (raw-link-debug (message raw-link))
+               ;; DEBUG: (raw-link-debug (message raw-link))
                (type (org-element-property :type link-element))
                (extension (or (file-name-extension (org-link-unescape path)) "txt"))
-               ;; (ext-debug (message extension))
+               ;; DEBUG: (ext-debug (message extension))
                (description (or (and (org-element-property :contents-begin link-element) ; in raw link case, it's nil
                                      (buffer-substring-no-properties
                                       (org-element-property :contents-begin link-element)
                                       (org-element-property :contents-end link-element)))
                                 ;; when description not exist, use raw link for raw link case.
                                 raw-link))
-               ;; (desc-debug (message description))
+               ;; DEBUG: (desc-debug (message description))
                (icon (org-link-beautify--return-icon path type extension)))
           (when bracket-p (ignore))
           (cond
@@ -437,6 +438,8 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
             (org-link-beautify--preview-text path start end))
            ;; general icons
            (t
+            ;; DEBUG:
+            ;; (message "-->> icon displayed")
             (org-link-beautify--add-overlay-marker start end)
             (org-link-beautify--add-keymap start end)
             (org-link-beautify--display-icon start end description icon))))))))
