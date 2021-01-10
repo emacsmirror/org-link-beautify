@@ -33,6 +33,7 @@ Supports video file link preview with thumbnail.
   [[pdfview:/path/to/filename.pdf::15]]
   #+end_src
 - [X] display thumbnail for video file link
+- [X] preview audio file link with wave form image
 - [X] add keymap on link text-property, available keybindings:
   + =[Enter]= :: =org-open-at-point=, so you can press =[Enter]= to open link.
 
@@ -54,6 +55,10 @@ Supports video file link preview with thumbnail.
   #+begin_src sh :dir /sudo:: :results none
   sudo pacman -S --noconfirm ffmpegthumbnailer
   #+end_src
+
+- audio wave form image preview need package "=audiowaveform="
+
+  Check out https://github.com/bbc/audiowaveform for installation guide.
 
 - PDF file preview with command "=pdftocairo=" or "=pdf2svg="
 

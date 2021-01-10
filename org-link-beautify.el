@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-07 22:18:44 stardiviner>
+;;; Time-stamp: <2021-01-10 16:51:23 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -68,10 +68,29 @@ which represent to ~/.cache/thumbnails/."
   :safe #'numberp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-video-preview-list '("avi" "rmvb" "ogg" "ogv" "mp4" "mkv" "mov" "m4v" "webm" "flv")
+(defcustom org-link-beautify-video-preview-list
+  '("avi" "rmvb" "ogg" "ogv" "mp4" "mkv" "mov" "m4v" "webm" "flv")
   "A list of video file types be supported with thumbnails."
   :type 'list
   :safe #'listp
+  :group 'org-link-beautify)
+
+(defcustom org-link-beautify-audio-preview (executable-find "audiowaveform")
+  "Whether enable audio files wave form preview?"
+  :type 'boolean
+  :safe #'booleanp
+  :group 'org-link-beautify)
+
+(defcustom org-link-beautify-audio-preview-list '("mp3" "wav" "flac" "ogg" "dat")
+  "A list of audio file types be supported generating audio wave form image."
+  :type 'list
+  :safe #'listp
+  :group 'org-link-beautify)
+
+(defcustom org-link-beautify-audio-preview-size 150
+  "The audio wave form image size."
+  :type 'number
+  :safe #'numberp
   :group 'org-link-beautify)
 
 (defcustom org-link-beautify-pdf-preview (or (executable-find "pdftocairo")
@@ -320,16 +339,41 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     (org-link-beautify--add-keymap start end)
     (org-link-beautify--display-thumbnail thumbnail thumbnail-size start end)))
 
+(defun org-link-beautify--preview-audio (path start end)
+  "Preview audio file PATH and display wave form image on link between START and END."
+  (let* ((audio-file (expand-file-name (org-link-unescape path)))
+         (thumbnails-dir (pcase org-link-beautify-thumbnails-dir
+                           ('source-path
+                            (concat (file-name-directory audio-file) ".thumbnails/"))
+                           ('user-home
+                            (expand-file-name "~/.cache/thumbnails/"))))
+         (thumbnail (expand-file-name
+                     (format "%s%s.png" thumbnails-dir (file-name-base audio-file))))
+         (thumbnail-size (or org-link-beautify-audio-preview-size 200)))
+    (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
+    (unless (file-exists-p thumbnail)
+      ;; DEBUG:
+      ;; (message "%s\n%s\n" audio-file thumbnail)
+      (start-process
+       "org-link-beautify--audio-preview"
+       " *org-link-beautify audio-preview*" ; DEBUG: check out output buffer
+       "audiowaveform"
+       "-i" audio-file
+       "-o" thumbnail))
+    (org-link-beautify--add-overlay-marker start end)
+    (org-link-beautify--add-keymap start end)
+    (org-link-beautify--display-thumbnail thumbnail thumbnail-size start end)))
+
 (defun org-link-beautify--return-icon (path type extension)
   "Return the corresponding icon for link PATH smartly based on TYPE, EXTENSION, etc."
   (pcase type
     ("file"
      (cond
-      ((file-remote-p path) ; remote file
+      ((file-remote-p path)             ; remote file
        (all-the-icons-material "dns" :face 'org-warning))
       ((not (file-exists-p (expand-file-name path))) ; not exist file
        (all-the-icons-material "priority_high" :face 'org-warning))
-      ((file-directory-p path) ; directory
+      ((file-directory-p path)          ; directory
        (all-the-icons-icon-for-dir
         "path"
         :face (org-link-beautify--warning path)
@@ -337,7 +381,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
       ;; MindMap files
       ((member (file-name-extension path) '("mm" "xmind"))
        (all-the-icons-fileicon "brain" :face '(:foreground "BlueViolet")))
-      (t (all-the-icons-icon-for-file ; file
+      (t (all-the-icons-icon-for-file   ; file
           (format ".%s" extension)
           :face (org-link-beautify--warning path)
           :v-adjust 0))))
@@ -420,6 +464,12 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                  (member extension org-link-beautify-video-preview-list)
                  org-link-beautify-video-preview)
             (org-link-beautify--preview-video path start end))
+           ;; audio wave form image preview
+           ;; [[file:/path/to/audio.mp3]]
+           ((and (equal type "file")
+                 (member extension org-link-beautify-audio-preview-list)
+                 org-link-beautify-audio-preview)
+            (org-link-beautify--preview-audio path start end))
            ;; PDF file preview
            ;; [[file:/path/to/filename.pdf]]
            ;; [[pdfview:/path/to/filename.pdf::15]]
