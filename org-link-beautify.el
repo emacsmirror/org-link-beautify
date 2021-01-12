@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-12 13:55:49 stardiviner>
+;;; Time-stamp: <2021-01-12 14:14:17 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -432,7 +432,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
      (propertize icon 'face '(:inherit nil :underline nil :foreground "gray"))
      (propertize ")" 'face '(:inherit nil :underline nil :foreground "orange"))))))
 
-(defun org-link-beautify (start end path bracket-p)
+(defun org-link-beautify-display (start end path bracket-p)
   "Display icon for the link type based on PATH from START to END."
   ;; DEBUG:
   ;; (message
@@ -527,7 +527,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
              (not (memq major-mode org-link-beautify-exclude-modes)))
     (org-link-beautify--add-more-icons-support)
     (dolist (link-type (mapcar #'car org-link-parameters))
-      (org-link-set-parameters link-type :activate-func #'org-link-beautify))
+      (org-link-set-parameters link-type :activate-func #'org-link-beautify-display))
     (org-link-beautify-toggle-overlays)))
 
 ;;;###autoload
