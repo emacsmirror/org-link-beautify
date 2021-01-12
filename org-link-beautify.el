@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-10 16:51:23 stardiviner>
+;;; Time-stamp: <2021-01-12 13:55:49 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -437,62 +437,61 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
   ;; DEBUG:
   ;; (message
   ;;  (format "start: %s, end: %s, path: %s, bracket-p: %s" start end path bracket-p))
-  (unless (memq major-mode org-link-beautify-exclude-modes)
-    ;; detect whether link is normal, jump other links in special places.
-    (when (eq (car (org-link-beautify--get-element start)) 'link)
-      (save-match-data
-        (let* ((link-element (org-link-beautify--get-element start))
-               ;; DEBUG: (link-element-debug (message link-element))
-               (raw-link (org-element-property :raw-link link-element))
-               ;; DEBUG: (raw-link-debug (message raw-link))
-               (type (org-element-property :type link-element))
-               (extension (or (file-name-extension (org-link-unescape path)) "txt"))
-               ;; DEBUG: (ext-debug (message extension))
-               (description (or (and (org-element-property :contents-begin link-element) ; in raw link case, it's nil
-                                     (buffer-substring-no-properties
-                                      (org-element-property :contents-begin link-element)
-                                      (org-element-property :contents-end link-element)))
-                                ;; when description not exist, use raw link for raw link case.
-                                raw-link))
-               ;; DEBUG: (desc-debug (message description))
-               (icon (org-link-beautify--return-icon path type extension)))
-          (when bracket-p (ignore))
-          (cond
-           ;; video thumbnail preview
-           ;; [[file:/path/to/video.mp4]]
-           ((and (equal type "file")
-                 (member extension org-link-beautify-video-preview-list)
-                 org-link-beautify-video-preview)
-            (org-link-beautify--preview-video path start end))
-           ;; audio wave form image preview
-           ;; [[file:/path/to/audio.mp3]]
-           ((and (equal type "file")
-                 (member extension org-link-beautify-audio-preview-list)
-                 org-link-beautify-audio-preview)
-            (org-link-beautify--preview-audio path start end))
-           ;; PDF file preview
-           ;; [[file:/path/to/filename.pdf]]
-           ;; [[pdfview:/path/to/filename.pdf::15]]
-           ((and org-link-beautify-pdf-preview
-                 (or (and (equal type "file") (string= extension "pdf"))
-                     (equal type "pdfview")))
-            (org-link-beautify--preview-pdf path start end))
-           ;; EPUB file cover preview
-           ((and org-link-beautify-epub-preview
-                 (and (equal type "file") (string= extension "epub")))
-            (org-link-beautify--preview-epub path start end))
-           ;; text content preview
-           ((and (equal type "file")
-                 (member extension org-link-beautify-text-preview-list)
-                 org-link-beautify-text-preview)
-            (org-link-beautify--preview-text path start end))
-           ;; general icons
-           (t
-            ;; DEBUG:
-            ;; (message "-->> icon displayed")
-            (org-link-beautify--add-overlay-marker start end)
-            (org-link-beautify--add-keymap start end)
-            (org-link-beautify--display-icon start end description icon))))))))
+  ;; detect whether link is normal, jump other links in special places.
+  (when (eq (car (org-link-beautify--get-element start)) 'link)
+    (save-match-data
+      (let* ((link-element (org-link-beautify--get-element start))
+             ;; DEBUG: (link-element-debug (message link-element))
+             (raw-link (org-element-property :raw-link link-element))
+             ;; DEBUG: (raw-link-debug (message raw-link))
+             (type (org-element-property :type link-element))
+             (extension (or (file-name-extension (org-link-unescape path)) "txt"))
+             ;; DEBUG: (ext-debug (message extension))
+             (description (or (and (org-element-property :contents-begin link-element) ; in raw link case, it's nil
+                                   (buffer-substring-no-properties
+                                    (org-element-property :contents-begin link-element)
+                                    (org-element-property :contents-end link-element)))
+                              ;; when description not exist, use raw link for raw link case.
+                              raw-link))
+             ;; DEBUG: (desc-debug (message description))
+             (icon (org-link-beautify--return-icon path type extension)))
+        (when bracket-p (ignore))
+        (cond
+         ;; video thumbnail preview
+         ;; [[file:/path/to/video.mp4]]
+         ((and (equal type "file")
+               (member extension org-link-beautify-video-preview-list)
+               org-link-beautify-video-preview)
+          (org-link-beautify--preview-video path start end))
+         ;; audio wave form image preview
+         ;; [[file:/path/to/audio.mp3]]
+         ((and (equal type "file")
+               (member extension org-link-beautify-audio-preview-list)
+               org-link-beautify-audio-preview)
+          (org-link-beautify--preview-audio path start end))
+         ;; PDF file preview
+         ;; [[file:/path/to/filename.pdf]]
+         ;; [[pdfview:/path/to/filename.pdf::15]]
+         ((and org-link-beautify-pdf-preview
+               (or (and (equal type "file") (string= extension "pdf"))
+                   (equal type "pdfview")))
+          (org-link-beautify--preview-pdf path start end))
+         ;; EPUB file cover preview
+         ((and org-link-beautify-epub-preview
+               (and (equal type "file") (string= extension "epub")))
+          (org-link-beautify--preview-epub path start end))
+         ;; text content preview
+         ((and (equal type "file")
+               (member extension org-link-beautify-text-preview-list)
+               org-link-beautify-text-preview)
+          (org-link-beautify--preview-text path start end))
+         ;; general icons
+         (t
+          ;; DEBUG:
+          ;; (message "-->> icon displayed")
+          (org-link-beautify--add-overlay-marker start end)
+          (org-link-beautify--add-keymap start end)
+          (org-link-beautify--display-icon start end description icon)))))))
 
 (defun org-link-beautify-toggle-overlays ()
   "Toggle the display of `org-link-beautify'."
@@ -523,10 +522,13 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
 ;;;###autoload
 (defun org-link-beautify-enable ()
   "Enable `org-link-beautify'."
-  (org-link-beautify--add-more-icons-support)
-  (dolist (link-type (mapcar #'car org-link-parameters))
-    (org-link-set-parameters link-type :activate-func #'org-link-beautify))
-  (org-link-beautify-toggle-overlays))
+  (when (and (display-graphic-p)
+             (derived-mode-p 'org-mode)
+             (not (memq major-mode org-link-beautify-exclude-modes)))
+    (org-link-beautify--add-more-icons-support)
+    (dolist (link-type (mapcar #'car org-link-parameters))
+      (org-link-set-parameters link-type :activate-func #'org-link-beautify))
+    (org-link-beautify-toggle-overlays)))
 
 ;;;###autoload
 (defun org-link-beautify-disable ()
