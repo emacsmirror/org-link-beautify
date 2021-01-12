@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-12 14:14:17 stardiviner>
+;;; Time-stamp: <2021-01-12 14:34:56 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -438,7 +438,8 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
   ;; (message
   ;;  (format "start: %s, end: %s, path: %s, bracket-p: %s" start end path bracket-p))
   ;; detect whether link is normal, jump other links in special places.
-  (when (eq (car (org-link-beautify--get-element start)) 'link)
+  (when (and org-link-beautify-headline-cycle-state
+             (eq (car (org-link-beautify--get-element start)) 'link))
     (save-match-data
       (let* ((link-element (org-link-beautify--get-element start))
              ;; DEBUG: (link-element-debug (message link-element))
@@ -493,6 +494,23 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
           (org-link-beautify--add-keymap start end)
           (org-link-beautify--display-icon start end description icon)))))))
 
+;;; hook on headline expand
+(defvar-local org-link-beautify-headline-cycle-state nil
+  "A buffer-local variable")
+
+(put 'org-link-beautify-headline-cycle-state 'risky-local-variable t)
+
+(defun org-link-beautify-headline-cycle (&optional state)
+  "Function to be executed on `org-cycle-hook'."
+  (pcase state
+    ('subtree
+     (setq-local org-link-beautify-headline-cycle-state t))
+    ('children
+     (setq-local org-link-beautify-headline-cycle-state t))
+    ('folded
+     (setq-local org-link-beautify-headline-cycle-state nil))))
+
+;;; toggle org-link-beautify text-properties
 (defun org-link-beautify-toggle-overlays ()
   "Toggle the display of `org-link-beautify'."
   (let ((point (point-min))
@@ -506,6 +524,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     (set-buffer-modified-p bmp))
   (org-restart-font-lock))
 
+;;; add more missing icons to `all-the-icons'.
 (defun org-link-beautify--add-more-icons-support ()
   "Add more icons for file types."
   (add-to-list 'all-the-icons-icon-alist '("\\.mm" all-the-icons-fileicon "brain" :face all-the-icons-lpink))
@@ -528,6 +547,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     (org-link-beautify--add-more-icons-support)
     (dolist (link-type (mapcar #'car org-link-parameters))
       (org-link-set-parameters link-type :activate-func #'org-link-beautify-display))
+    (add-hook 'org-cycle-hook #'org-link-beautify-headline-cycle)
     (org-link-beautify-toggle-overlays)))
 
 ;;;###autoload
@@ -535,6 +555,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
   "Disable `org-link-beautify'."
   (dolist (link-type (mapcar #'car org-link-parameters))
     (org-link-set-parameters link-type :activate-func t))
+  (remove-hook 'org-cycle-hook #'org-link-beautify-headline-cycle)
   (org-link-beautify-toggle-overlays))
 
 ;;;###autoload
