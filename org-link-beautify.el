@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-12 14:34:56 stardiviner>
+;;; Time-stamp: <2021-01-12 14:35:04 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -508,7 +508,8 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     ('children
      (setq-local org-link-beautify-headline-cycle-state t))
     ('folded
-     (setq-local org-link-beautify-headline-cycle-state nil))))
+     (setq-local org-link-beautify-headline-cycle-state nil)))
+  (org-restart-font-lock))
 
 ;;; toggle org-link-beautify text-properties
 (defun org-link-beautify-toggle-overlays ()
