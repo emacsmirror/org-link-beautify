@@ -19,8 +19,10 @@ Supports video file link preview with thumbnail.
 #+ATTR_HTML: :width 600px
 [[file:video-thumbnail.png]]
 
-* Features
+* Features [9/9]
 
+- [X] Only display org-link-beautify preview images (and icons) when headline
+  expanded. This will reduce Emacs memory and improve performance!!!
 - [X] support colorize links if file: target file does not exist
 - [X] support display icons for link types (currently already supported many link types)
 - [X] supported many different link types (If you found not supported link type, PR welcome!)
