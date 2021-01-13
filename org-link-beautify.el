@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-12 14:35:04 stardiviner>
+;;; Time-stamp: <2021-01-13 10:27:44 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -538,6 +538,9 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
   (put-text-property start end 'keymap org-link-beautify-keymap))
 
 (define-key org-link-beautify-keymap (kbd "RET") 'org-open-at-point)
+(define-key org-link-beautify-keymap [mouse-1] 'org-open-at-point)
+(define-key org-link-beautify-keymap (kbd "<mouse-1>") 'org-open-at-point)
+
 
 ;;;###autoload
 (defun org-link-beautify-enable ()
