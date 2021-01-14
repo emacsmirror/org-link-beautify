@@ -532,8 +532,10 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
 ;;; add more missing icons to `all-the-icons'.
 (defun org-link-beautify--add-more-icons-support ()
   "Add more icons for file types."
-  (add-to-list 'all-the-icons-icon-alist '("\\.mm" all-the-icons-fileicon "brain" :face all-the-icons-lpink))
-  (add-to-list 'all-the-icons-icon-alist '("\\.xmind" all-the-icons-fileicon "brain" :face all-the-icons-lpink)))
+  (add-to-list 'all-the-icons-icon-alist
+               '("\\.mm" all-the-icons-fileicon "brain" :face all-the-icons-lpink))
+  (add-to-list 'all-the-icons-icon-alist
+               '("\\.xmind" all-the-icons-fileicon "brain" :face all-the-icons-lpink)))
 
 (defvar org-link-beautify-keymap (make-sparse-keymap))
 
