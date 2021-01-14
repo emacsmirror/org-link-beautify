@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-14 20:05:51 stardiviner>
+;;; Time-stamp: <2021-01-14 20:06:20 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -188,7 +188,7 @@ EPUB preview."
   (put-text-property start end 'type 'org-link-beautify))
 
 (defun org-link-beautify--ensure-thumbnails-dir (thumbnails-dir)
-  "Ensure THUMBNAILS-DIRECTORY exist, if not ,create it."
+  "Ensure THUMBNAILS-DIR exist, if not ,create it."
   (unless (file-directory-p thumbnails-dir)
     (make-directory thumbnails-dir)))
 
