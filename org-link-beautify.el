@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-14 18:55:27 stardiviner>
+;;; Time-stamp: <2021-01-14 19:07:15 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -554,8 +554,8 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
              (not (memq major-mode org-link-beautify-exclude-modes)))
     (org-link-beautify--add-more-icons-support)
     (dolist (link-type (mapcar #'car org-link-parameters))
-    (add-hook 'org-cycle-hook #'org-link-beautify-headline-cycle)
       (org-link-set-parameters link-type :activate-func #'org-link-beautify-activate))
+    (add-hook 'org-cycle-hook #'org-link-beautify-headline-cycle)
     (org-restart-font-lock)))
 
 ;;;###autoload
