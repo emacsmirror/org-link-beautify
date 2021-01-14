@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-14 19:07:15 stardiviner>
+;;; Time-stamp: <2021-01-14 20:05:51 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -493,16 +493,6 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
           (org-link-beautify--add-keymap start end)
           (org-link-beautify--display-icon start end description icon)))))))
 
-(defun org-link-beautify-activate (start end path bracket-p)
-  "Display icon for the link type based on PATH from START to END."
-  (pcase org-link-beautify-headline-cycle-state
-    ('subtree
-     (org-link-beautify-display start end path bracket-p))
-    ('children
-     (org-link-beautify-display start end path bracket-p))
-    ('folded
-     (org-link-beautify-remove-overlays))))
-
 ;;; hook on headline expand
 (defvar-local org-link-beautify-headline-cycle-state nil
   "A buffer-local variable")
@@ -516,18 +506,43 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
   (org-restart-font-lock))
 
 ;;; toggle org-link-beautify text-properties
-(defun org-link-beautify-remove-overlays ()
-  "Remove the overlays of `org-link-beautify'."
-  (let ((point (point-min))
+(defun org-link-beautify--clear-text-properties (&optional begin end)
+  "Clear all org-link-beautify text-properties between BEGIN and END."
+  (let ((point (or begin (point-min)))
         (bmp (buffer-modified-p)))
     (while (setq point (next-single-property-change point 'display))
-	  (when (and (get-text-property point 'display)
-		         (eq (get-text-property point 'type) 'org-link-beautify))
-	    (remove-text-properties
+      (when (and (< point (or end (point-max)))
+                 (get-text-property point 'display)
+                 (eq (get-text-property point 'type) 'org-link-beautify))
+        (remove-text-properties
 	     point (setq point (next-single-property-change point 'display))
 	     '(display t))))
-    (set-buffer-modified-p bmp))
+    (set-buffer-modified-p bmp)))
+
+(defun org-link-beautify-clear (&optional state)
+  "Clear the text-properties of `org-link-beautify' globally.
+Or clear org-link-beautify if headline STATE is folded."
+  (if (eq state 'folded)
+      ;; clear in current folded headline
+      (save-excursion
+        (save-restriction
+          (org-narrow-to-subtree)
+          (let* ((begin (point-min))
+                 (end (save-excursion (org-next-visible-heading 1) (point))))
+            (org-link-beautify--clear-text-properties begin end))))
+    ;; clear in whole buffer
+    (org-link-beautify--clear-text-properties))
   (org-restart-font-lock))
+
+(defun org-link-beautify-activate (start end path bracket-p)
+  "Display icon for the link type based on PATH from START to END."
+  (pcase org-link-beautify-headline-cycle-state
+    ('subtree
+     (org-link-beautify-display start end path bracket-p))
+    ('children
+     (org-link-beautify-display start end path bracket-p))
+    ('folded
+     (org-link-beautify-clear org-link-beautify-headline-cycle-state))))
 
 ;;; add more missing icons to `all-the-icons'.
 (defun org-link-beautify--add-more-icons-support ()
@@ -566,7 +581,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
   (dolist (link-type (mapcar #'car org-link-parameters))
     (org-link-set-parameters link-type :activate-func t))
   (remove-hook 'org-cycle-hook #'org-link-beautify-headline-cycle)
-  (org-link-beautify-remove-overlays))
+  (org-link-beautify-clear))
 
 ;;;###autoload
 (define-minor-mode org-link-beautify-mode
