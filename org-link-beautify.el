@@ -1,10 +1,10 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-14 20:06:20 stardiviner>
+;;; Time-stamp: <2021-01-14 20:07:28 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
-;; Package-Version: 1.1.0
+;; Package-Version: 1.2.1
 ;; Keywords: hypermedia
 ;; homepage: https://github.com/stardiviner/org-link-beautify
 
