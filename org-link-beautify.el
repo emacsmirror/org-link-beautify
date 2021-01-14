@@ -512,8 +512,8 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
   (org-restart-font-lock))
 
 ;;; toggle org-link-beautify text-properties
-(defun org-link-beautify-toggle-overlays ()
-  "Toggle the display of `org-link-beautify'."
+(defun org-link-beautify-remove-overlays ()
+  "Remove the overlays of `org-link-beautify'."
   (let ((point (point-min))
         (bmp (buffer-modified-p)))
     (while (setq point (next-single-property-change point 'display))
@@ -552,7 +552,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     (dolist (link-type (mapcar #'car org-link-parameters))
       (org-link-set-parameters link-type :activate-func #'org-link-beautify-display))
     (add-hook 'org-cycle-hook #'org-link-beautify-headline-cycle)
-    (org-link-beautify-toggle-overlays)))
+    (org-restart-font-lock)))
 
 ;;;###autoload
 (defun org-link-beautify-disable ()
@@ -560,7 +560,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
   (dolist (link-type (mapcar #'car org-link-parameters))
     (org-link-set-parameters link-type :activate-func t))
   (remove-hook 'org-cycle-hook #'org-link-beautify-headline-cycle)
-  (org-link-beautify-toggle-overlays))
+  (org-link-beautify-remove-overlays))
 
 ;;;###autoload
 (define-minor-mode org-link-beautify-mode
