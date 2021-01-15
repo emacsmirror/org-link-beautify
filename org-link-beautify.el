@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-14 20:07:28 stardiviner>
+;;; Time-stamp: <2021-01-15 10:59:48 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -569,9 +569,7 @@ Or clear org-link-beautify if headline STATE is folded."
 ;;;###autoload
 (defun org-link-beautify-enable ()
   "Enable `org-link-beautify'."
-  (when (and (display-graphic-p)
-             (derived-mode-p 'org-mode)
-             (not (memq major-mode org-link-beautify-exclude-modes)))
+  (when (display-graphic-p)
     (org-link-beautify--add-more-icons-support)
     (dolist (link-type (mapcar #'car org-link-parameters))
       (org-link-set-parameters link-type :activate-func #'org-link-beautify-activate))
