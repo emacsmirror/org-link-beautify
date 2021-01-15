@@ -59,7 +59,7 @@ By default the thumbnails are generated in source file path’s
 preview thumbnails. Or you can set this option to ‘'user-home’
 which represent to ~/.cache/thumbnails/."
   :type 'symbol
-  :safe #'symbol
+  :safe #'symbolp
   :group 'org-link-beautify)
 
 (defcustom org-link-beautify-video-preview-size 512
