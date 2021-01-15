@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-15 10:59:48 stardiviner>
+;;; Time-stamp: <2021-01-15 12:54:55 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -497,7 +497,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
           (org-link-beautify--display-icon start end description icon)))))))
 
 ;;; hook on headline expand
-(defvar-local org-link-beautify-headline-cycle-state nil
+(defvar-local org-link-beautify-headline-cycle-state t
   "A buffer-local variable")
 
 (put 'org-link-beautify-headline-cycle-state 'risky-local-variable t)
@@ -545,7 +545,9 @@ Or clear org-link-beautify if headline STATE is folded."
     ('children
      (org-link-beautify-display start end path bracket-p))
     ('folded
-     (org-link-beautify-clear org-link-beautify-headline-cycle-state))))
+     (org-link-beautify-clear org-link-beautify-headline-cycle-state))
+    (_
+     (org-link-beautify-display start end path bracket-p))))
 
 ;;; add more missing icons to `all-the-icons'.
 (defun org-link-beautify--add-more-icons-support ()
