@@ -1,6 +1,6 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
-;;; Time-stamp: <2021-01-15 12:54:55 stardiviner>
+;;; Time-stamp: <2021-01-15 18:39:38 stardiviner>
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
@@ -545,7 +545,10 @@ Or clear org-link-beautify if headline STATE is folded."
     ('children
      (org-link-beautify-display start end path bracket-p))
     ('folded
-     (org-link-beautify-clear org-link-beautify-headline-cycle-state))
+     (ignore)
+     ;; FIXME: This caused whole Org buffer fontify error
+     ;; (org-link-beautify-clear org-link-beautify-headline-cycle-state)
+     )
     (_
      (org-link-beautify-display start end path bracket-p))))
 
