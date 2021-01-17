@@ -497,14 +497,14 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
           (org-link-beautify--display-icon start end description icon)))))))
 
 ;;; hook on headline expand
-(defvar-local org-link-beautify-headline-cycle-state t
-  "A buffer-local variable")
-
-(put 'org-link-beautify-headline-cycle-state 'risky-local-variable t)
-
 (defun org-link-beautify-headline-cycle (&optional state)
   "Function to be executed on `org-cycle-hook' STATE."
-  (setq-local org-link-beautify-headline-cycle-state state)
+  (pcase state
+    ('subtree (ignore))
+    ('children (ignore))
+    ('folded
+     (org-link-beautify-clear state))
+    (_ (ignore)))
   ;; PERFORMANCE: benchmark this.
   (org-restart-font-lock))
 
@@ -537,21 +537,6 @@ Or clear org-link-beautify if headline STATE is folded."
     (org-link-beautify--clear-text-properties))
   (org-restart-font-lock))
 
-(defun org-link-beautify-activate (start end path bracket-p)
-  "Display icon for the link type based on PATH from START to END."
-  (pcase org-link-beautify-headline-cycle-state
-    ('subtree
-     (org-link-beautify-display start end path bracket-p))
-    ('children
-     (org-link-beautify-display start end path bracket-p))
-    ('folded
-     (ignore)
-     ;; FIXME: This caused whole Org buffer fontify error
-     ;; (org-link-beautify-clear org-link-beautify-headline-cycle-state)
-     )
-    (_
-     (org-link-beautify-display start end path bracket-p))))
-
 ;;; add more missing icons to `all-the-icons'.
 (defun org-link-beautify--add-more-icons-support ()
   "Add more icons for file types."
@@ -577,7 +562,7 @@ Or clear org-link-beautify if headline STATE is folded."
   (when (display-graphic-p)
     (org-link-beautify--add-more-icons-support)
     (dolist (link-type (mapcar #'car org-link-parameters))
-      (org-link-set-parameters link-type :activate-func #'org-link-beautify-activate))
+      (org-link-set-parameters link-type :activate-func #'org-link-beautify-display))
     (add-hook 'org-cycle-hook #'org-link-beautify-headline-cycle)
     (org-restart-font-lock)))
 
