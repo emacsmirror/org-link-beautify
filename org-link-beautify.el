@@ -205,8 +205,9 @@ EPUB preview."
   (if (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
       (let* ((file-path (match-string 1 path))
              ;; DEBUG: (_ (lambda (message "--> HERE")))
-             (pdf-page-number (or (string-to-number (match-string 2 path))
-                                  org-link-beautify-pdf-preview-default-page-number))
+             (pdf-page-number (if (match-string 2 path)
+                                  (string-to-number (match-string 2 path))
+                                org-link-beautify-pdf-preview-default-page-number))
              (pdf-file (expand-file-name (org-link-unescape file-path)))
              (thumbnails-dir (pcase org-link-beautify-thumbnails-dir
                                ('source-path
