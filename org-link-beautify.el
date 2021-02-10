@@ -478,8 +478,13 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
          ((and org-link-beautify-pdf-preview
                (or (and (equal type "file") (string= extension "pdf"))
                    (equal type "pdfview")
-                   (equal type "docview")))
-          (org-link-beautify--preview-pdf path start end))
+                   (equal type "docview")
+                   (equal type "eaf")))
+          (org-link-beautify--preview-pdf
+           (if (equal type "eaf")
+               (replace-regexp-in-string "pdfviewer::" "" path)
+             path)
+           start end))
          ;; EPUB file cover preview
          ((and org-link-beautify-epub-preview
                (and (equal type "file") (string= extension "epub")))
