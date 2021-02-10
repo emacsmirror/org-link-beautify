@@ -19,7 +19,7 @@ Supports video file link preview with thumbnail.
 #+ATTR_HTML: :width 600px
 [[file:video-thumbnail.png]]
 
-* Features [9/9]
+* Features [9/10]
 
 - [X] Only display org-link-beautify preview images (and icons) when headline
   expanded. This will reduce Emacs memory and improve performance!!!
@@ -34,6 +34,12 @@ Supports video file link preview with thumbnail.
   #+begin_src org
   [[pdfview:/path/to/filename.pdf::15]]
   #+end_src
+
+  Currently support PDF link types:
+
+  + pdfview:
+  + docview:
+  + eaf:pdfviewer::
 - [X] display thumbnail for video file link
 - [X] preview audio file link with wave form image
 - [X] add keymap on link text-property, available keybindings:
