@@ -89,6 +89,15 @@ Supports video file link preview with thumbnail.
 (org-link-beautify-mode 1) ; (ref:toggle org-link-beautify-mode)
 #+end_src
 
+** If you want better better performance
+
+You can toggle this option carefully to improve Org ~org-activate-links~
+performance:
+
+#+begin_src emacs-lisp
+(setq org-element-use-cache t)
+#+end_src
+
 * Link examples
 
 *NOTE*: Because =all-the-icons= fonts has some issue on my system, so bellowing some
