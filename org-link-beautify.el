@@ -257,7 +257,8 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
         (org-link-beautify--add-overlay-marker start end)
         (org-link-beautify--add-keymap start end)
         ;; display thumbnail only when it exist.
-        (org-link-beautify--display-thumbnail thumbnail thumbnail-size start end))))
+        (when (file-exists-p thumbnail)
+          (org-link-beautify--display-thumbnail thumbnail thumbnail-size start end)))))
 
 (defun org-link-beautify--preview-epub (path start end)
   "Preview EPUB file PATH and display on link between START and END."
