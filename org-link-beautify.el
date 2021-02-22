@@ -447,8 +447,11 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
       (let* ((link-element (org-link-beautify--get-element start))
              ;; DEBUG: (link-element-debug (message link-element))
              (raw-link (org-element-property :raw-link link-element))
-             ;; DEBUG: (raw-link-debug (message raw-link))
+             ;; DEBUG:
+             ;; (raw-link-debug (message raw-link))
              (type (org-element-property :type link-element))
+             ;; DEBUG:
+             ;; (type-debug (message type))
              (extension (or (file-name-extension (org-link-unescape path)) "txt"))
              ;; DEBUG: (ext-debug (message extension))
              (description (or (and (org-element-property :contents-begin link-element) ; in raw link case, it's nil
