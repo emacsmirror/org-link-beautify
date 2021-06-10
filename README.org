@@ -53,6 +53,8 @@ Supports video file link preview with thumbnail.
 
 * Install
 
+** Requirements
+
 - all-the-icons :: This Emacs package icons use "[[https://github.com/domtronn/all-the-icons.el][all-the-icons]]". If you got icon
   problem. You need to make sure all-the-icons *AND FONTS* installed correctly.
 
@@ -60,8 +62,14 @@ Supports video file link preview with thumbnail.
 
   For Arch Linux:
 
-  #+begin_src sh :dir /sudo:: :results none
+  #+begin_src shell :dir /sudo:: :results none
   sudo pacman -S --noconfirm ffmpegthumbnailer
+  #+end_src
+
+  For macOS:
+
+  #+begin_src shell
+  brew install ffmpegthumbnailer
   #+end_src
 
 - audio wave form image preview need package "=audiowaveform="
@@ -72,16 +80,30 @@ Supports video file link preview with thumbnail.
 
   For Arch Linux:
 
-  #+begin_src sh :dir /sudo:: :results none
+  #+begin_src shell :dir /sudo:: :results none
   sudo pacman -S --noconfirm poppler # command pdftocairo
   sudo pacman -S --noconfirm pdf2svg # command pdf2svg
   #+end_src
 
+  For macOS:
+
+  #+begin_src shell
+  brew install poppler pdf2svg
+  #+end_src
+
 - EPUB file cover image preview need command "=gnome-epub-thumbnailer="
 
-  #+begin_src sh :dir /sudo:: :results none
+  For Arch Linux:
+
+  #+begin_src shell :dir /sudo:: :results none
   sudo pacman -S --noconfirm gnome-epub-thumbnailer
   #+end_src
+
+  For macOS:
+
+  https://github.com/marianosimone/epub-thumbnailer
+
+** MELPA
 
 * Usage
 
