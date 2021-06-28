@@ -133,7 +133,10 @@ PDF preview."
   :safe #'symbolp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-epub-preview (executable-find "gnome-epub-thumbnailer")
+(defcustom org-link-beautify-epub-preview
+  (cl-case system-type
+    ('gnu/linux (executable-find "gnome-epub-thumbnailer"))
+    ('darwin (executable-find "epub-thumbnailer")))
   "Whether enable EPUB files cover preview?
 If command \"gnome-epub-thumbnailer\" is available, enable EPUB
 preview by default. You can set this option to nil to disable
@@ -275,20 +278,40 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
              (thumbnail (expand-file-name
                          (format "%s%s.png"
                                  thumbnails-dir (file-name-base epub-file))))
-             (thumbnail-size org-link-beautify-epub-preview-size))
+             (thumbnail-size (or org-link-beautify-epub-preview-size 500)))
         (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
+        ;; DEBUG:
+        ;; (message epub-file)
         (unless (file-exists-p thumbnail)
-          (start-process
-           "org-link-beautify--epub-preview"
-           ;; DEBUG: check out this output buffer
-           " *org-link-beautify epub-preview*"
-           "gnome-epub-thumbnailer"
-           epub-file thumbnail
-           ;; (if org-link-beautify-epub-preview-size
-           ;;     "--size")
-           ;; (if org-link-beautify-epub-preview-size
-           ;;     (number-to-string thumbnail-size))
-           ))
+          (cl-case system-type
+            ('gnu/linux                 ; for Linux "gnome-epub-thumbnailer"
+             (start-process
+              "org-link-beautify--epub-preview"
+              " *org-link-beautify epub-preview*"
+              org-link-beautify-epub-preview
+              epub-file thumbnail
+              ;; (if org-link-beautify-epub-preview-size
+              ;;     "--size")
+              ;; (if org-link-beautify-epub-preview-size
+              ;;     (number-to-string thumbnail-size))
+              ))
+            ('darwin                    ; for macOS "epub-thumbnailer" command
+             (make-process
+              :name "org-link-beautify--epub-preview"
+              :command (list org-link-beautify-epub-preview
+                             epub-file
+                             thumbnail
+                             (number-to-string org-link-beautify-epub-preview-size))
+              :buffer " *org-link-beautify epub-preview*"
+              :sentinel (lambda (proc event)
+                          (message (format "> proc: %s\n> event: %s" proc event))
+                          (when (string= event "finished\n")
+                            (message "org-link-beautify epub preview Process DONE!")
+                            (kill-buffer (process-buffer proc))
+                            ;; (kill-process proc)
+                            ))
+              :stdout " *org-link-beautify epub-preview*"
+              :stderr " *org-link-beautify epub-preview*"))))
         (org-link-beautify--add-overlay-marker start end)
         (org-link-beautify--add-keymap start end)
         (org-link-beautify--display-thumbnail thumbnail thumbnail-size start end))))
