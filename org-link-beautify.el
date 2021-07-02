@@ -319,13 +319,20 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
 (defun org-link-beautify--preview-text-file (file lines)
   "Return first LINES of FILE."
   (with-temp-buffer
-    (insert-file-contents-literally file)
-    (cl-loop repeat lines
-             unless (eobp)
-             collect (prog1 (buffer-substring-no-properties
-                             (line-beginning-position)
-                             (line-end-position))
-                       (forward-line 1)))))
+    (condition-case nil
+        (progn
+          (insert-file-contents-literally file)
+          (cl-loop repeat lines
+                   unless (eobp)
+                   collect (prog1 (buffer-substring-no-properties
+                                   (line-beginning-position)
+                                   (line-end-position))
+                             (forward-line 1))))
+      (file-error
+       (funcall (if noerror #'message #'user-error)
+		        "Unable to read file %S"
+		        file)
+	   nil))))
 
 (defun org-link-beautify--preview-text (path start end)
   "Preview TEXT file PATH and display on link between START and END."
