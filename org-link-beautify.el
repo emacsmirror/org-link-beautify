@@ -459,6 +459,20 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
      (propertize icon 'face '(:inherit nil :underline nil :foreground "gray"))
      (propertize ")" 'face '(:inherit nil :underline nil :foreground "orange"))))))
 
+(defun org-link-beautify--display-not-exist (start end description icon)
+  "Display error color and ICON on START and END with DESCRIPTION."
+  (put-text-property
+   start end
+   'display
+   (propertize
+    (concat
+     (propertize "[" 'face '(:inherit nil :underline nil :foreground "black"))
+     (propertize description 'face '(:underline t :foreground "red" :strike-through t))
+     (propertize "]" 'face '(:inherit nil :underline nil :foreground "black"))
+     (propertize "(" 'face '(:inherit nil :underline nil :foreground "black"))
+     (propertize icon 'face '(:inherit nil :underline nil :foreground "orange red"))
+     (propertize ")" 'face '(:inherit nil :underline nil :foreground "black"))))))
+
 (defun org-link-beautify-display (start end path bracket-p)
   "Display icon for the link type based on PATH from START to END."
   ;; DEBUG:
@@ -521,6 +535,10 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                (member extension org-link-beautify-text-preview-list)
                org-link-beautify-text-preview)
           (org-link-beautify--preview-text path start end))
+         ;; file does not exist
+         ((and (equal type "file") (not (file-exists-p raw-link)))
+          (org-link-beautify--add-overlay-marker start end)
+          (org-link-beautify--display-not-exist start end description icon))
          ;; general icons
          (t
           ;; DEBUG:
