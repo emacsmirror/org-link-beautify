@@ -322,17 +322,27 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     (condition-case nil
         (progn
           (insert-file-contents-literally file)
-          (cl-loop repeat lines
-                   unless (eobp)
-                   collect (prog1 (buffer-substring-no-properties
-                                   (line-beginning-position)
-                                   (line-end-position))
-                             (forward-line 1))))
+          (format
+           (mapconcat
+            'concat
+            ;; extract lines of file contents
+            (cl-loop repeat lines
+                     unless (eobp)
+                     collect (prog1 (buffer-substring-no-properties
+                                     (line-beginning-position)
+                                     (line-end-position))
+                               (forward-line 1)))
+            "\n")))
       (file-error
        (funcall (if noerror #'message #'user-error)
 		        "Unable to read file %S"
 		        file)
 	   nil))))
+
+;;; test
+;; (org-link-beautify--preview-text-file
+;;  (expand-file-name "~/Code/Emacs/org-link-beautify/org-link-beautify.el")
+;;  3)
 
 (defun org-link-beautify--preview-text (path start end)
   "Preview TEXT file PATH and display on link between START and END."
