@@ -344,10 +344,10 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
 ;;  (expand-file-name "~/Code/Emacs/org-link-beautify/org-link-beautify.el")
 ;;  3)
 
-(defun org-link-beautify--preview-text (path start end)
+(defun org-link-beautify--preview-text (path start end &optional lines)
   "Preview TEXT file PATH and display on link between START and END."
   (let* ((text-file (expand-file-name (org-link-unescape path)))
-         (preview-lines 10)
+         (preview-lines (or lines 10))
          (preview-content (org-link-beautify--preview-text-file text-file preview-lines)))
     (org-link-beautify--add-overlay-marker (1+ end) (+ end 2))
     (org-link-beautify--add-keymap (1+ end) (+ end 2))
