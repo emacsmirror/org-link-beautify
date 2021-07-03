@@ -553,7 +553,8 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                org-link-beautify-text-preview)
           (org-link-beautify--preview-text path start end))
          ;; file does not exist
-         ((and (equal type "file") (not (file-exists-p raw-link)))
+         ((and (equal type "file") (not (file-exists-p path)))
+          ;; DEBUG (message path)
           (org-link-beautify--add-overlay-marker start end)
           (org-link-beautify--display-not-exist start end description icon))
          ;; general icons
