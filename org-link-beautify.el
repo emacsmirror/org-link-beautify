@@ -296,12 +296,16 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
               ;;     (number-to-string thumbnail-size))
               ))
             ('darwin                    ; for macOS "epub-thumbnailer" command
+             ;; DEBUG
+             ;; (message epub-file)
+             ;; (message thumbnail)
+             ;; (message (number-to-string org-link-beautify-epub-preview-size))
              (make-process
               :name "org-link-beautify--epub-preview"
               :command (list org-link-beautify-epub-preview
                              epub-file
                              thumbnail
-                             (number-to-string org-link-beautify-epub-preview-size))
+                             (number-to-string thumbnail-size))
               :buffer " *org-link-beautify epub-preview*"
               :sentinel (lambda (proc event)
                           (message (format "> proc: %s\n> event: %s" proc event))
