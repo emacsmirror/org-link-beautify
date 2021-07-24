@@ -2,7 +2,7 @@
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
-;; Version: 1.2.1
+;; Version: 1.2.2
 ;; Keywords: hypermedia
 ;; homepage: https://github.com/stardiviner/org-link-beautify
 
@@ -376,13 +376,42 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
          (thumbnail-size (or org-link-beautify-video-preview-size 512)))
     (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
     (unless (file-exists-p thumbnail)
-      (start-process
-       "org-link-beautify--video-preview"
-       " *org-link-beautify video-preview*"
-       "ffmpegthumbnailer"
-       "-f" "-i" video-file
-       "-s" (number-to-string thumbnail-size)
-       "-o" thumbnail))
+      (cond
+       ;; for macOS, use `qlmanage'
+       ((and (eq system-type 'darwin) (executable-find "qlmanage"))
+        (start-process
+         "org-link-beautify--video-preview"
+         " *org-link-beautify video-preview*"
+         "qlmanage"
+         "-x"
+         "-t"
+         "-s" (number-to-string thumbnail-size)
+         video-file
+         "-o" thumbnails-dir)
+        ;; then rename [video.mp4.png] to [video.png]
+        (rename-file (concat thumbnails-dir (file-name-nondirectory video-file) ".png") thumbnail))
+       ;; use `ffmpegthumbnailer'
+       ((executable-find "ffmpegthumbnailer")
+        (start-process
+         "org-link-beautify--video-preview"
+         " *org-link-beautify video-preview*"
+         "ffmpegthumbnailer"
+         "-f" "-i" video-file
+         "-s" (number-to-string thumbnail-size)
+         "-o" thumbnail))
+       ;; use `ffmpeg'
+       ;; $ ffmpeg -ss 00:09:00 video.avi -vcodec png -vframes 1 -an -f rawvideo -s 119x64 out.png
+       ((executable-find "ffmpeg")
+        (start-process
+         "org-link-beautify--video-preview"
+         " *org-link-beautify video-preview*"
+         "ffmpeg"
+         "-s" "00:09:00" video-file
+         "-vcodec" "png"
+         "-vframes" "1"
+         "-an" "-f" "rawvideo"
+         "-s" (number-to-string thumbnail-size)
+         thumbnail))))
     (org-link-beautify--add-overlay-marker start end)
     (org-link-beautify--add-keymap start end)
     (org-link-beautify--display-thumbnail thumbnail thumbnail-size start end)))
