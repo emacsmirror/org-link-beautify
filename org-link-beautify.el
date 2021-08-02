@@ -247,7 +247,9 @@ EPUB preview."
                 ('svg "-svg"))
               "-singlefile"
               "-f" (number-to-string pdf-page-number)
-              pdf-file (file-name-sans-extension thumbnail)))
+              pdf-file (file-name-sans-extension thumbnail))
+             (unless (file-exists-p thumbnail)
+               (message "[org-link-beautify] PDF create thumbnail for\n %s \nfailed." thumbnail)))
             ('pdf2svg
              (unless (eq org-link-beautify-pdf-preview-image-format 'svg)
                (warn "The pdf2svg only supports convert PDF to SVG format.
@@ -258,7 +260,9 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
               "org-link-beautify--pdf-preview"
               " *org-link-beautify pdf-preview*"
               "pdf2svg"
-              pdf-file thumbnail (number-to-string pdf-page-number)))))
+              pdf-file thumbnail (number-to-string pdf-page-number))
+             (unless (file-exists-p thumbnail)
+               (message "[org-link-beautify] PDF create thumbnail for\n %s \nfailed." thumbnail)))))
         (org-link-beautify--add-overlay-marker start end)
         (org-link-beautify--add-keymap start end)
         ;; display thumbnail only when it exist.
@@ -296,7 +300,9 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
               ;;     "--size")
               ;; (if org-link-beautify-epub-preview-size
               ;;     (number-to-string thumbnail-size))
-              ))
+              )
+             (unless (file-exists-p thumbnail)
+               (message "[org-link-beautify] epub create thumbnail for\n %s \nfailed." thumbnail)))
             ('darwin                    ; for macOS "epub-thumbnailer" command
              ;; DEBUG
              ;; (message epub-file)
@@ -317,7 +323,9 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                             ;; (kill-process proc)
                             ))
               :stdout " *org-link-beautify epub-preview*"
-              :stderr " *org-link-beautify epub-preview*"))
+              :stderr " *org-link-beautify epub-preview*")
+             (unless (file-exists-p thumbnail)
+               (message "[org-link-beautify] epub create thumbnail for\n %s \nfailed." thumbnail)))
             (t (user-error "This system platform currently not supported by org-link-beautify.\n Please contribute code to support"))))
         (org-link-beautify--add-overlay-marker start end)
         (org-link-beautify--add-keymap start end)
@@ -405,7 +413,9 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
          "ffmpegthumbnailer"
          "-f" "-i" video-file
          "-s" (number-to-string thumbnail-size)
-         "-o" thumbnail))
+         "-o" thumbnail)
+        (unless (file-exists-p thumbnail)
+          (message "[org-link-beautify] 'ffmpegthumbnailer' create thumbnail for\n %s \nfailed." thumbnail)))
        ;; use `ffmpeg'
        ;; $ ffmpeg -ss 00:09:00 video.avi -vcodec png -vframes 1 -an -f rawvideo -s 119x64 out.png
        ((executable-find "ffmpeg")
@@ -418,7 +428,9 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
          "-vframes" "1"
          "-an" "-f" "rawvideo"
          "-s" (number-to-string thumbnail-size)
-         thumbnail))))
+         thumbnail)
+        (unless (file-exists-p thumbnail)
+          (message "[org-link-beautify] 'ffmpeg' create thumbnail for\n %s \nfailed." thumbnail)))))
     (org-link-beautify--add-overlay-marker start end)
     (org-link-beautify--add-keymap start end)
     (org-link-beautify--display-thumbnail thumbnail thumbnail-size start end)))
@@ -443,7 +455,9 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
        " *org-link-beautify audio-preview*" ; DEBUG: check out output buffer
        "audiowaveform"
        "-i" audio-file
-       "-o" thumbnail))
+       "-o" thumbnail)
+      (unless (file-exists-p thumbnail)
+        (message "[org-link-beautify] 'audiowaveform' create thumbnail for\n %s \nfailed." thumbnail)))
     (org-link-beautify--add-overlay-marker start end)
     (org-link-beautify--add-keymap start end)
     (org-link-beautify--display-thumbnail thumbnail thumbnail-size start end)))
