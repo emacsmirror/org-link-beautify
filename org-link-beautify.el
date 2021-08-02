@@ -391,7 +391,10 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
          video-file
          "-o" thumbnails-dir)
         ;; then rename [video.mp4.png] to [video.png]
-        (rename-file (concat thumbnails-dir (file-name-nondirectory video-file) ".png") thumbnail))
+        (let ((original-thumbnail-file (concat thumbnails-dir (file-name-nondirectory video-file) ".png")))
+          (if (file-exists-p original-thumbnail-file)
+              (rename-file original-thumbnail-file thumbnail)
+            (message "[org-link-beautify] qlmanage create thumbnail for\n %s \nfailed." original-thumbnail-file))))
        ;; use `ffmpegthumbnailer'
        ((executable-find "ffmpegthumbnailer")
         (start-process
