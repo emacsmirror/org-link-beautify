@@ -43,7 +43,9 @@
   :safe #'listp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-video-preview (executable-find "ffmpegthumbnailer")
+(defcustom org-link-beautify-video-preview (or (executable-find "ffmpegthumbnailer")
+                                               (executable-find "qlmanage")
+                                               (executable-find "ffmpeg"))
   "Whether enable video files thumbnail preview?"
   :type 'boolean
   :safe #'booleanp
