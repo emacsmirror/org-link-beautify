@@ -75,7 +75,8 @@ which represent to ~/.cache/thumbnails/."
   :safe #'listp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-audio-preview (executable-find "audiowaveform")
+(defcustom org-link-beautify-audio-preview (or (executable-find "audiowaveform")
+                                               (executable-find "qlmanage"))
   "Whether enable audio files wave form preview?"
   :type 'boolean
   :safe #'booleanp
@@ -450,12 +451,29 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     (unless (file-exists-p thumbnail)
       ;; DEBUG:
       ;; (message "%s\n%s\n" audio-file thumbnail)
-      (start-process
-       "org-link-beautify--audio-preview"
-       " *org-link-beautify audio-preview*" ; DEBUG: check out output buffer
-       "audiowaveform"
-       "-i" audio-file
-       "-o" thumbnail)
+      (cond
+       ((and (eq system-type 'darwin) (executable-find "qlmanage"))
+        (start-process
+         "org-link-beautify--audio-preview"
+         " *org-link-beautify audio preview*"
+         "qlmanage"
+         "-x"
+         "-t"
+         "-s" (number-to-string 100)
+         audio-file
+         "-o" thumbnails-dir)
+        ;; then rename [video.mp4.png] to [video.png]
+        (let ((original-thumbnail-file (concat thumbnails-dir (file-name-nondirectory audio-file) ".png")))
+          (if (file-exists-p original-thumbnail-file)
+              (rename-file original-thumbnail-file thumbnail)
+            (message "[org-link-beautify] qlmanage create thumbnail for\n %s \nfailed." original-thumbnail-file)))))
+      ((and (eq system-type 'gnu/linux) (executable-find "audiowaveform"))
+       (start-process
+        "org-link-beautify--audio-preview"
+        " *org-link-beautify audio preview*" ; DEBUG: check out output buffer
+        "audiowaveform"
+        "-i" audio-file
+        "-o" thumbnail))
       (unless (file-exists-p thumbnail)
         (message "[org-link-beautify] 'audiowaveform' create thumbnail for\n %s \nfailed." thumbnail)))
     (org-link-beautify--add-overlay-marker start end)
