@@ -361,7 +361,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
 ;;  3)
 
 (defun org-link-beautify--preview-text (path start end &optional lines)
-  "Preview TEXT file PATH and display on link between START and END."
+  "Preview LINES of TEXT file PATH and display on link between START and END."
   (let* ((text-file (expand-file-name (org-link-unescape path)))
          (preview-lines (or lines 10))
          (preview-content (org-link-beautify--preview-text-file text-file preview-lines)))
