@@ -391,7 +391,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
        ;; for macOS, use `qlmanage'
        ((and (eq system-type 'darwin) (executable-find "qlmanage")
              ;; filter not supported video types of "qlmanage".
-             (not (member (file-name-extension video-file) '("mkv" "flv"))))
+             (not (member (file-name-extension video-file) '("flv" "mkv" "webm"))))
         (start-process
          "org-link-beautify--video-preview"
          " *org-link-beautify video-preview*"
