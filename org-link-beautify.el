@@ -723,9 +723,10 @@ Or clear org-link-beautify if headline STATE is folded."
   :global t
   :init-value nil
   :lighter nil
-  (if org-link-beautify-mode
-      (org-link-beautify-enable)
-    (org-link-beautify-disable)))
+  (unless (member major-mode org-link-beautify-exclude-modes)
+    (if org-link-beautify-mode
+        (org-link-beautify-enable)
+      (org-link-beautify-disable))))
 
 
 
