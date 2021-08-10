@@ -489,6 +489,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
 
 (defun org-link-beautify--return-icon (path type extension)
   "Return the corresponding icon for link PATH smartly based on TYPE, EXTENSION, etc."
+  ;; (message "DEBUG: %s" type)
   (pcase type
     ("file"
      (cond
@@ -595,7 +596,9 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                               ;; when description not exist, use raw link for raw link case.
                               raw-link))
              ;; DEBUG: (desc-debug (message description))
-             (icon (org-link-beautify--return-icon path type extension)))
+             (icon (org-link-beautify--return-icon path type extension))
+             ;; DEBUG: (icon-debug (print icon))
+             )
         (when bracket-p (ignore))
         (cond
          ;; video thumbnail preview
