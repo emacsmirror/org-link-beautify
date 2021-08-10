@@ -30,6 +30,7 @@
 
 (require 'ol)
 (require 'org-element)
+(require 'org-crypt)
 (require 'all-the-icons)
 
 (defgroup org-link-beautify nil
@@ -173,7 +174,13 @@ EPUB preview."
 
 (defun org-link-beautify--get-element (position)
   "Return the org element of link at the `POSITION'."
-  (save-excursion (goto-char position) (org-element-context)))
+  (save-excursion
+    (goto-char position)
+    ;; don't beautify in those elements
+    (unless (or (org-at-property-p)
+                (org-at-clock-log-p)
+                (org-at-encrypted-entry-p))
+      (org-element-context))))
 
 (defun org-link-beautify--get-link-description-fast (position)
   "Get the link description at `POSITION' (fuzzy but faster version)."
