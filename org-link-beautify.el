@@ -487,9 +487,11 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     (org-link-beautify--add-keymap start end)
     (org-link-beautify--display-thumbnail thumbnail thumbnail-size start end)))
 
-(defun org-link-beautify--return-icon (path type extension)
+(defun org-link-beautify--return-icon (type path extension &optional link-element)
   "Return the corresponding icon for link PATH smartly based on TYPE, EXTENSION, etc."
-  ;; (message "DEBUG: %s" type)
+  ;; (message "DEBUG: (type) %s" type)
+  ;; (message "DEBUG: (path) %s" path)
+  ;; (message "DEBUG: (link-element) %s" link-element)
   (pcase type
     ("file"
      (cond
@@ -515,7 +517,6 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     ("https" (all-the-icons-icon-for-url (concat "https:" path) :v-adjust -0.05))
     ("ftp" (all-the-icons-material "link"))
     ("telnet" (all-the-icons-material "settings_ethernet"))
-    ("eaf" (all-the-icons-material "apps" :v-adjust -0.05)) ; emacs-application-framework
     ("custom-id" (all-the-icons-material "location_searching"))
     ("coderef" (all-the-icons-material "code"))
     ("id" (all-the-icons-material "link"))
@@ -523,25 +524,31 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     ("elisp" (all-the-icons-icon-for-mode 'emacs-lisp-mode :v-adjust -0.05))
     ("eshell" (all-the-icons-icon-for-mode 'eshell-mode))
     ("shell" (all-the-icons-icon-for-mode 'shell-mode))
-    ("eww" (all-the-icons-icon-for-mode 'eww-mode))
-    ("mu4e" (all-the-icons-material "mail_outline"))
-    ("git" (all-the-icons-octicon "git-branch"))
-    ("orgit" (all-the-icons-octicon "git-branch"))
-    ("orgit-rev" (all-the-icons-octicon "git-commit"))
-    ("orgit-log" (all-the-icons-icon-for-mode 'magit-log-mode))
-    ("pdfview" (all-the-icons-icon-for-file ".pdf"))
-    ("grep" (all-the-icons-icon-for-mode 'grep-mode))
-    ("occur" (all-the-icons-icon-for-mode 'occur-mode))
     ("man" (all-the-icons-material "description"))
     ("info" (all-the-icons-material "description"))
     ("help" (all-the-icons-material "description"))
-    ("rss" (all-the-icons-material "rss_feed"))
-    ("elfeed" (all-the-icons-material "rss_feed"))
-    ("wikipedia" (all-the-icons-faicon "wikipedia-w"))
-    ("mailto" (all-the-icons-material "contact_mail" :v-adjust -0.05))
-    ("irc" (all-the-icons-material "comment"))
-    ("doi" (all-the-icons-material "link"))
-    ("org-contact" (all-the-icons-material "account_box"))))
+    ;; `org-element-context' will return "fuzzy" type when link not recognized.
+    ("fuzzy"
+     (when (string-match ".*:.*" link-element) ; extract the "real" link type for "fuzzy" type.
+       (let ((real-type (match-string 1 link-element)))
+         (pcase real-type
+           ("eaf" (all-the-icons-material "apps" :v-adjust -0.05)) ; emacs-application-framework
+           ("eww" (all-the-icons-icon-for-mode 'eww-mode))
+           ("mu4e" (all-the-icons-material "mail_outline"))
+           ("git" (all-the-icons-octicon "git-branch"))
+           ("orgit" (all-the-icons-octicon "git-branch"))
+           ("orgit-rev" (all-the-icons-octicon "git-commit"))
+           ("orgit-log" (all-the-icons-icon-for-mode 'magit-log-mode))
+           ("pdfview" (all-the-icons-icon-for-file ".pdf"))
+           ("grep" (all-the-icons-icon-for-mode 'grep-mode))
+           ("occur" (all-the-icons-icon-for-mode 'occur-mode))
+           ("rss" (all-the-icons-material "rss_feed"))
+           ("elfeed" (all-the-icons-material "rss_feed"))
+           ("wikipedia" (all-the-icons-faicon "wikipedia-w"))
+           ("mailto" (all-the-icons-material "contact_mail" :v-adjust -0.05))
+           ("irc" (all-the-icons-material "comment"))
+           ("doi" (all-the-icons-material "link"))
+           ("org-contact" (all-the-icons-material "account_box"))))))))
 
 (defun org-link-beautify--display-icon (start end description icon)
   "Display ICON for link on START and END with DESCRIPTION."
@@ -597,7 +604,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                               ;; when description not exist, use raw link for raw link case.
                               raw-link))
              ;; DEBUG: (desc-debug (print description))
-             (icon (org-link-beautify--return-icon type path extension))
+             (icon (org-link-beautify--return-icon type path extension link-element))
              ;; DEBUG:
              ;; (icon-debug (print icon))
              )
