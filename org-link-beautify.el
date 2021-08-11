@@ -580,13 +580,14 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
   (when (eq (car (org-link-beautify--get-element start)) 'link)
     (save-match-data
       (let* ((link-element (org-link-beautify--get-element start))
-             ;; DEBUG: (link-element-debug (message link-element))
+             ;; DEBUG:
+             ;; (link-element-debug (print link-element))
              (raw-link (org-element-property :raw-link link-element))
              ;; DEBUG:
-             ;; (raw-link-debug (message raw-link))
+             ;; (raw-link-debug (print raw-link))
              (type (org-element-property :type link-element))
              ;; DEBUG:
-             ;; (type-debug (message type))
+             ;; (type-debug (print type))
              (extension (or (file-name-extension (org-link-unescape path)) "txt"))
              ;; DEBUG: (ext-debug (message extension))
              (description (or (and (org-element-property :contents-begin link-element) ; in raw link case, it's nil
@@ -595,9 +596,10 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                                     (org-element-property :contents-end link-element)))
                               ;; when description not exist, use raw link for raw link case.
                               raw-link))
-             ;; DEBUG: (desc-debug (message description))
-             (icon (org-link-beautify--return-icon path type extension))
-             ;; DEBUG: (icon-debug (print icon))
+             ;; DEBUG: (desc-debug (print description))
+             (icon (org-link-beautify--return-icon type path extension))
+             ;; DEBUG:
+             ;; (icon-debug (print icon))
              )
         (when bracket-p (ignore))
         (cond
