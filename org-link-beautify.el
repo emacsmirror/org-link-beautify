@@ -390,7 +390,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                            ('user-home
                             (expand-file-name "~/.cache/thumbnails/"))))
          (thumbnail (expand-file-name
-                     (format "%s%s.jpg" thumbnails-dir (file-name-base video-file))))
+                     (format "%s%s.png" thumbnails-dir (file-name-base video-file))))
          (thumbnail-size (or org-link-beautify-video-preview-size 512)))
     (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
     (unless (file-exists-p thumbnail)
