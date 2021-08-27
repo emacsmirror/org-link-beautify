@@ -217,7 +217,7 @@ EPUB preview."
   "Preview PDF file PATH and display on link between START and END."
   (if (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
       (let* ((file-path (match-string 1 path))
-             ;; DEBUG: (_ (lambda (message "--> HERE")))
+             ;; DEBUG: (_ (lambda (message "--> HERE org-link-beautify (pdf): path: %s" path)))
              (pdf-page-number (if (match-string 2 path)
                                   (string-to-number (match-string 2 path))
                                 org-link-beautify-pdf-preview-default-page-number))
@@ -539,7 +539,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
            ("orgit" (all-the-icons-octicon "git-branch"))
            ("orgit-rev" (all-the-icons-octicon "git-commit"))
            ("orgit-log" (all-the-icons-icon-for-mode 'magit-log-mode))
-           ("pdfview" (all-the-icons-icon-for-file ".pdf"))
+           ("pdf" (all-the-icons-icon-for-file ".pdf"))
            ("grep" (all-the-icons-icon-for-mode 'grep-mode))
            ("occur" (all-the-icons-icon-for-mode 'occur-mode))
            ("rss" (all-the-icons-material "rss_feed"))
@@ -624,15 +624,17 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
           (org-link-beautify--preview-audio path start end))
          ;; PDF file preview
          ;; [[file:/path/to/filename.pdf]]
+         ;; [[pdf:/path/to/filename.pdf::15]]
          ;; [[pdfview:/path/to/filename.pdf::15]]
          ((and org-link-beautify-pdf-preview
                (or (and (equal type "file") (string= extension "pdf"))
+                   (equal type "pdf")
                    (equal type "pdfview")
                    (equal type "docview")
                    (equal type "eaf")))
           (org-link-beautify--preview-pdf
            (if (equal type "eaf")
-               (replace-regexp-in-string "pdfviewer::" "" path)
+               (replace-regexp-in-string "pdf::" "" path)
              path)
            start end))
          ;; EPUB file cover preview
