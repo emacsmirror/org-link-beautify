@@ -527,28 +527,37 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     ("man" (all-the-icons-material "description"))
     ("info" (all-the-icons-material "description"))
     ("help" (all-the-icons-material "description"))
+
+    ("eaf" (all-the-icons-material "apps" :v-adjust -0.05)) ; emacs-application-framework
+    ("eww" (all-the-icons-icon-for-mode 'eww-mode))
+    ("mu4e" (all-the-icons-material "mail_outline"))
+    ("git" (all-the-icons-octicon "git-branch"))
+    ("orgit" (all-the-icons-octicon "git-branch"))
+    ("orgit-rev" (all-the-icons-octicon "git-commit"))
+    ("orgit-log" (all-the-icons-icon-for-mode 'magit-log-mode))
+    ("pdf" (all-the-icons-icon-for-file ".pdf"))
+    ("grep" (all-the-icons-icon-for-mode 'grep-mode))
+    ("occur" (all-the-icons-icon-for-mode 'occur-mode))
+    ("rss" (all-the-icons-material "rss_feed"))
+    ("elfeed" (all-the-icons-material "rss_feed"))
+    ("wikipedia" (all-the-icons-faicon "wikipedia-w"))
+    ("mailto" (all-the-icons-material "contact_mail" :v-adjust -0.05))
+    ("irc" (all-the-icons-material "comment"))
+    ("doi" (all-the-icons-material "link"))
+    ("org-contact" (all-the-icons-material "account_box"))
+    
     ;; `org-element-context' will return "fuzzy" type when link not recognized.
-    ("fuzzy"
-     (when (string-match ".*:.*" link-element) ; extract the "real" link type for "fuzzy" type.
-       (let ((real-type (match-string 1 link-element)))
-         (pcase real-type
-           ("eaf" (all-the-icons-material "apps" :v-adjust -0.05)) ; emacs-application-framework
-           ("eww" (all-the-icons-icon-for-mode 'eww-mode))
-           ("mu4e" (all-the-icons-material "mail_outline"))
-           ("git" (all-the-icons-octicon "git-branch"))
-           ("orgit" (all-the-icons-octicon "git-branch"))
-           ("orgit-rev" (all-the-icons-octicon "git-commit"))
-           ("orgit-log" (all-the-icons-icon-for-mode 'magit-log-mode))
-           ("pdf" (all-the-icons-icon-for-file ".pdf"))
-           ("grep" (all-the-icons-icon-for-mode 'grep-mode))
-           ("occur" (all-the-icons-icon-for-mode 'occur-mode))
-           ("rss" (all-the-icons-material "rss_feed"))
-           ("elfeed" (all-the-icons-material "rss_feed"))
-           ("wikipedia" (all-the-icons-faicon "wikipedia-w"))
-           ("mailto" (all-the-icons-material "contact_mail" :v-adjust -0.05))
-           ("irc" (all-the-icons-material "comment"))
-           ("doi" (all-the-icons-material "link"))
-           ("org-contact" (all-the-icons-material "account_box"))))))))
+    ;; ("fuzzy"
+    ;;  ;; DEBUG
+    ;;  (message "[org-link-beautify] link-element: %s" link-element)
+    ;;  (when (string-match ".*:.*" link-element) ; extract the "real" link type for "fuzzy" type.
+    ;;    (let ((real-type (match-string 1 link-element)))
+    ;;      (pcase real-type
+    ;;        ))))
+    ;; (_
+    ;;  ;; DEBUG
+    ;;  (message "[org-link-beautify] link-element: %s" link-element))
+    ))
 
 (defun org-link-beautify--display-icon (start end description icon)
   "Display ICON for link on START and END with DESCRIPTION."
