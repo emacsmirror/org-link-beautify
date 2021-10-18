@@ -218,14 +218,18 @@ EPUB preview."
     (make-local-variable 'image-map)
     (define-key image-map (kbd "<mouse-1>") 'org-open-at-point)))
 
-(defun org-link-beautify--preview-pdf (path start end)
+(defun org-link-beautify--preview-pdf (path start end &optional search-option)
   "Preview PDF file PATH and display on link between START and END."
   (if (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
       (let* ((file-path (match-string 1 path))
-             ;; DEBUG: (_ (lambda (message "--> HERE org-link-beautify (pdf): path: %s" path)))
-             (pdf-page-number (if (match-string 2 path)
-                                  (string-to-number (match-string 2 path))
-                                org-link-beautify-pdf-preview-default-page-number))
+             ;; DEBUG:
+             ;; (_ (lambda (message "--> HERE org-link-beautify (pdf): path: %s" path)))
+             ;; (_ (lambda (message "--> HERE org-link-beautify (pdf): search-option: %s" search-option)))
+             (pdf-page-number (if search-option
+                                  (string-to-number search-option)
+                                (if (match-string 2 path)
+                                    (string-to-number (match-string 2 path))
+                                  org-link-beautify-pdf-preview-default-page-number)))
              (pdf-file (expand-file-name (org-link-unescape file-path)))
              (thumbnails-dir (pcase org-link-beautify-thumbnails-dir
                                ('source-path
@@ -610,6 +614,8 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
              ;; DEBUG:
              ;; (type-debug (print type))
              (extension (or (file-name-extension (org-link-unescape path)) "txt"))
+             ;; the search part behind link separator "::"
+             (search-option (org-element-property :search-option link-element))
              ;; DEBUG: (ext-debug (message extension))
              (description (or (and (org-element-property :contents-begin link-element) ; in raw link case, it's nil
                                    (buffer-substring-no-properties
@@ -646,11 +652,14 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                    (equal type "pdfview")
                    (equal type "docview")
                    (equal type "eaf")))
+          ;; DEBUG:
+          ;; (message "org-link-beautify: PDF file previewing [%s], search-option: [%s] (type: %s)," path search-option (type-of search-option))
           (org-link-beautify--preview-pdf
            (if (equal type "eaf")
                (replace-regexp-in-string "pdf::" "" path)
              path)
-           start end))
+           start end
+           search-option))
          ;; EPUB file cover preview
          ((and org-link-beautify-epub-preview
                (and (equal type "file") (string= extension "epub")))
