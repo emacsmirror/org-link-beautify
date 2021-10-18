@@ -226,7 +226,10 @@ EPUB preview."
              ;; (_ (lambda (message "--> HERE org-link-beautify (pdf): path: %s" path)))
              ;; (_ (lambda (message "--> HERE org-link-beautify (pdf): search-option: %s" search-option)))
              (pdf-page-number (if search-option
-                                  (string-to-number search-option)
+                                  (string-to-number
+                                   (if (string-prefix-p "P" search-option) ; "P42"
+                                       (substring search-option 1 nil)
+                                     search-option))
                                 (if (match-string 2 path)
                                     (string-to-number (match-string 2 path))
                                   org-link-beautify-pdf-preview-default-page-number)))
