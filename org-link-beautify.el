@@ -424,7 +424,8 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
         (let ((original-thumbnail-file (concat thumbnails-dir (file-name-nondirectory video-file) ".png")))
           (if (and (not org-link-beautify-enable-debug-p) (file-exists-p original-thumbnail-file))
               (rename-file original-thumbnail-file thumbnail)
-            (message "[org-link-beautify] qlmanage create thumbnail for\n %s \nfailed." original-thumbnail-file))))
+            (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail)))
+              (message "[org-link-beautify] qlmanage create thumbnail for\n %s \nfailed." thumbnail)))))
        ;; use `ffmpegthumbnailer'
        ((executable-find "ffmpegthumbnailer")
         (start-process
@@ -485,7 +486,8 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
         (let ((original-thumbnail-file (concat thumbnails-dir (file-name-nondirectory audio-file) ".png")))
           (if (and (not org-link-beautify-enable-debug-p) (file-exists-p original-thumbnail-file))
               (rename-file original-thumbnail-file thumbnail)
-            (message "[org-link-beautify] qlmanage create thumbnail for\n %s \nfailed." original-thumbnail-file))))
+            (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail)))
+              (message "[org-link-beautify] qlmanage create thumbnail for\n %s \nfailed." thumbnail)))))
        ((and (eq system-type 'gnu/linux) (executable-find "audiowaveform"))
         (start-process
          "org-link-beautify--audio-preview"
