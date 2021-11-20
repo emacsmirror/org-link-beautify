@@ -233,8 +233,14 @@ EPUB preview."
                                     ((string-match "\\([[:digit:]]+\\)\\+\\+\\(.*\\)" search-option) ; "40++0.00"
                                      (match-string 1 search-option))
                                     (t search-option)))
-                                (if (match-string 2 path)
-                                    (string-to-number (match-string 2 path))
+                                (if-let ((search-option (match-string 2 path)))
+                                    (string-to-number
+                                     (cond
+                                      ((string-prefix-p "P" search-option) ; "P42"
+                                       (substring search-option 1 nil))
+                                      ((string-match "\\([[:digit:]]+\\)\\+\\+\\(.*\\)" search-option) ; "40++0.00"
+                                       (match-string 1 search-option))
+                                      (t search-option)))
                                   org-link-beautify-pdf-preview-default-page-number)))
              (pdf-file (expand-file-name (org-link-unescape file-path)))
              (thumbnails-dir (pcase org-link-beautify-thumbnails-dir
