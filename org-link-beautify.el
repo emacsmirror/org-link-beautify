@@ -227,9 +227,12 @@ EPUB preview."
              ;; (_ (lambda (message "--> HERE org-link-beautify (pdf): search-option: %s" search-option)))
              (pdf-page-number (if search-option
                                   (string-to-number
-                                   (if (string-prefix-p "P" search-option) ; "P42"
-                                       (substring search-option 1 nil)
-                                     search-option))
+                                   (cond
+                                    ((string-prefix-p "P" search-option) ; "P42"
+                                     (substring search-option 1 nil))
+                                    ((string-match "\\([[:digit:]]+\\)\\+\\+\\(.*\\)" search-option) ; "40++0.00"
+                                     (match-string 1 search-option))
+                                    (t search-option)))
                                 (if (match-string 2 path)
                                     (string-to-number (match-string 2 path))
                                   org-link-beautify-pdf-preview-default-page-number)))
@@ -658,7 +661,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                    (equal type "docview")
                    (equal type "eaf")))
           ;; DEBUG:
-          ;; (message "org-link-beautify: PDF file previewing [%s], search-option: [%s] (type: %s)," path search-option (type-of search-option))
+          ;; (message "org-link-beautify: PDF file previewing [%s], link-type: [%s], search-option: [%s] (type: %s)," path type search-option (type-of search-option))
           (org-link-beautify--preview-pdf
            (if (equal type "eaf")
                (replace-regexp-in-string "pdf::" "" path)
