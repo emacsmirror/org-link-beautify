@@ -547,9 +547,9 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     ("elisp" (all-the-icons-icon-for-mode 'emacs-lisp-mode :v-adjust -0.05))
     ("eshell" (all-the-icons-icon-for-mode 'eshell-mode))
     ("shell" (all-the-icons-icon-for-mode 'shell-mode))
-    ("man" (all-the-icons-material "description"))
-    ("info" (all-the-icons-material "description"))
-    ("help" (all-the-icons-material "description"))
+    ("man" (all-the-icons-faicon "info-circle" :v-adjust -0.05))
+    ("info" (all-the-icons-faicon "info" :v-adjust -0.05))
+    ("help" (all-the-icons-faicon "info" :v-adjust -0.05))
 
     ("eaf" (all-the-icons-material "apps" :v-adjust -0.05)) ; emacs-application-framework
     ("eww" (all-the-icons-icon-for-mode 'eww-mode))
