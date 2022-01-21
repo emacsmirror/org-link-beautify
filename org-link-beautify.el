@@ -565,7 +565,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     ("elfeed" (all-the-icons-material "rss_feed"))
     ("wikipedia" (all-the-icons-faicon "wikipedia-w"))
     ("mailto" (all-the-icons-faicon "envelope-o" :v-adjust -0.05))
-    ("irc" (all-the-icons-faicon "comments-o"))
+    ("irc" (all-the-icons-faicon "comments-o" :v-adjust -0.05))
     ("doi" (all-the-icons-material "link"))
     ("org-contact" (all-the-icons-material "account_box"))
     
