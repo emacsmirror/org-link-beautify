@@ -550,7 +550,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     ("man" (all-the-icons-faicon "info-circle" :v-adjust -0.05))
     ("info" (all-the-icons-faicon "info" :v-adjust -0.05))
     ("help" (all-the-icons-faicon "info" :v-adjust -0.05))
-
+    ;; external Org link types
     ("eaf" (all-the-icons-material "apps" :v-adjust -0.05)) ; emacs-application-framework
     ("eww" (all-the-icons-icon-for-mode 'eww-mode))
     ("mu4e" (all-the-icons-material "mail_outline"))
@@ -565,7 +565,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     ("elfeed" (all-the-icons-material "rss_feed"))
     ("wikipedia" (all-the-icons-faicon "wikipedia-w"))
     ("mailto" (all-the-icons-material "contact_mail" :v-adjust -0.05))
-    ("irc" (all-the-icons-material "comment"))
+    ("irc" (all-the-icons-faicon "comments-o"))
     ("doi" (all-the-icons-material "link"))
     ("org-contact" (all-the-icons-material "account_box"))
     
