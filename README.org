@@ -3,6 +3,10 @@
 Usually Org links only have text, it's not very intuitive to recognize what type
 of link it is. Add some color and icon, even image preview will help user read links.
 
+* Intro
+
+An Emacs extension which beautify Org Mode links with previewing.
+
 * Screenshots
 
 Annotate link with icon to indicate link type. And use color to indicate link file exist or not?
@@ -52,6 +56,7 @@ Supports video file link preview with thumbnail.
   #+begin_src emacs-lisp :eval no
   (define-key org-link-beautify-keymap (kbd "RET") 'org-open-at-point)
   #+end_src
+- [ ] preview URL with screenshot on web page (Still considering whether should add this feature.)
 
 * Install
 
