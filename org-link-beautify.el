@@ -4,7 +4,7 @@
 ;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
 ;; Version: 1.2.2
 ;; Keywords: hypermedia
-;; homepage: https://github.com/stardiviner/org-link-beautify
+;; homepage: https://repo.or.cz/org-link-beautify.git
 
 ;; org-link-beautify is free software; you can redistribute it and/or modify it
 ;; under the terms of the GNU General Public License as published by
