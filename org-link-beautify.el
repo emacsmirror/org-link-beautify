@@ -519,31 +519,36 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     ("file"
      (cond
       ((file-remote-p path)             ; remote file
-       (all-the-icons-material "dns" :face 'org-warning))
+       (all-the-icons-faicon "server" :face 'org-warning))
       ((not (file-exists-p (expand-file-name path))) ; not exist file
-       (all-the-icons-material "priority_high" :face 'org-warning))
+       (all-the-icons-faicon "ban" :face 'org-warning :v-adjust -0.05))
       ((file-directory-p path)          ; directory
        (all-the-icons-icon-for-dir
         "path"
         :face (org-link-beautify--warning path)
         :v-adjust 0))
+      ;; depend on file extensions.
       ;; MindMap files
+      ((string-equal (file-name-extension path) "org")
+       (all-the-icons-fileicon "org" :face '(:foreground "LightGreen") :v-adjust -0.05))
+      ((member (file-name-extension path) '("md" "markdown"))
+       (all-the-icons-fileicon "markdownlint" :face '(:foreground "DimGray")))
       ((member (file-name-extension path) '("mm" "xmind"))
        (all-the-icons-fileicon "brain" :face '(:foreground "BlueViolet")))
       (t (all-the-icons-icon-for-file   ; file
           (format ".%s" extension)
           :face (org-link-beautify--warning path)
           :v-adjust 0))))
-    ("file+sys" (all-the-icons-material "link"))
+    ("file+sys" (all-the-icons-faicon "link"))
     ("file+emacs" (all-the-icons-icon-for-mode 'emacs-lisp-mode))
     ("http" (all-the-icons-icon-for-url (concat "http:" path) :v-adjust -0.05))
     ("https" (all-the-icons-icon-for-url (concat "https:" path) :v-adjust -0.05))
-    ("ftp" (all-the-icons-material "link"))
-    ("telnet" (all-the-icons-material "settings_ethernet"))
-    ("custom-id" (all-the-icons-material "location_searching"))
-    ("coderef" (all-the-icons-material "code"))
-    ("id" (all-the-icons-material "link"))
-    ("attachment" (all-the-icons-material "attachment"))
+    ("ftp" (all-the-icons-faicon "link"))
+    ;; ("telnet" (all-the-icons-material "settings_ethernet"))
+    ("custom-id" (all-the-icons-faicon "search-plus"))
+    ("coderef" (all-the-icons-faicon "code"))
+    ("id" (all-the-icons-faicon "link"))
+    ("attachment" (all-the-icons-faicon "file-archive-o"))
     ("elisp" (all-the-icons-icon-for-mode 'emacs-lisp-mode :v-adjust -0.05))
     ("eshell" (all-the-icons-icon-for-mode 'eshell-mode))
     ("shell" (all-the-icons-icon-for-mode 'shell-mode))
@@ -551,7 +556,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     ("info" (all-the-icons-faicon "info" :v-adjust -0.05))
     ("help" (all-the-icons-faicon "info" :v-adjust -0.05))
     ;; external Org link types
-    ("eaf" (all-the-icons-material "apps" :v-adjust -0.05)) ; emacs-application-framework
+    ("eaf" (all-the-icons-faicon "cubes" :v-adjust -0.05)) ; emacs-application-framework
     ("eww" (all-the-icons-icon-for-mode 'eww-mode))
     ("mu4e" (all-the-icons-faicon "envelope"))
     ("git" (all-the-icons-faicon "git-square" :v-adjust -0.05))
@@ -561,13 +566,13 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     ("pdf" (all-the-icons-icon-for-file ".pdf"))
     ("grep" (all-the-icons-icon-for-mode 'grep-mode))
     ("occur" (all-the-icons-icon-for-mode 'occur-mode))
-    ("rss" (all-the-icons-material "rss_feed"))
-    ("elfeed" (all-the-icons-material "rss_feed"))
+    ("rss" (all-the-icons-faicon "rss"))
+    ("elfeed" (all-the-icons-faicon "rss"))
     ("wikipedia" (all-the-icons-faicon "wikipedia-w"))
     ("mailto" (all-the-icons-faicon "envelope-o" :v-adjust -0.05))
     ("irc" (all-the-icons-faicon "comments-o" :v-adjust -0.05))
-    ("doi" (all-the-icons-material "link"))
-    ("org-contact" (all-the-icons-material "account_box"))
+    ("doi" (all-the-icons-faicon "link"))
+    ("org-contact" (all-the-icons-faicon "user" :v-adjust -0.05))
     
     ;; `org-element-context' will return "fuzzy" type when link not recognized.
     ;; ("fuzzy"
