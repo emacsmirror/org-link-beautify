@@ -172,6 +172,17 @@ not available, it will be colored. If you have any idea, PR welcome.
 *NOTE*: This Emacs package icons use "[[https://github.com/domtronn/all-the-icons.el][all-the-icons]]". If you got icon problem. You
 need to make sure all-the-icons and fonts installed correctly.
 
+** Q: Some link types are not beautified by org-link-beautify?
+
+This is because =org-link-beautify= finished loading before that package register link type. This
+depend on your Emacs config init file the order or loading packages.
+
+Solution: make sure =org-link-beautify= is loaded at the end of all packages. You can config like this:
+
+#+begin_src emacs-lisp
+(add-hook 'after-init-hook #'org-link-beautify-mode)
+#+end_src
+
 * Contributions
 
 - Thanks to John Kitchin and Nicolas Goaziou help in Org Mode mailing list.
