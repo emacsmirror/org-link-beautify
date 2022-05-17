@@ -791,15 +791,26 @@ Or clear org-link-beautify if headline STATE is folded."
 
 ;;;###autoload
 (define-minor-mode org-link-beautify-mode
-  "A minor mode that beautify Org links with colors and icons."
+  "A minor mode that beautify Org-mode buffer links with colors, icons, and inline preview."
   :group 'org-link-beautify
-  :global t
+  :global nil
   :init-value nil
   :lighter nil
-  (unless (member major-mode org-link-beautify-exclude-modes)
-    (if org-link-beautify-mode
-        (org-link-beautify-enable)
-      (org-link-beautify-disable))))
+  (if org-link-beautify-mode
+      (org-link-beautify-enable)
+    (org-link-beautify-disable)))
+
+(defun org-link-beautify-mode-enable ()
+  "Required by `define-globalized-minor-mode'."
+  (org-link-beautify-mode 1))
+
+(define-globalized-minor-mode global-org-link-beautify-mode
+  org-link-beautify-mode org-link-beautify-mode-enable
+  (message "global-org-link-beautify-mode toggled for all Org-mode buffers.")
+  :require 'org-link-beautify-mode
+  :predicate 'org-mode
+  :lighter nil
+  :group 'org-link-beautify)
 
 
 
