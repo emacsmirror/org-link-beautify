@@ -38,6 +38,12 @@
   :prefix "org-link-beautify-"
   :group 'org)
 
+(defcustom org-link-beautify-condition-functions '(org-link-beautify--filter-org-mode
+                                                   org-link-beautify--filter-larg-file)
+  "A list of functions to be executed as condition before really activate `org-link-beautify'.
+Only if all functions evaluated as TRUE, then processed."
+  :type 'list
+  :safe #'listp)
 
 (defcustom org-link-beautify-video-preview (or (executable-find "ffmpegthumbnailer")
                                                (executable-find "qlmanage")
@@ -799,11 +805,20 @@ Or clear org-link-beautify if headline STATE is folded."
   "Required by `define-globalized-minor-mode'."
   (org-link-beautify-mode 1))
 
+;; More than 400K characters.
+(defun org-link-beautify--filter-org-mode ()
+  "Only enable on org-mode major-mode buffers."
+  (eq major-mode 'org-mode))
+
+;;; Only enable `org-link-beautify-mode' on `org-mode' buffer.
+(defun org-link-beautify--filter-larg-file ()
+  (< (buffer-size) 400000))
+
 (define-globalized-minor-mode global-org-link-beautify-mode
   org-link-beautify-mode org-link-beautify-mode-enable
   (message "global-org-link-beautify-mode toggled for all Org-mode buffers.")
   :require 'org-link-beautify-mode
-  :predicate 'org-mode
+  :predicate (not (some 'null (mapcar 'funcall org-link-beautify-condition-functions)))
   :lighter nil
   :group 'org-link-beautify)
 
