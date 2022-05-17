@@ -742,13 +742,22 @@ Or clear org-link-beautify if headline STATE is folded."
     (org-link-beautify--clear-text-properties))
   (org-restart-font-lock))
 
+(defvar org-link-beautify--icon-spec-list
+  '(("\\.mm" all-the-icons-fileicon "brain" :face all-the-icons-lpink)
+    ("\\.xmind" all-the-icons-fileicon "brain" :face all-the-icons-lpink))
+  "A list of icon spec to be used by `org-link-beautify--add-more-icons-support'.")
+
 ;;; add more missing icons to `all-the-icons'.
 (defun org-link-beautify--add-more-icons-support ()
   "Add more icons for file types."
-  (add-to-list 'all-the-icons-icon-alist
-               '("\\.mm" all-the-icons-fileicon "brain" :face all-the-icons-lpink))
-  (add-to-list 'all-the-icons-icon-alist
-               '("\\.xmind" all-the-icons-fileicon "brain" :face all-the-icons-lpink)))
+  (dolist (icon-spec org-link-beautify--icon-spec-list)
+    (add-to-list 'all-the-icons-icon-alist icon-spec)))
+
+(defun org-link-beautify--remove-more-icons-support ()
+  "Remove added extra icons support for file types from `org-link-beautify'."
+  (dolist (icon-spec org-link-beautify--icon-spec-list)
+    (setq all-the-icons-icon-alist
+          (delete icon-spec all-the-icons-icon-alist))))
 
 (defvar org-link-beautify-keymap (make-sparse-keymap))
 
@@ -774,6 +783,7 @@ Or clear org-link-beautify if headline STATE is folded."
 ;;;###autoload
 (defun org-link-beautify-disable ()
   "Disable `org-link-beautify'."
+  (org-link-beautify--remove-more-icons-support)
   (dolist (link-type (mapcar #'car org-link-parameters))
     (org-link-set-parameters link-type :activate-func t))
   (remove-hook 'org-cycle-hook #'org-link-beautify-headline-cycle)
