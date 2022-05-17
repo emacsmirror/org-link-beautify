@@ -38,11 +38,6 @@
   :prefix "org-link-beautify-"
   :group 'org)
 
-(defcustom org-link-beautify-exclude-modes '(org-agenda-mode)
-  "A list of excluded major modes which wouldn't enable `org-link-beautify'."
-  :type 'list
-  :safe #'listp
-  :group 'org-link-beautify)
 
 (defcustom org-link-beautify-video-preview (or (executable-find "ffmpegthumbnailer")
                                                (executable-find "qlmanage")
