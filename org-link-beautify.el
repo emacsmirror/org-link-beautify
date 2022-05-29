@@ -595,12 +595,12 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
    'display
    (propertize
     (concat
-     (propertize "[" 'face '(:inherit nil :underline nil :foreground "orange"))
-     (propertize description 'face '(:underline t :foreground "dark cyan"))
-     (propertize "]" 'face '(:inherit nil :underline nil :foreground "orange"))
-     (propertize "(" 'face '(:inherit nil :underline nil :foreground "orange"))
-     (propertize icon 'face '(:inherit nil :underline nil :foreground "gray"))
-     (propertize ")" 'face '(:inherit nil :underline nil :foreground "orange"))))))
+     (propertize "[" 'face `(:inherit nil :underline nil :foreground ,(color-lighten-name (face-foreground 'shadow) 2)))
+     (propertize description 'face `(:underline t :foreground ,(face-foreground 'org-link)))
+     (propertize "]" 'face `(:inherit nil :underline nil :foreground ,(color-lighten-name (face-foreground 'shadow) 2)))
+     (propertize "⌈" 'face `(:inherit nil :underline nil :foreground ,(color-lighten-name (face-foreground 'shadow) 2)))
+     (propertize icon 'face '(:inherit nil :underline nil :foreground "gray" :height 95))
+     (propertize "⌋" 'face `(:inherit nil :underline nil :foreground ,(color-lighten-name (face-foreground 'shadow) 2)))))))
 
 (defun org-link-beautify--display-not-exist (start end description icon)
   "Display error color and ICON on START and END with DESCRIPTION."
