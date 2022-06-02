@@ -194,7 +194,7 @@ EPUB preview."
     (goto-char position)
     (and (org-in-regexp org-link-bracket-re) (match-string 2))))
 
-(defun org-link-beautify--warning (path)
+(defun org-link-beautify--warning-face (path)
   "Use `org-warning' face if link PATH does not exist."
   (if (and (not (file-remote-p path))
            (file-exists-p (expand-file-name path)))
@@ -532,7 +532,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
       ((file-directory-p path)          ; directory
        (all-the-icons-icon-for-dir
         "path"
-        :face (org-link-beautify--warning path)
+        :face (org-link-beautify--warning-face path)
         :v-adjust 0))
       ;; depend on file extensions.
       ;; MindMap files
@@ -544,7 +544,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
        (all-the-icons-fileicon "brain" :face '(:foreground "BlueViolet")))
       (t (all-the-icons-icon-for-file   ; file
           (format ".%s" extension)
-          :face (org-link-beautify--warning path)
+          :face (org-link-beautify--warning-face path)
           :v-adjust 0))))
     ("file+sys" (all-the-icons-faicon "link"))
     ("file+emacs" (all-the-icons-icon-for-mode 'emacs-lisp-mode))
