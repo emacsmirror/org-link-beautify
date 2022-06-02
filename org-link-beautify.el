@@ -200,6 +200,12 @@ EPUB preview."
            (file-exists-p (expand-file-name path)))
       'org-link 'org-warning))
 
+(defun org-link-beautify--notify-generate-thumbnail-failed (source-file thumbnail-file)
+  "Notify user that org-link-beautify generating thumbnail file failed."
+  (message
+   "[org-link-beautify] For file %s.\nCreate thumbnail %s failed."
+   source-file thumbnail-file))
+
 (defun org-link-beautify--add-overlay-marker (start end)
   "Add 'org-link-beautify on link text-property. between START and END."
   (put-text-property start end 'type 'org-link-beautify))
@@ -279,7 +285,7 @@ EPUB preview."
               "-f" (number-to-string pdf-page-number)
               pdf-file (file-name-sans-extension thumbnail))
              (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail)))
-               (message "[org-link-beautify] PDF create thumbnail for\n %s \nfailed." thumbnail)))
+               (org-link-beautify--notify-generate-thumbnail-failed pdf-file thumbnail)))
             ('pdf2svg
              (unless (eq org-link-beautify-pdf-preview-image-format 'svg)
                (warn "The pdf2svg only supports convert PDF to SVG format.
@@ -292,7 +298,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
               "pdf2svg"
               pdf-file thumbnail (number-to-string pdf-page-number))
              (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail)))
-               (message "[org-link-beautify] PDF create thumbnail for\n %s \nfailed." thumbnail)))))
+               (org-link-beautify--notify-generate-thumbnail-failed pdf-file thumbnail)))))
         (org-link-beautify--add-overlay-marker start end)
         (org-link-beautify--add-keymap start end)
         ;; display thumbnail only when it exist.
@@ -332,7 +338,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
               ;;     (number-to-string thumbnail-size))
               )
              (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail)))
-               (message "[org-link-beautify] epub create thumbnail for\n %s \nfailed." thumbnail)))
+               (org-link-beautify--notify-generate-thumbnail-failed epub-file thumbnail)))
             ('darwin                    ; for macOS "epub-thumbnailer" command
              ;; DEBUG
              ;; (message epub-file)
@@ -355,7 +361,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
               :stdout " *org-link-beautify epub-preview*"
               :stderr " *org-link-beautify epub-preview*")
              (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail)))
-               (message "[org-link-beautify] epub create thumbnail for\n %s \nfailed." thumbnail)))
+               (org-link-beautify--notify-generate-thumbnail-failed epub-file thumbnail)))
             (t (user-error "This system platform currently not supported by org-link-beautify.\n Please contribute code to support"))))
         (org-link-beautify--add-overlay-marker start end)
         (org-link-beautify--add-keymap start end)
@@ -435,7 +441,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
           (if (and (not org-link-beautify-enable-debug-p) (file-exists-p original-thumbnail-file))
               (rename-file original-thumbnail-file thumbnail)
             (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail)))
-              (message "[org-link-beautify] qlmanage create thumbnail for\n %s \nfailed." thumbnail)))))
+              (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail)))))
        ;; use `ffmpegthumbnailer'
        ((executable-find "ffmpegthumbnailer")
         (start-process
@@ -446,7 +452,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
          "-s" (number-to-string thumbnail-size)
          "-o" thumbnail)
         (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail)))
-          (message "[org-link-beautify] 'ffmpegthumbnailer' create thumbnail for\n %s \nfailed." thumbnail)))
+          (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail)))
        ;; use `ffmpeg'
        ;; $ ffmpeg -ss 00:09:00 video.avi -vcodec png -vframes 1 -an -f rawvideo -s 119x64 out.png
        ((executable-find "ffmpeg")
@@ -461,7 +467,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
          "-s" (number-to-string thumbnail-size)
          thumbnail)
         (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail)))
-          (message "[org-link-beautify] 'ffmpeg' create thumbnail for\n %s \nfailed." thumbnail)))))
+          (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail)))))
     (org-link-beautify--add-overlay-marker start end)
     (org-link-beautify--add-keymap start end)
     (org-link-beautify--display-thumbnail thumbnail thumbnail-size start end)))
@@ -497,7 +503,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
           (if (and (not org-link-beautify-enable-debug-p) (file-exists-p original-thumbnail-file))
               (rename-file original-thumbnail-file thumbnail)
             (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail)))
-              (message "[org-link-beautify] qlmanage create thumbnail for\n %s \nfailed." thumbnail)))))
+              (org-link-beautify--notify-generate-thumbnail-failed audio-file thumbnail)))))
        ((and (eq system-type 'gnu/linux) (executable-find "audiowaveform"))
         (start-process
          "org-link-beautify--audio-preview"
@@ -506,7 +512,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
          "-i" audio-file
          "-o" thumbnail)
         (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail)))
-          (message "[org-link-beautify] 'audiowaveform' create thumbnail for\n %s \nfailed." thumbnail)))))
+          (org-link-beautify--notify-generate-thumbnail-failed audio-file thumbnail)))))
     (org-link-beautify--add-overlay-marker start end)
     (org-link-beautify--add-keymap start end)
     (org-link-beautify--display-thumbnail thumbnail thumbnail-size start end)))
