@@ -1,7 +1,7 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
 ;; Authors: stardiviner <numbchild@gmail.com>
-;; Package-Requires: ((emacs "27.1") (all-the-icons "4.0.0"))
+;; Package-Requires: ((emacs "27.1") (all-the-icons "5.0.0"))
 ;; Version: 1.2.2
 ;; Keywords: hypermedia
 ;; homepage: https://repo.or.cz/org-link-beautify.git
@@ -758,13 +758,13 @@ Or clear org-link-beautify if headline STATE is folded."
 (defun org-link-beautify--add-more-icons-support ()
   "Add more icons for file types."
   (dolist (icon-spec org-link-beautify--icon-spec-list)
-    (add-to-list 'all-the-icons-icon-alist icon-spec)))
+    (add-to-list 'all-the-icons-regexp-icon-alist icon-spec)))
 
 (defun org-link-beautify--remove-more-icons-support ()
   "Remove added extra icons support for file types from `org-link-beautify'."
   (dolist (icon-spec org-link-beautify--icon-spec-list)
-    (setq all-the-icons-icon-alist
-          (delete icon-spec all-the-icons-icon-alist))))
+    (setq all-the-icons-regexp-icon-alist
+          (delete icon-spec all-the-icons-regexp-icon-alist))))
 
 (defvar org-link-beautify-keymap (make-sparse-keymap))
 
