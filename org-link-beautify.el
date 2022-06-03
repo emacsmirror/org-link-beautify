@@ -376,17 +376,17 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     (condition-case nil
         (progn
           (insert-file-contents-literally file)
-          (format
-           (mapconcat
-            'concat
-            ;; extract lines of file contents
-            (cl-loop repeat lines
-                     unless (eobp)
-                     collect (prog1 (buffer-substring-no-properties
-                                     (line-beginning-position)
-                                     (line-end-position))
-                               (forward-line 1)))
-            "\n")))
+          (format "%s\n"
+                  (mapconcat
+                   'concat
+                   ;; extract lines of file contents
+                   (cl-loop repeat lines
+                            unless (eobp)
+                            collect (prog1 (buffer-substring-no-properties
+                                            (line-beginning-position)
+                                            (line-end-position))
+                                      (forward-line 1)))
+                   "\n")))
       (file-error
        (funcall (if noerror #'message #'user-error)
 		        "Unable to read file %S"
