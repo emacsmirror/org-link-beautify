@@ -29,9 +29,12 @@
 ;;; Code:
 
 (require 'ol)
+(require 'org)
 (require 'org-element)
 (require 'org-crypt)
 (require 'all-the-icons)
+(require 'color)
+(require 'cl-lib)
 
 (defgroup org-link-beautify nil
   "Customize group of org-link-beautify-mode."
@@ -824,7 +827,7 @@ Or clear org-link-beautify if headline STATE is folded."
   org-link-beautify-mode org-link-beautify-mode-enable
   (message "global-org-link-beautify-mode toggled for all Org-mode buffers.")
   :require 'org-link-beautify-mode
-  :predicate (not (some 'null (mapcar 'funcall org-link-beautify-condition-functions)))
+  :predicate (not (cl-some 'null (mapcar 'funcall org-link-beautify-condition-functions)))
   :lighter nil
   :group 'org-link-beautify)
 
