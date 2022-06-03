@@ -219,7 +219,7 @@ EPUB preview."
     (make-directory thumbnails-dir)))
 
 (defun org-link-beautify--display-thumbnail (thumbnail thumbnail-size start end)
-  "Display THUMBNAIL between START and END in size of THUMBNAIL-SIZE only when it exist."
+  "Display THUMBNAIL between START and END with size THUMBNAIL-SIZE when exist."
   (when (file-exists-p thumbnail)
     (put-text-property
      start end
@@ -476,7 +476,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     (org-link-beautify--display-thumbnail thumbnail thumbnail-size start end)))
 
 (defun org-link-beautify--preview-audio (path start end)
-  "Preview audio file PATH and display wave form image on link between START and END."
+  "Preview audio PATH with wave form image on link between START and END."
   (let* ((audio-file (expand-file-name (org-link-unescape path)))
          (thumbnails-dir (pcase org-link-beautify-thumbnails-dir
                            ('source-path
@@ -521,7 +521,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     (org-link-beautify--display-thumbnail thumbnail thumbnail-size start end)))
 
 (defun org-link-beautify--return-icon (type path extension &optional link-element)
-  "Return the corresponding icon for link PATH smartly based on TYPE, EXTENSION, etc."
+  "Return icon for the link PATH smartly based on TYPE, EXTENSION, etc."
   ;; (message "DEBUG: (type) %s" type)
   ;; (message "DEBUG: (path) %s" path)
   ;; (message "DEBUG: (link-element) %s" link-element)
@@ -801,7 +801,7 @@ Or clear org-link-beautify if headline STATE is folded."
 
 ;;;###autoload
 (define-minor-mode org-link-beautify-mode
-  "A minor mode that beautify Org-mode buffer links with colors, icons, and inline preview."
+  "A minor mode to beautify Org Mode links with icons, and inline preview etc."
   :group 'org-link-beautify
   :global nil
   :init-value nil
