@@ -737,12 +737,16 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
          ((and (equal type "file")
                (member extension org-link-beautify-video-preview-list)
                org-link-beautify-video-preview)
+          ;; DEBUG:
+          ;; (user-error "[org-link-beautify] cond -> video file")
           (org-link-beautify--preview-video path start end))
          ;; audio wave form image preview
          ;; [[file:/path/to/audio.mp3]]
          ((and (equal type "file")
                (member extension org-link-beautify-audio-preview-list)
                org-link-beautify-audio-preview)
+          ;; DEBUG:
+          ;; (user-error "[org-link-beautify] cond -> audio file")
           (org-link-beautify--preview-audio path start end))
          ;; PDF file preview
          ;; [[file:/path/to/filename.pdf]]
@@ -755,6 +759,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                    (equal type "docview")
                    (equal type "eaf")))
           ;; DEBUG:
+          ;; (user-error "[org-link-beautify] cond -> PDF file")
           ;; (message "org-link-beautify: PDF file previewing [%s], link-type: [%s], search-option: [%s] (type: %s)," path type search-option (type-of search-option))
           (org-link-beautify--preview-pdf
            (if (equal type "eaf")
@@ -765,17 +770,22 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
          ;; EPUB file cover preview
          ((and org-link-beautify-epub-preview
                (and (equal type "file") (string= extension "epub")))
+          ;; DEBUG:
+          ;; (user-error "[org-link-beautify] cond -> epub file")
           (org-link-beautify--preview-epub path start end))
          ;; text content preview
          ((and org-link-beautify-text-preview
                (equal type "file")
                (member extension org-link-beautify-text-preview-list))
+          ;; DEBUG:
+          ;; (user-error "[org-link-beautify] cond -> text file")
           (org-link-beautify--preview-text path start end))
          ;; compressed archive file preview
          ((and org-link-beautify-archive-preview
                (equal type "file")
                (member extension (mapcar 'car org-link-beautify-archive-preview-alist)))
           ;; DEBUG:
+          ;; (user-error "[org-link-beautify] cond -> archive file")
           ;; (if (null extension)
           ;;     (user-error "[org-link-beautify] archive file preview> extension: %s" extension))
           ;; (message "[org-link-beautify] archive file preview> path: %s" path)
