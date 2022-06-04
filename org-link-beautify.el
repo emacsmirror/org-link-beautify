@@ -839,8 +839,20 @@ Or clear org-link-beautify if headline STATE is folded."
   (org-restart-font-lock))
 
 (defvar org-link-beautify--icon-spec-list
-  '(("\\.mm" all-the-icons-fileicon "brain" :face all-the-icons-lpink)
-    ("\\.xmind" all-the-icons-fileicon "brain" :face all-the-icons-lpink))
+  '(;; mind map files
+    ("\\.mm" all-the-icons-fileicon "brain" :face all-the-icons-lpink)
+    ("\\.xmind" all-the-icons-fileicon "brain" :face all-the-icons-lpink)
+    ;; archive files
+    ("\\.zip" all-the-icons-faicon "file-archive-o" :face all-the-icons-yellow)
+    ("\\.rar" all-the-icons-faicon "file-archive-o" :face all-the-icons-yellow)
+    ("\\.7z" all-the-icons-faicon "file-archive-o" :face all-the-icons-yellow)
+    ("\\.gz" all-the-icons-faicon "file-archive-o" :face all-the-icons-yellow)
+    ("\\.bz2" all-the-icons-faicon "file-archive-o" :face all-the-icons-yellow)
+    ("\\.tar" all-the-icons-faicon "file-archive-o" :face all-the-icons-yellow)
+    ("\\.tar.gz" all-the-icons-faicon "file-archive-o" :face all-the-icons-yellow)
+    ("\\.tar.bz2" all-the-icons-faicon "file-archive-o" :face all-the-icons-yellow)
+    ("\\.xz" all-the-icons-faicon "file-archive-o" :face all-the-icons-yellow)
+    ("\\.zst" all-the-icons-faicon "file-archive-o" :face all-the-icons-yellow))
   "A list of icon spec to be used by `org-link-beautify--add-more-icons-support'.")
 
 ;;; add more missing icons to `all-the-icons'.
