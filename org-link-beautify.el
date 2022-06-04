@@ -412,7 +412,9 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
      (1+ end) (+ end 2)
      'face '(:inherit nil :slant 'italic
                       :foreground nil
-                      :background (color-darken-name (face-background 'default) 5)))))
+                      :background (color-darken-name (face-background 'default) 5))))
+  ;; Fix elisp compiler warning: Unused lexical argument `start'.
+  (ignore start))
 
 (defun org-link-beautify--preview-video (path start end)
   "Preview video file PATH and display on link between START and END."
@@ -597,7 +599,10 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     ;; (_
     ;;  ;; DEBUG
     ;;  (message "[org-link-beautify] link-element: %s" link-element))
-    ))
+    )
+  
+  ;; Fix elisp compiler warning: Unused lexical argument `link-element'.
+  (ignore link-element))
 
 (defun org-link-beautify--display-icon (start end description icon)
   "Display ICON for link on START and END with DESCRIPTION."
