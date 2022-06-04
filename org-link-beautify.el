@@ -377,7 +377,13 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
   (with-temp-buffer
     (condition-case nil
         (progn
-          (insert-file-contents-literally file)
+          ;; I originally use `insert-file-contents-literally', so Emacs doesn't
+          ;; decode the non-ASCII characters it reads from the file, i.e. it
+          ;; doesn't interpret the byte sequences as Chinese characters. Use
+          ;; `insert-file-contents' instead. In addition, this function decodes
+          ;; the inserted text from known formats by calling format-decode,
+          ;; which see.
+          (insert-file-contents file)
           (format "%s\n"
                   (mapconcat
                    'concat
@@ -397,8 +403,8 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
 
 ;;; test
 ;; (org-link-beautify--preview-text-file
-;;  (expand-file-name "~/Code/Emacs/org-link-beautify/org-link-beautify.el")
-;;  3)
+;;  (expand-file-name "~/Code/Emacs/org-link-beautify/README.org")
+;;  20)
 
 (defun org-link-beautify--preview-text (path start end &optional lines)
   "Preview LINES of TEXT file PATH and display on link between START and END."
