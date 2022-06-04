@@ -25,7 +25,7 @@ Supports video file link preview with thumbnail.
 #+ATTR_HTML: :width 600px
 [[file:video-thumbnail.png]]
 
-* Features [15/16]
+* Features [16/17]
 
 - [X] Only display org-link-beautify preview images (and icons) when headline
   expanded. This will reduce Emacs memory and improve performance!!!
@@ -58,7 +58,8 @@ Supports video file link preview with thumbnail.
   #+begin_src emacs-lisp :eval no
   (define-key org-link-beautify-keymap (kbd "RET") 'org-open-at-point)
   #+end_src
-- [X] preview text file like .org, .markdown (.md), .txt, and source code files etc (customized with ~org-link-beautify-text-preview-list~).
+- [X] preview text files like .org, .markdown (.md), .txt, and source code files etc (customized with ~org-link-beautify-text-preview-list~).
+- [X] preview archive files like .zip, .rar, .tar.gz, .tar.bz2, .7z etc.
 - [ ] preview URL with screenshot on web page (Still considering whether should add this feature.)
 
 * Install

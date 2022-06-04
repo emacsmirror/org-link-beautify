@@ -176,6 +176,34 @@ EPUB preview."
   :safe #'listp
   :group 'org-link-beautify)
 
+(defcustom org-link-beautify-archive-preview nil
+  "Whether enable archive inside files list preview?"
+  :type 'boolean
+  :safe #'booleanp
+  :group 'org-link-beautify)
+
+(defcustom org-link-beautify-archive-preview-alist
+  '(("zip" . "unzip -l")
+    ("rar" . "unrar l")
+    ("7z" . "7z l -ba") ; -ba - suppress headers; undocumented.
+    ("gz" . "gzip --list")
+    ;; ("bz2" . "")
+    ("tar" . "tar --list")
+    ("tar.gz" . "tar --gzip --list")
+    ("tar.bz2" . "tar --bzip2 --list")
+    ("xz" . "xz --list")
+    ("zst" . "zstd --list"))
+  "An alist of archive types supported archive preview inside files list.
+Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
+  :type '(alist :value-type (group string))
+  :group 'org-link-beautify)
+
+(defcustom org-link-beautify-archive-preview-command (executable-find "7z")
+  "The command to list out files inside archive file."
+  :type 'string
+  :safe #'stringp
+  :group 'org-link-beautify)
+
 (defcustom org-link-beautify-enable-debug-p nil
   "Whether enable org-link-beautify print debug info."
   :type 'boolean
@@ -424,6 +452,35 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     (org-link-beautify--add-keymap (1+ end) (+ end 2))
     (put-text-property (1+ end) (+ end 2) 'display (propertize preview-content))
     (put-text-property (1+ end) (+ end 2) 'face '(:inherit org-block)))
+  ;; Fix elisp compiler warning: Unused lexical argument `start'.
+  (ignore start))
+
+(defun org-link-beautify--preview-archive-file (file command)
+  "Return the files list inside of archive FILE with COMMAND."
+  (let ((cmd (format "%s '%s'" command file)))
+    (format
+     "
+┏━§ ✂ %s
+%s
+┗━§ ✂ %s
+\n"
+     (make-string (- fill-column 6) ?━)
+     (mapconcat
+      (lambda (line)
+        (concat "┃" line))
+      ;; split lines of content into list of lines.
+      (split-string (shell-command-to-string cmd) "\n")
+      "\n")
+     (make-string (- fill-column 6) ?━))))
+
+(defun org-link-beautify--preview-archive (path command start end)
+  "Preview files list of archive file PATH with COMMAND and display on link between START and END."
+  (let* ((archive-file (expand-file-name (org-link-unescape path)))
+         (preview-content (org-link-beautify--preview-archive-file archive-file command)))
+    (org-link-beautify--add-overlay-marker (1+ end) (+ end 2))
+    (org-link-beautify--add-keymap (1+ end) (+ end 2))
+    (put-text-property (1+ end) (+ end 2) 'display (propertize preview-content))
+    (put-text-property (1+ end) (+ end 2) 'face '(:inherit org-verbatim)))
   ;; Fix elisp compiler warning: Unused lexical argument `start'.
   (ignore start))
 
@@ -712,10 +769,20 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                (and (equal type "file") (string= extension "epub")))
           (org-link-beautify--preview-epub path start end))
          ;; text content preview
-         ((and (equal type "file")
-               (member extension org-link-beautify-text-preview-list)
-               org-link-beautify-text-preview)
+         ((and org-link-beautify-text-preview
+               (equal type "file")
+               (member extension org-link-beautify-text-preview-list))
           (org-link-beautify--preview-text path start end))
+         ;; compressed archive file preview
+         ((and org-link-beautify-archive-preview
+               (equal type "file")
+               (member extension (mapcar 'car org-link-beautify-archive-preview-alist)))
+          ;; DEBUG:
+          ;; (if (null extension)
+          ;;     (user-error "[org-link-beautify] archive file preview> extension: %s" extension))
+          ;; (message "[org-link-beautify] archive file preview> path: %s" path)
+          (let ((command (cdr (assoc extension org-link-beautify-archive-preview-alist))))
+            (org-link-beautify--preview-archive path command start end)))
          ;; file does not exist
          ((and (equal type "file") (not (file-exists-p path)))
           ;; DEBUG (message path)
