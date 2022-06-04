@@ -423,11 +423,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     (org-link-beautify--add-overlay-marker (1+ end) (+ end 2))
     (org-link-beautify--add-keymap (1+ end) (+ end 2))
     (put-text-property (1+ end) (+ end 2) 'display (propertize preview-content))
-    (put-text-property
-     (1+ end) (+ end 2)
-     'face '(:inherit nil :slant 'italic
-                      :foreground nil
-                      :background (color-darken-name (face-background 'default) 5))))
+    (put-text-property (1+ end) (+ end 2) 'face '(:inherit org-block)))
   ;; Fix elisp compiler warning: Unused lexical argument `start'.
   (ignore start))
 
