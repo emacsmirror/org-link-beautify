@@ -1,5 +1,7 @@
 * Motivation
 
+美化并预览 Org Mode 的链接。支持一些文件的缩略图，预览，等特性。
+
 Usually Org links only have text, it's not very intuitive to recognize what type
 of link it is. Add some color and icon, even image preview will help user read links.
 

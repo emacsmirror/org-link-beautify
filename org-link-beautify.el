@@ -370,6 +370,8 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
         (org-link-beautify--add-keymap start end)
         (org-link-beautify--display-thumbnail thumbnail thumbnail-size start end))))
 
+(defvar org-link-beautify--preview-text--noerror)
+
 (defun org-link-beautify--preview-text-file (file lines)
   "Return first LINES of FILE."
   (with-temp-buffer
@@ -388,7 +390,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                                       (forward-line 1)))
                    "\n")))
       (file-error
-       (funcall (if noerror #'message #'user-error)
+       (funcall (if org-link-beautify--preview-text--noerror #'message #'user-error)
 		        "Unable to read file %S"
 		        file)
 	   nil))))
