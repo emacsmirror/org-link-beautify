@@ -384,17 +384,26 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
           ;; the inserted text from known formats by calling format-decode,
           ;; which see.
           (insert-file-contents file)
-          (format "%s\n"
-                  (mapconcat
-                   'concat
-                   ;; extract lines of file contents
-                   (cl-loop repeat lines
-                            unless (eobp)
-                            collect (prog1 (buffer-substring-no-properties
-                                            (line-beginning-position)
-                                            (line-end-position))
-                                      (forward-line 1)))
-                   "\n")))
+          (format
+           "
+┏━§ ✂ %s
+%s
+┗━§ ✂ %s
+\n"
+           (make-string (- fill-column 6) ?━)
+           (mapconcat
+            (lambda (line)
+              (concat "┃" line))
+            ;; This `cl-loop' extract a LIST of string lines from the file content.
+            (cl-loop repeat lines
+                     unless (eobp)
+                     collect (prog1 (buffer-substring-no-properties
+                                     (line-beginning-position)
+                                     (line-end-position))
+                               (forward-line 1)))
+            "\n")
+           (make-string (- fill-column 6) ?━)
+           ))
       (file-error
        (funcall (if org-link-beautify--preview-text--noerror #'message #'user-error)
 		        "Unable to read file %S"
@@ -404,7 +413,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
 ;;; test
 ;; (org-link-beautify--preview-text-file
 ;;  (expand-file-name "~/Code/Emacs/org-link-beautify/README.org")
-;;  20)
+;;  3)
 
 (defun org-link-beautify--preview-text (path start end &optional lines)
   "Preview LINES of TEXT file PATH and display on link between START and END."
