@@ -724,7 +724,9 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                               ;; when description not exist, use raw link for raw link case.
                               raw-link))
              ;; DEBUG: (desc-debug (print description))
-             (icon (org-link-beautify--return-icon type path extension link-element))
+             (icon (if (null (org-link-beautify--return-icon type path extension link-element)) ; handle when returned icon is `nil'.
+                       (all-the-icons-faicon "question" :v-adjust -0.05)
+                     (org-link-beautify--return-icon type path extension link-element)))
              ;; DEBUG:
              ;; (icon-debug (print icon))
              )
@@ -781,13 +783,16 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
             (org-link-beautify--preview-archive path command start end)))
          ;; file does not exist
          ((and (equal type "file") (not (file-exists-p path)))
-          ;; DEBUG (message path)
+          ;; DEBUG:
+          ;; (user-error "[org-link-beautify] cond -> file")
+          ;; (message path)
           (org-link-beautify--add-overlay-marker start end)
           (org-link-beautify--display-not-exist start end description icon))
          ;; general icons
          (t
           ;; DEBUG:
-          ;; (message "-->> icon displayed")
+          ;; (user-error "[org-link-beautify] cond -> t")
+          ;; (message "start: %d, end: %d, description: %s, icon: %s" start end description icon)
           (org-link-beautify--add-overlay-marker start end)
           (org-link-beautify--add-keymap start end)
           (org-link-beautify--display-icon start end description icon)))))))
