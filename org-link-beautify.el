@@ -209,6 +209,8 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
   :type 'boolean
   :safe #'booleanp)
 
+
+;;; Common functions
 (defun org-link-beautify--get-element (position)
   "Return the org element of link at the `POSITION'."
   (save-excursion
@@ -256,6 +258,25 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
     (make-local-variable 'image-map)
     (define-key image-map (kbd "<mouse-1>") 'org-open-at-point)))
 
+(defun org-link-beautify--display-content-block (content)
+  "Display CONTENT string as a block with beautified frame border."
+  (format
+   "
+┏━§ ✂ %s
+%s
+┗━§ ✂ %s
+\n"
+   (make-string (- fill-column 6) ?━)
+   (mapconcat
+    (lambda (line)
+      (concat "┃" line))
+    ;; split lines of content into list of lines.
+    (split-string content "\n")
+    "\n")
+   (make-string (- fill-column 6) ?━)))
+
+
+;;; Preview functions
 (defun org-link-beautify--preview-pdf (path start end &optional search-option)
   "Preview PDF file PATH and display on link between START and END."
   (if (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
@@ -412,26 +433,14 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
           ;; the inserted text from known formats by calling format-decode,
           ;; which see.
           (insert-file-contents file)
-          (format
-           "
-┏━§ ✂ %s
-%s
-┗━§ ✂ %s
-\n"
-           (make-string (- fill-column 6) ?━)
-           (mapconcat
-            (lambda (line)
-              (concat "┃" line))
-            ;; This `cl-loop' extract a LIST of string lines from the file content.
-            (cl-loop repeat lines
-                     unless (eobp)
-                     collect (prog1 (buffer-substring-no-properties
-                                     (line-beginning-position)
-                                     (line-end-position))
-                               (forward-line 1)))
-            "\n")
-           (make-string (- fill-column 6) ?━)
-           ))
+          (org-link-beautify--display-content-block
+           ;; This `cl-loop' extract a LIST of string lines from the file content.
+           (cl-loop repeat lines
+                    unless (eobp)
+                    collect (prog1 (buffer-substring-no-properties
+                                    (line-beginning-position)
+                                    (line-end-position))
+                              (forward-line 1)))))
       (file-error
        (funcall (if org-link-beautify--preview-text--noerror #'message #'user-error)
 		        "Unable to read file %S"
@@ -458,20 +467,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
 (defun org-link-beautify--preview-archive-file (file command)
   "Return the files list inside of archive FILE with COMMAND."
   (let ((cmd (format "%s '%s'" command file)))
-    (format
-     "
-┏━§ ✂ %s
-%s
-┗━§ ✂ %s
-\n"
-     (make-string (- fill-column 6) ?━)
-     (mapconcat
-      (lambda (line)
-        (concat "┃" line))
-      ;; split lines of content into list of lines.
-      (split-string (shell-command-to-string cmd) "\n")
-      "\n")
-     (make-string (- fill-column 6) ?━))))
+    (org-link-beautify--display-content-block (shell-command-to-string cmd))))
 
 (defun org-link-beautify--preview-archive (path command start end)
   "Preview files list of archive file PATH with COMMAND and display on link between START and END."
