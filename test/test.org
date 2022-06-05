@@ -1,0 +1,55 @@
+* warning colorize link if file: target file does not exist
+
+[[file:does-not-exist-file.org]]
+
+* display icon for link type
+
+[[file:test.org]]
+
+* image file link inline preview
+
+[[file:screenshot.png]]
+
+* PDF file preview
+
+[[file:README.pdf]]
+
+[[pdfview:README.pdf]]
+
+[[docview:README.pdf]]
+
+[[eaf:pdfviewer::README.pdf]]
+
+* PDF file preview (support PDF page number)
+
+[[file:README.pdf::3]]
+
+* video file thumbnail
+
+[[file:Japanese Spring Cloth Beauty.mp4]]
+
+* audio file waveform
+
+[[file:第1集 你才是作弊吧.mp3]]
+
+* keymap on link
+
+** [RET] key to open link
+
+[[file:README.pdf]]
+
+* text file preview
+
+[[file:test.org]]
+
+* archive file listing inside files
+
+#+begin_src shell :results file link :file "archive.zip"
+zip -r archive.zip test.org README.pdf
+#+end_src
+
+#+RESULTS[(2022-06-05 11:09:27) 5afa65069b8e7e98d2d5ee449a99b5bfbec9c32f]:
+[[file:archive.zip]]
+
+
+
