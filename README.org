@@ -34,6 +34,7 @@ Supports video file link preview with thumbnail.
 - [X] supported many different link types (If you found not supported link type, PR welcome!)
 - [X] display image for previewing image file
 - [X] display image for previewing PDF file and preview of specific PDF page number. Like this:
+
   #+begin_src org
   [[file:/path/to/filename.pdf]]
   #+end_src
@@ -45,6 +46,7 @@ Supports video file link preview with thumbnail.
   + pdfview:
   + docview:
   + eaf:pdfviewer::
+  + file:
 - [X] display thumbnail for video file link
   + [X] support Linux video thumbnail with "=ffmpegthumbnailer="
   + [X] support macOS video thumbnail with "=qlmanage="
