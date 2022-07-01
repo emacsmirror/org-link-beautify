@@ -637,6 +637,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     ;; Org Mode external link types
     ("eaf" (all-the-icons-faicon "cubes" :v-adjust -0.05)) ; emacs-application-framework
     ("eww" (all-the-icons-icon-for-mode 'eww-mode))
+    ("chrome" (all-the-icons-faicon "chrome" :v-adjust -0.05))
     ("mu4e" (all-the-icons-faicon "envelope" :v-adjust -0.05))
     ("git" (all-the-icons-faicon "git-square" :v-adjust -0.05))
     ("orgit" (all-the-icons-faicon "git-square" :v-adjust -0.05))
