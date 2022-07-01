@@ -813,9 +813,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     ('children (ignore))
     ('folded
      (org-link-beautify-clear state))
-    (_ (ignore)))
-  ;; PERFORMANCE: benchmark this.
-  (org-restart-font-lock))
+    (_ (ignore))))
 
 ;;; toggle org-link-beautify text-properties
 (defun org-link-beautify--clear-text-properties (&optional begin end)
