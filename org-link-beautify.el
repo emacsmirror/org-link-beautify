@@ -209,6 +209,32 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
   :type 'boolean
   :safe #'booleanp)
 
+;;; Helper functions
+
+;;; Invoke external Python script file or code.
+(defcustom org-link-beautify-python-interpreter (executable-find "python3")
+  "Specify the Python interpreter to run org-link-beautify python scripts or code."
+  :type 'string
+  :safe #'stringp)
+
+(defun org-link-beautify--python-script-run (python-script-file)
+  "Run Python script file through shell command."
+  (shell-command-to-string
+   (format "%s %s" org-link-beautify-python-interpreter python-script-file)))
+
+(defun org-link-beautify--python-command-to-string (&rest code-lines)
+  "Run Python code lines through shell command."
+  (shell-command-to-string
+   (concat "python -c "
+           ;; solve double quote character issue.
+           "\"" (string-replace "\"" "\\\"" (string-join code-lines "\n")) "\"")))
+
+;;; e.g.
+;; (org-link-beautify--python-command-to-string
+;;  "import numpy as np"
+;;  "print(np.arange(6))"
+;;  "print(\"blah blah\")"
+;;  "print('{}'.format(3))")
 
 ;;; Common functions
 (defun org-link-beautify--get-element (position)
