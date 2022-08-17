@@ -760,20 +760,20 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
           (cond
            ;; video thumbnail preview
            ;; [[file:/path/to/video.mp4]]
-           ((and (equal type "file")
-                 (member extension org-link-beautify-video-preview-list)
-                 org-link-beautify-video-preview)
+           ((and org-link-beautify-video-preview
+                 (equal type "file") (member extension org-link-beautify-video-preview-list))
             ;; DEBUG:
             ;; (user-error "[org-link-beautify] cond -> video file")
             (org-link-beautify--preview-video path start end))
+           
            ;; audio wave form image preview
            ;; [[file:/path/to/audio.mp3]]
-           ((and (equal type "file")
-                 (member extension org-link-beautify-audio-preview-list)
-                 org-link-beautify-audio-preview)
+           ((and org-link-beautify-audio-preview
+                 (equal type "file") (member extension org-link-beautify-audio-preview-list))
             ;; DEBUG:
             ;; (user-error "[org-link-beautify] cond -> audio file")
             (org-link-beautify--preview-audio path start end))
+           
            ;; PDF file preview
            ;; [[file:/path/to/filename.pdf]]
            ;; [[pdf:/path/to/filename.pdf::15]]
@@ -793,23 +793,24 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                path)
              start end
              search-option))
+           
            ;; EPUB file cover preview
            ((and org-link-beautify-epub-preview
-                 (and (equal type "file") (string= extension "epub")))
+                 (equal type "file") (string= extension "epub"))
             ;; DEBUG:
             ;; (user-error "[org-link-beautify] cond -> epub file")
             (org-link-beautify--preview-epub path start end))
+           
            ;; text content preview
            ((and org-link-beautify-text-preview
-                 (equal type "file")
-                 (member extension org-link-beautify-text-preview-list))
+                 (equal type "file") (member extension org-link-beautify-text-preview-list))
             ;; DEBUG:
             ;; (user-error "[org-link-beautify] cond -> text file")
             (org-link-beautify--preview-text path start end))
+           
            ;; compressed archive file preview
            ((and org-link-beautify-archive-preview
-                 (equal type "file")
-                 (member extension (mapcar 'car org-link-beautify-archive-preview-alist)))
+                 (equal type "file") (member extension (mapcar 'car org-link-beautify-archive-preview-alist)))
             ;; DEBUG:
             ;; (user-error "[org-link-beautify] cond -> archive file")
             ;; (if (null extension)
@@ -817,6 +818,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
             ;; (message "[org-link-beautify] archive file preview> path: %s" path)
             (let ((command (cdr (assoc extension org-link-beautify-archive-preview-alist))))
               (org-link-beautify--preview-archive path command start end)))
+           
            ;; file does not exist
            ((and (equal type "file") (not (file-exists-p path)))
             ;; DEBUG:
@@ -824,6 +826,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
             ;; (message path)
             (org-link-beautify--add-overlay-marker start end)
             (org-link-beautify--display-not-exist start end description icon))
+           
            ;; general icons
            (t
             ;; DEBUG:
