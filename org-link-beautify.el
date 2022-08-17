@@ -753,7 +753,8 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                ;; DEBUG:
                ;; (icon-debug (print icon))
                )
-          (when bracket-p (ignore))
+          ;; Fix elisp compiler warning: Unused lexical argument `bracket-p'.
+          (ignore bracket-p)
           (cond
            ;; video thumbnail preview
            ;; [[file:/path/to/video.mp4]]
