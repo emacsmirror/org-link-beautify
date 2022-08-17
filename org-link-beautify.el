@@ -726,111 +726,112 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
   ;; DEBUG:
   ;; (message
   ;;  (format "start: %s, end: %s, path: %s, bracket-p: %s" start end path bracket-p))
-  ;; detect whether link is normal, jump other links in special places.
-  (when (eq (car (org-link-beautify--get-element start)) 'link)
-    (save-match-data
-      (let* ((link-element (org-link-beautify--get-element start))
-             ;; DEBUG:
-             ;; (link-element-debug (print link-element))
-             (raw-link (org-element-property :raw-link link-element))
-             ;; DEBUG:
-             ;; (raw-link-debug (print raw-link))
-             (type (org-element-property :type link-element))
-             ;; DEBUG:
-             ;; (type-debug (print type))
-             (extension (or (file-name-extension (org-link-unescape path)) "txt"))
-             ;; the search part behind link separator "::"
-             (search-option (org-element-property :search-option link-element))
-             ;; DEBUG: (ext-debug (message extension))
-             (description (or (and (org-element-property :contents-begin link-element) ; in raw link case, it's nil
-                                   (buffer-substring-no-properties
-                                    (org-element-property :contents-begin link-element)
-                                    (org-element-property :contents-end link-element)))
-                              ;; when description not exist, use raw link for raw link case.
-                              raw-link))
-             ;; DEBUG: (desc-debug (print description))
-             (icon (if (null (org-link-beautify--return-icon type path extension link-element)) ; handle when returned icon is `nil'.
-                       (all-the-icons-faicon "question" :v-adjust -0.05)
-                     (org-link-beautify--return-icon type path extension link-element)))
-             ;; DEBUG:
-             ;; (icon-debug (print icon))
-             )
-        (when bracket-p (ignore))
-        (cond
-         ;; video thumbnail preview
-         ;; [[file:/path/to/video.mp4]]
-         ((and (equal type "file")
-               (member extension org-link-beautify-video-preview-list)
-               org-link-beautify-video-preview)
-          ;; DEBUG:
-          ;; (user-error "[org-link-beautify] cond -> video file")
-          (org-link-beautify--preview-video path start end))
-         ;; audio wave form image preview
-         ;; [[file:/path/to/audio.mp3]]
-         ((and (equal type "file")
-               (member extension org-link-beautify-audio-preview-list)
-               org-link-beautify-audio-preview)
-          ;; DEBUG:
-          ;; (user-error "[org-link-beautify] cond -> audio file")
-          (org-link-beautify--preview-audio path start end))
-         ;; PDF file preview
-         ;; [[file:/path/to/filename.pdf]]
-         ;; [[pdf:/path/to/filename.pdf::15]]
-         ;; [[pdfview:/path/to/filename.pdf::15]]
-         ((and org-link-beautify-pdf-preview
-               (or (and (equal type "file") (string= extension "pdf"))
-                   (equal type "pdf")
-                   (equal type "pdfview")
-                   (equal type "docview")
-                   (equal type "eaf")))
-          ;; DEBUG:
-          ;; (user-error "[org-link-beautify] cond -> PDF file")
-          ;; (message "org-link-beautify: PDF file previewing [%s], link-type: [%s], search-option: [%s] (type: %s)," path type search-option (type-of search-option))
-          (org-link-beautify--preview-pdf
-           (if (equal type "eaf")
-               (replace-regexp-in-string "pdf::" "" path)
-             path)
-           start end
-           search-option))
-         ;; EPUB file cover preview
-         ((and org-link-beautify-epub-preview
-               (and (equal type "file") (string= extension "epub")))
-          ;; DEBUG:
-          ;; (user-error "[org-link-beautify] cond -> epub file")
-          (org-link-beautify--preview-epub path start end))
-         ;; text content preview
-         ((and org-link-beautify-text-preview
-               (equal type "file")
-               (member extension org-link-beautify-text-preview-list))
-          ;; DEBUG:
-          ;; (user-error "[org-link-beautify] cond -> text file")
-          (org-link-beautify--preview-text path start end))
-         ;; compressed archive file preview
-         ((and org-link-beautify-archive-preview
-               (equal type "file")
-               (member extension (mapcar 'car org-link-beautify-archive-preview-alist)))
-          ;; DEBUG:
-          ;; (user-error "[org-link-beautify] cond -> archive file")
-          ;; (if (null extension)
-          ;;     (user-error "[org-link-beautify] archive file preview> extension: %s" extension))
-          ;; (message "[org-link-beautify] archive file preview> path: %s" path)
-          (let ((command (cdr (assoc extension org-link-beautify-archive-preview-alist))))
-            (org-link-beautify--preview-archive path command start end)))
-         ;; file does not exist
-         ((and (equal type "file") (not (file-exists-p path)))
-          ;; DEBUG:
-          ;; (user-error "[org-link-beautify] cond -> file")
-          ;; (message path)
-          (org-link-beautify--add-overlay-marker start end)
-          (org-link-beautify--display-not-exist start end description icon))
-         ;; general icons
-         (t
-          ;; DEBUG:
-          ;; (user-error "[org-link-beautify] cond -> t")
-          ;; (message "start: %d, end: %d, description: %s, icon: %s" start end description icon)
-          (org-link-beautify--add-overlay-marker start end)
-          (org-link-beautify--add-keymap start end)
-          (org-link-beautify--display-icon start end description icon)))))))
+  ;; detect whether link is normal, skip other links in special places.
+  (let ((link-element (org-link-beautify--get-element start))
+        ;; DEBUG:
+        ;; (link-element-debug (print link-element))
+        )
+    (when (eq (car link-element) 'link)
+      (save-match-data
+        (let* ((raw-link (org-element-property :raw-link link-element))
+               ;; DEBUG:
+               ;; (raw-link-debug (print raw-link))
+               (type (org-element-property :type link-element))
+               ;; DEBUG:
+               ;; (type-debug (print type))
+               (extension (or (file-name-extension (org-link-unescape path)) "txt"))
+               ;; the search part behind link separator "::"
+               (search-option (org-element-property :search-option link-element))
+               ;; DEBUG: (ext-debug (message extension))
+               (description (or (and (org-element-property :contents-begin link-element) ; in raw link case, it's nil
+                                     (buffer-substring-no-properties
+                                      (org-element-property :contents-begin link-element)
+                                      (org-element-property :contents-end link-element)))
+                                ;; when description not exist, use raw link for raw link case.
+                                raw-link))
+               ;; DEBUG: (desc-debug (print description))
+               (icon (if (null (org-link-beautify--return-icon type path extension link-element)) ; handle when returned icon is `nil'.
+                         (all-the-icons-faicon "question" :v-adjust -0.05)
+                       (org-link-beautify--return-icon type path extension link-element)))
+               ;; DEBUG:
+               ;; (icon-debug (print icon))
+               )
+          (when bracket-p (ignore))
+          (cond
+           ;; video thumbnail preview
+           ;; [[file:/path/to/video.mp4]]
+           ((and (equal type "file")
+                 (member extension org-link-beautify-video-preview-list)
+                 org-link-beautify-video-preview)
+            ;; DEBUG:
+            ;; (user-error "[org-link-beautify] cond -> video file")
+            (org-link-beautify--preview-video path start end))
+           ;; audio wave form image preview
+           ;; [[file:/path/to/audio.mp3]]
+           ((and (equal type "file")
+                 (member extension org-link-beautify-audio-preview-list)
+                 org-link-beautify-audio-preview)
+            ;; DEBUG:
+            ;; (user-error "[org-link-beautify] cond -> audio file")
+            (org-link-beautify--preview-audio path start end))
+           ;; PDF file preview
+           ;; [[file:/path/to/filename.pdf]]
+           ;; [[pdf:/path/to/filename.pdf::15]]
+           ;; [[pdfview:/path/to/filename.pdf::15]]
+           ((and org-link-beautify-pdf-preview
+                 (or (and (equal type "file") (string= extension "pdf"))
+                     (equal type "pdf")
+                     (equal type "pdfview")
+                     (equal type "docview")
+                     (equal type "eaf")))
+            ;; DEBUG:
+            ;; (user-error "[org-link-beautify] cond -> PDF file")
+            ;; (message "org-link-beautify: PDF file previewing [%s], link-type: [%s], search-option: [%s] (type: %s)," path type search-option (type-of search-option))
+            (org-link-beautify--preview-pdf
+             (if (equal type "eaf")
+                 (replace-regexp-in-string "pdf::" "" path)
+               path)
+             start end
+             search-option))
+           ;; EPUB file cover preview
+           ((and org-link-beautify-epub-preview
+                 (and (equal type "file") (string= extension "epub")))
+            ;; DEBUG:
+            ;; (user-error "[org-link-beautify] cond -> epub file")
+            (org-link-beautify--preview-epub path start end))
+           ;; text content preview
+           ((and org-link-beautify-text-preview
+                 (equal type "file")
+                 (member extension org-link-beautify-text-preview-list))
+            ;; DEBUG:
+            ;; (user-error "[org-link-beautify] cond -> text file")
+            (org-link-beautify--preview-text path start end))
+           ;; compressed archive file preview
+           ((and org-link-beautify-archive-preview
+                 (equal type "file")
+                 (member extension (mapcar 'car org-link-beautify-archive-preview-alist)))
+            ;; DEBUG:
+            ;; (user-error "[org-link-beautify] cond -> archive file")
+            ;; (if (null extension)
+            ;;     (user-error "[org-link-beautify] archive file preview> extension: %s" extension))
+            ;; (message "[org-link-beautify] archive file preview> path: %s" path)
+            (let ((command (cdr (assoc extension org-link-beautify-archive-preview-alist))))
+              (org-link-beautify--preview-archive path command start end)))
+           ;; file does not exist
+           ((and (equal type "file") (not (file-exists-p path)))
+            ;; DEBUG:
+            ;; (user-error "[org-link-beautify] cond -> file")
+            ;; (message path)
+            (org-link-beautify--add-overlay-marker start end)
+            (org-link-beautify--display-not-exist start end description icon))
+           ;; general icons
+           (t
+            ;; DEBUG:
+            ;; (user-error "[org-link-beautify] cond -> t")
+            ;; (message "start: %d, end: %d, description: %s, icon: %s" start end description icon)
+            (org-link-beautify--add-overlay-marker start end)
+            (org-link-beautify--add-keymap start end)
+            (org-link-beautify--display-icon start end description icon))))))))
 
 ;;; hook on headline expand
 (defun org-link-beautify-headline-cycle (&optional state)
