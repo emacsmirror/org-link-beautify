@@ -506,65 +506,71 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
   ;; Fix elisp compiler warning: Unused lexical argument `start'.
   (ignore start))
 
+(defvar org-link-beautify--video-thumbnailer
+  (cond
+   ;; for macOS, use `qlmanage'
+   ((and (eq system-type 'darwin) (executable-find "qlmanage")) "qlmanage")
+   ;; for Linux, use `ffmpegthumbnailer'
+   ((and (eq system-type 'gnu/linux) (executable-find "ffmpegthumbnailer")) "ffmpegthumbnailer")
+   ;; for general, use `ffmpeg'
+   ;; $ ffmpeg -ss 00:09:00 video.avi -vcodec png -vframes 1 -an -f rawvideo -s 119x64 out.png
+   ((executable-find "ffmpeg") "ffmpeg"))
+  "Find available video thumbnailer command.")
+
 (defun org-link-beautify--preview-video (path start end)
   "Preview video file PATH and display on link between START and END."
   (let* ((video-file (expand-file-name (org-link-unescape path)))
          (thumbnails-dir (pcase org-link-beautify-thumbnails-dir
-                           ('source-path
-                            (concat (file-name-directory video-file) ".thumbnails/"))
-                           ('user-home
-                            (expand-file-name "~/.cache/thumbnails/"))))
-         (thumbnail-file (expand-file-name
-                     (format "%s%s.png" thumbnails-dir (file-name-base video-file))))
+                           ('source-path (concat (file-name-directory video-file) ".thumbnails/"))
+                           ('user-home (expand-file-name "~/.cache/thumbnails/"))))
+         (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base video-file))))
          (thumbnail-size (or org-link-beautify-video-preview-size 512)))
     (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
     (unless (file-exists-p thumbnail-file)
-      (cond
-       ;; for macOS, use `qlmanage'
-       ((and (eq system-type 'darwin) (executable-find "qlmanage")
-             ;; filter not supported video types of "qlmanage".
-             (not (member (file-name-extension video-file) '("flv" "mkv" "webm"))))
-        (start-process
-         "org-link-beautify--video-preview"
-         " *org-link-beautify video-preview*"
-         "qlmanage"
-         "-x"
-         "-t"
-         "-s" (number-to-string thumbnail-size)
-         video-file
-         "-o" thumbnails-dir)
-        ;; then rename [video.mp4.png] to [video.png]
-        (let ((original-thumbnail-file (concat thumbnails-dir (file-name-nondirectory video-file) ".png")))
-          (if (and (not org-link-beautify-enable-debug-p) (file-exists-p original-thumbnail-file))
-              (rename-file original-thumbnail-file thumbnail-file)
-            (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
-              (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file)))))
-       ;; use `ffmpegthumbnailer'
-       ((executable-find "ffmpegthumbnailer")
-        (start-process
-         "org-link-beautify--video-preview"
-         " *org-link-beautify video-preview*"
-         "ffmpegthumbnailer"
-         "-f" "-i" video-file
-         "-s" (number-to-string thumbnail-size)
-         "-o" thumbnail-file)
-        (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
-          (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file)))
-       ;; use `ffmpeg'
-       ;; $ ffmpeg -ss 00:09:00 video.avi -vcodec png -vframes 1 -an -f rawvideo -s 119x64 out.png
-       ((executable-find "ffmpeg")
-        (start-process
-         "org-link-beautify--video-preview"
-         " *org-link-beautify video-preview*"
-         "ffmpeg"
-         "-s" "00:09:00" video-file
-         "-vcodec" "png"
-         "-vframes" "1"
-         "-an" "-f" "rawvideo"
-         "-s" (number-to-string thumbnail-size)
-         thumbnail-file)
-        (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
-          (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file)))))
+      (pcase org-link-beautify--video-thumbnailer
+        ("qlmanage"
+         ;; filter not supported video types of "qlmanage".
+         (when (not (member (file-name-extension video-file) '("flv" "mkv" "webm")))
+           (start-process
+            "org-link-beautify--video-preview"
+            " *org-link-beautify video-preview*"
+            "qlmanage"
+            "-x"
+            "-t"
+            "-s" (number-to-string thumbnail-size)
+            video-file
+            "-o" thumbnails-dir)
+           ;; then rename [video.mp4.png] to [video.png]
+           (let ((original-thumbnail-file (concat thumbnails-dir (file-name-nondirectory video-file) ".png")))
+             (if (and (not org-link-beautify-enable-debug-p) (file-exists-p original-thumbnail-file))
+                 (rename-file original-thumbnail-file thumbnail-file)
+               (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+                 (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file))))))
+        ("ffmpegthumbnailer"
+         (start-process
+          "org-link-beautify--video-preview"
+          " *org-link-beautify video-preview*"
+          "ffmpegthumbnailer"
+          "-f" "-i" video-file
+          "-s" (number-to-string thumbnail-size)
+          "-o" thumbnail-file)
+         (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+           (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file)))
+        ("ffmpeg"
+         ;; $ ffmpeg -ss 00:09:00 video.avi -vcodec png -vframes 1 -an -f rawvideo -s 119x64 out.png
+         ((executable-find "ffmpeg")
+          (start-process
+           "org-link-beautify--video-preview"
+           " *org-link-beautify video-preview*"
+           "ffmpeg"
+           "-s" "00:09:00" video-file
+           "-vcodec" "png"
+           "-vframes" "1"
+           "-an" "-f" "rawvideo"
+           "-s" (number-to-string thumbnail-size)
+           thumbnail-file)
+          (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+            (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file))))))
     (org-link-beautify--add-overlay-marker start end)
     (org-link-beautify--add-keymap start end)
     (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end)))
