@@ -741,9 +741,9 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                                 ;; when description not exist, use raw link for raw link case.
                                 raw-link))
                ;; DEBUG: (desc-debug (print description))
-               (icon (if (null (org-link-beautify--return-icon type path extension link-element)) ; handle when returned icon is `nil'.
-                         (all-the-icons-faicon "question" :v-adjust -0.05)
-                       (org-link-beautify--return-icon type path extension link-element)))
+               (icon (or (org-link-beautify--return-icon type path extension link-element)
+                         ;; handle when returned icon is `nil'.
+                         (all-the-icons-faicon "question" :v-adjust -0.05)))
                ;; DEBUG:
                ;; (icon-debug (print icon))
                )
