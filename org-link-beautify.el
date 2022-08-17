@@ -269,6 +269,14 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
   "Add 'org-link-beautify on link text-property. between START and END."
   (put-text-property start end 'type 'org-link-beautify))
 
+(defun org-link-beautify--get-thumbnails-dir-path (file)
+  "Return the FILE thumbnail directory's path."
+  (cl-case org-link-beautify-thumbnails-dir
+    ('source-path
+     (concat (file-name-directory file) ".thumbnails/"))
+    ('user-home
+     (expand-file-name "~/.cache/thumbnails/"))))
+
 (defun org-link-beautify--ensure-thumbnails-dir (thumbnails-dir)
   "Ensure THUMBNAILS-DIR exist, if not ,create it."
   (unless (file-directory-p thumbnails-dir)
@@ -328,20 +336,16 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
                                       (t search-option)))
                                   org-link-beautify-pdf-preview-default-page-number)))
              (pdf-file (expand-file-name (org-link-unescape file-path)))
-             (thumbnails-dir (pcase org-link-beautify-thumbnails-dir
-                               ('source-path
-                                (concat (file-name-directory pdf-file) ".thumbnails/"))
-                               ('user-home
-                                (expand-file-name "~/.cache/thumbnails/"))))
+             (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path pdf-file))
              (thumbnail-file (expand-file-name
-                         (concat
-                          (if (= pdf-page-number 1)
-                              (format "%s%s.%s"
-                                      thumbnails-dir (file-name-base pdf-file)
-                                      (symbol-name org-link-beautify-pdf-preview-image-format))
-                            (format "%s%s-P%s.%s"
-                                    thumbnails-dir (file-name-base pdf-file) pdf-page-number
-                                    (symbol-name org-link-beautify-pdf-preview-image-format))))))
+                              (concat
+                               (if (= pdf-page-number 1) ; if have page number ::N specified.
+                                   (format "%s%s.%s"
+                                           thumbnails-dir (file-name-base pdf-file)
+                                           (symbol-name org-link-beautify-pdf-preview-image-format))
+                                 (format "%s%s-P%s.%s"
+                                         thumbnails-dir (file-name-base pdf-file) pdf-page-number
+                                         (symbol-name org-link-beautify-pdf-preview-image-format))))))
              (thumbnail-size (or org-link-beautify-pdf-preview-size 512)))
         (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
         (unless (file-exists-p thumbnail-file)
@@ -390,14 +394,8 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
              ;; DEBUG: (_ (lambda (message "--> HERE")))
              (_epub-page-number (or (match-string 2 path) 1))
              (epub-file (expand-file-name (org-link-unescape file-path)))
-             (thumbnails-dir (pcase org-link-beautify-thumbnails-dir
-                               ('source-path
-                                (concat (file-name-directory epub-file) ".thumbnails/"))
-                               ('user-home
-                                (expand-file-name "~/.cache/thumbnails/"))))
-             (thumbnail-file (expand-file-name
-                         (format "%s%s.png"
-                                 thumbnails-dir (file-name-base epub-file))))
+             (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path epub-file))
+             (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base epub-file))))
              (thumbnail-size (or org-link-beautify-epub-preview-size 500)))
         (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
         ;; DEBUG:
@@ -520,9 +518,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
 (defun org-link-beautify--preview-video (path start end)
   "Preview video file PATH and display on link between START and END."
   (let* ((video-file (expand-file-name (org-link-unescape path)))
-         (thumbnails-dir (cl-case org-link-beautify-thumbnails-dir
-                           ('source-path (concat (file-name-directory video-file) ".thumbnails/"))
-                           ('user-home (expand-file-name "~/.cache/thumbnails/"))))
+         (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path video-file))
          (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base video-file))))
          (thumbnail-size (or org-link-beautify-video-preview-size 512)))
     (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
@@ -578,13 +574,8 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
 (defun org-link-beautify--preview-audio (path start end)
   "Preview audio PATH with wave form image on link between START and END."
   (let* ((audio-file (expand-file-name (org-link-unescape path)))
-         (thumbnails-dir (pcase org-link-beautify-thumbnails-dir
-                           ('source-path
-                            (concat (file-name-directory audio-file) ".thumbnails/"))
-                           ('user-home
-                            (expand-file-name "~/.cache/thumbnails/"))))
-         (thumbnail-file (expand-file-name
-                     (format "%s%s.png" thumbnails-dir (file-name-base audio-file))))
+         (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path audio-file))
+         (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base audio-file))))
          (thumbnail-size (or org-link-beautify-audio-preview-size 200)))
     (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
     (unless (file-exists-p thumbnail-file)
