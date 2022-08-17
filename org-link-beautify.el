@@ -333,7 +333,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
                                 (concat (file-name-directory pdf-file) ".thumbnails/"))
                                ('user-home
                                 (expand-file-name "~/.cache/thumbnails/"))))
-             (thumbnail (expand-file-name
+             (thumbnail-file (expand-file-name
                          (concat
                           (if (= pdf-page-number 1)
                               (format "%s%s.%s"
@@ -344,13 +344,13 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
                                     (symbol-name org-link-beautify-pdf-preview-image-format))))))
              (thumbnail-size (or org-link-beautify-pdf-preview-size 512)))
         (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
-        (unless (file-exists-p thumbnail)
+        (unless (file-exists-p thumbnail-file)
           (pcase org-link-beautify-pdf-preview-command
             ('pdftocairo
              ;; DEBUG:
              ;; (message
-             ;;  "org-link-beautify: page-number %s, pdf-file %s, thumbnail %s"
-             ;;  pdf-page-number pdf-file thumbnail)
+             ;;  "org-link-beautify: page-number %s, pdf-file %s, thumbnail-file %s"
+             ;;  pdf-page-number pdf-file thumbnail-file)
              (start-process
               "org-link-beautify--pdf-preview"
               " *org-link-beautify pdf-preview*"
@@ -361,9 +361,9 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
                 ('svg "-svg"))
               "-singlefile"
               "-f" (number-to-string pdf-page-number)
-              pdf-file (file-name-sans-extension thumbnail))
-             (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail)))
-               (org-link-beautify--notify-generate-thumbnail-failed pdf-file thumbnail)))
+              pdf-file (file-name-sans-extension thumbnail-file))
+             (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+               (org-link-beautify--notify-generate-thumbnail-failed pdf-file thumbnail-file)))
             ('pdf2svg
              (unless (eq org-link-beautify-pdf-preview-image-format 'svg)
                (warn "The pdf2svg only supports convert PDF to SVG format.
@@ -374,14 +374,14 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
               "org-link-beautify--pdf-preview"
               " *org-link-beautify pdf-preview*"
               "pdf2svg"
-              pdf-file thumbnail (number-to-string pdf-page-number))
-             (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail)))
-               (org-link-beautify--notify-generate-thumbnail-failed pdf-file thumbnail)))))
+              pdf-file thumbnail-file (number-to-string pdf-page-number))
+             (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+               (org-link-beautify--notify-generate-thumbnail-failed pdf-file thumbnail-file)))))
         (org-link-beautify--add-overlay-marker start end)
         (org-link-beautify--add-keymap start end)
-        ;; display thumbnail only when it exist.
-        (when (file-exists-p thumbnail)
-          (org-link-beautify--display-thumbnail thumbnail thumbnail-size start end)))))
+        ;; display thumbnail-file only when it exist.
+        (when (file-exists-p thumbnail-file)
+          (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end)))))
 
 (defun org-link-beautify--preview-epub (path start end)
   "Preview EPUB file PATH and display on link between START and END."
@@ -395,38 +395,38 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                                 (concat (file-name-directory epub-file) ".thumbnails/"))
                                ('user-home
                                 (expand-file-name "~/.cache/thumbnails/"))))
-             (thumbnail (expand-file-name
+             (thumbnail-file (expand-file-name
                          (format "%s%s.png"
                                  thumbnails-dir (file-name-base epub-file))))
              (thumbnail-size (or org-link-beautify-epub-preview-size 500)))
         (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
         ;; DEBUG:
         ;; (message epub-file)
-        (unless (file-exists-p thumbnail)
+        (unless (file-exists-p thumbnail-file)
           (cl-case system-type
             ('gnu/linux                 ; for Linux "gnome-epub-thumbnailer"
              (start-process
               "org-link-beautify--epub-preview"
               " *org-link-beautify epub-preview*"
               org-link-beautify-epub-preview
-              epub-file thumbnail
+              epub-file thumbnail-file
               ;; (if org-link-beautify-epub-preview-size
               ;;     "--size")
               ;; (if org-link-beautify-epub-preview-size
               ;;     (number-to-string thumbnail-size))
               )
-             (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail)))
-               (org-link-beautify--notify-generate-thumbnail-failed epub-file thumbnail)))
+             (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+               (org-link-beautify--notify-generate-thumbnail-failed epub-file thumbnail-file)))
             ('darwin                    ; for macOS "epub-thumbnailer" command
              ;; DEBUG
              ;; (message epub-file)
-             ;; (message thumbnail)
+             ;; (message thumbnail-file)
              ;; (message (number-to-string org-link-beautify-epub-preview-size))
              (make-process
               :name "org-link-beautify--epub-preview"
               :command (list org-link-beautify-epub-preview
                              epub-file
-                             thumbnail
+                             thumbnail-file
                              (number-to-string thumbnail-size))
               :buffer " *org-link-beautify epub-preview*"
               :sentinel (lambda (proc event)
@@ -438,12 +438,12 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                             ))
               :stdout " *org-link-beautify epub-preview*"
               :stderr " *org-link-beautify epub-preview*")
-             (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail)))
-               (org-link-beautify--notify-generate-thumbnail-failed epub-file thumbnail)))
+             (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+               (org-link-beautify--notify-generate-thumbnail-failed epub-file thumbnail-file)))
             (t (user-error "This system platform currently not supported by org-link-beautify.\n Please contribute code to support"))))
         (org-link-beautify--add-overlay-marker start end)
         (org-link-beautify--add-keymap start end)
-        (org-link-beautify--display-thumbnail thumbnail thumbnail-size start end))))
+        (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end))))
 
 (defvar org-link-beautify--preview-text--noerror)
 
@@ -514,11 +514,11 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                             (concat (file-name-directory video-file) ".thumbnails/"))
                            ('user-home
                             (expand-file-name "~/.cache/thumbnails/"))))
-         (thumbnail (expand-file-name
+         (thumbnail-file (expand-file-name
                      (format "%s%s.png" thumbnails-dir (file-name-base video-file))))
          (thumbnail-size (or org-link-beautify-video-preview-size 512)))
     (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
-    (unless (file-exists-p thumbnail)
+    (unless (file-exists-p thumbnail-file)
       (cond
        ;; for macOS, use `qlmanage'
        ((and (eq system-type 'darwin) (executable-find "qlmanage")
@@ -536,9 +536,9 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
         ;; then rename [video.mp4.png] to [video.png]
         (let ((original-thumbnail-file (concat thumbnails-dir (file-name-nondirectory video-file) ".png")))
           (if (and (not org-link-beautify-enable-debug-p) (file-exists-p original-thumbnail-file))
-              (rename-file original-thumbnail-file thumbnail)
-            (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail)))
-              (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail)))))
+              (rename-file original-thumbnail-file thumbnail-file)
+            (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+              (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file)))))
        ;; use `ffmpegthumbnailer'
        ((executable-find "ffmpegthumbnailer")
         (start-process
@@ -547,9 +547,9 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
          "ffmpegthumbnailer"
          "-f" "-i" video-file
          "-s" (number-to-string thumbnail-size)
-         "-o" thumbnail)
-        (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail)))
-          (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail)))
+         "-o" thumbnail-file)
+        (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+          (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file)))
        ;; use `ffmpeg'
        ;; $ ffmpeg -ss 00:09:00 video.avi -vcodec png -vframes 1 -an -f rawvideo -s 119x64 out.png
        ((executable-find "ffmpeg")
@@ -562,12 +562,12 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
          "-vframes" "1"
          "-an" "-f" "rawvideo"
          "-s" (number-to-string thumbnail-size)
-         thumbnail)
-        (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail)))
-          (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail)))))
+         thumbnail-file)
+        (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+          (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file)))))
     (org-link-beautify--add-overlay-marker start end)
     (org-link-beautify--add-keymap start end)
-    (org-link-beautify--display-thumbnail thumbnail thumbnail-size start end)))
+    (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end)))
 
 (defun org-link-beautify--preview-audio (path start end)
   "Preview audio PATH with wave form image on link between START and END."
@@ -577,13 +577,13 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                             (concat (file-name-directory audio-file) ".thumbnails/"))
                            ('user-home
                             (expand-file-name "~/.cache/thumbnails/"))))
-         (thumbnail (expand-file-name
+         (thumbnail-file (expand-file-name
                      (format "%s%s.png" thumbnails-dir (file-name-base audio-file))))
          (thumbnail-size (or org-link-beautify-audio-preview-size 200)))
     (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
-    (unless (file-exists-p thumbnail)
+    (unless (file-exists-p thumbnail-file)
       ;; DEBUG:
-      ;; (message "%s\n%s\n" audio-file thumbnail)
+      ;; (message "%s\n%s\n" audio-file thumbnail-file)
       (cond
        ((and (eq system-type 'darwin) (executable-find "qlmanage"))
         (start-process
@@ -598,21 +598,21 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
         ;; then rename [video.mp4.png] to [video.png]
         (let ((original-thumbnail-file (concat thumbnails-dir (file-name-nondirectory audio-file) ".png")))
           (if (and (not org-link-beautify-enable-debug-p) (file-exists-p original-thumbnail-file))
-              (rename-file original-thumbnail-file thumbnail)
-            (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail)))
-              (org-link-beautify--notify-generate-thumbnail-failed audio-file thumbnail)))))
+              (rename-file original-thumbnail-file thumbnail-file)
+            (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+              (org-link-beautify--notify-generate-thumbnail-failed audio-file thumbnail-file)))))
        ((and (eq system-type 'gnu/linux) (executable-find "audiowaveform"))
         (start-process
          "org-link-beautify--audio-preview"
          " *org-link-beautify audio preview*" ; DEBUG: check out output buffer
          "audiowaveform"
          "-i" audio-file
-         "-o" thumbnail)
-        (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail)))
-          (org-link-beautify--notify-generate-thumbnail-failed audio-file thumbnail)))))
+         "-o" thumbnail-file)
+        (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+          (org-link-beautify--notify-generate-thumbnail-failed audio-file thumbnail-file)))))
     (org-link-beautify--add-overlay-marker start end)
     (org-link-beautify--add-keymap start end)
-    (org-link-beautify--display-thumbnail thumbnail thumbnail-size start end)))
+    (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end)))
 
 (defun org-link-beautify--return-icon (type path extension &optional link-element)
   "Return icon for the link PATH smartly based on TYPE, EXTENSION, etc."
