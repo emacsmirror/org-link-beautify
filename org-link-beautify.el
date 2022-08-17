@@ -245,7 +245,8 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
     (unless (or (org-at-property-p)
                 (org-at-clock-log-p)
                 (org-at-encrypted-entry-p))
-      (org-element-context))))
+      ;; Parse link at point, if any. replace (org-element-context) to improve performance.
+      (org-element-link-parser))))
 
 (defun org-link-beautify--get-link-description-fast (position)
   "Get the link description at `POSITION' (fuzzy but faster version)."
