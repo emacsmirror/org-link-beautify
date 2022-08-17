@@ -520,7 +520,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
 (defun org-link-beautify--preview-video (path start end)
   "Preview video file PATH and display on link between START and END."
   (let* ((video-file (expand-file-name (org-link-unescape path)))
-         (thumbnails-dir (pcase org-link-beautify-thumbnails-dir
+         (thumbnails-dir (cl-case org-link-beautify-thumbnails-dir
                            ('source-path (concat (file-name-directory video-file) ".thumbnails/"))
                            ('user-home (expand-file-name "~/.cache/thumbnails/"))))
          (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base video-file))))
