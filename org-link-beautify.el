@@ -616,8 +616,6 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
   (pcase type
     ("file"
      (cond
-      ((file-directory-p path)          ; directory
-       (all-the-icons-icon-for-dir "path" :face (org-link-beautify--warning-face-p path) :v-adjust 0))
       ;; depend on file extensions.
       ((string-equal (file-name-extension path) "org") ; Org Mode file
        (all-the-icons-fileicon "org" :face '(:foreground "LightGreen") :v-adjust -0.05))
@@ -627,6 +625,8 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
        (all-the-icons-fileicon "brain" :face '(:foreground "BlueViolet")))
       ((not (file-exists-p (expand-file-name path))) ; not exist file!
        (all-the-icons-faicon "ban" :face 'org-warning :v-adjust -0.05))
+      ((file-directory-p path)          ; directory
+       (all-the-icons-icon-for-dir "path" :face (org-link-beautify--warning-face-p path) :v-adjust 0))
       ((file-remote-p path)             ; remote file
        (all-the-icons-faicon "server" :face 'org-warning))
       (t (all-the-icons-icon-for-file   ; other file types
