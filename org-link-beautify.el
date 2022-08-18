@@ -1004,10 +1004,11 @@ Or clear org-link-beautify if headline STATE is folded."
 (defun org-link-beautify--filter-larg-file ()
   (< (buffer-size) 400000))
 
+;;;###autoload
 (define-globalized-minor-mode global-org-link-beautify-mode
   org-link-beautify-mode org-link-beautify-mode-enable
   (message "global-org-link-beautify-mode toggled for all Org-mode buffers.")
-  :require 'org-link-beautify-mode
+  :require 'org-link-beautify
   :predicate (not (cl-some 'null (mapcar 'funcall org-link-beautify-condition-functions)))
   :lighter nil
   :group 'org-link-beautify)
