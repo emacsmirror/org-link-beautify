@@ -681,6 +681,21 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     ;;  (message "[org-link-beautify] link-element: %s" link-element))
     ))
 
+(defface org-link-beautify-link-decorator-face
+  `((t :foreground ,(color-lighten-name (face-foreground 'shadow) 2)))
+  "Face for org-link-beautify link decorator."
+  :group 'org-link-beautify)
+
+(defface org-link-beautify-link-description-face
+  '((t :inherit 'org-link))
+  "Face for org-link-beautify link description."
+  :group 'org-link-beautify)
+
+(defface org-link-beautify-link-icon-face
+  '((t :foreground "gray" :height 95))
+  "Face for org-link-beautify link icon."
+  :group 'org-link-beautify)
+
 (defun org-link-beautify--display-icon (start end description icon)
   "Display ICON for link on START and END with DESCRIPTION."
   (put-text-property
@@ -688,12 +703,12 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
    'display
    (propertize
     (concat
-     (propertize "[" 'face `(:inherit nil :underline nil :foreground ,(color-lighten-name (face-foreground 'shadow) 2)))
-     (propertize description 'face `(:underline t :foreground ,(face-foreground 'org-link)))
-     (propertize "]" 'face `(:inherit nil :underline nil :foreground ,(color-lighten-name (face-foreground 'shadow) 2)))
-     (propertize "⌈" 'face `(:inherit nil :underline nil :foreground ,(color-lighten-name (face-foreground 'shadow) 2)))
-     (propertize icon 'face '(:inherit nil :underline nil :foreground "gray" :height 95))
-     (propertize "⌋" 'face `(:inherit nil :underline nil :foreground ,(color-lighten-name (face-foreground 'shadow) 2)))))))
+     (propertize "[" 'face 'org-link-beautify-link-decorator-face)
+     (propertize description 'face 'org-link-beautify-link-description-face)
+     (propertize "]" 'face 'org-link-beautify-link-decorator-face)
+     (propertize "⌈" 'face 'org-link-beautify-link-decorator-face)
+     (propertize icon 'face 'org-link-beautify-link-icon-face)
+     (propertize "⌋" 'face 'org-link-beautify-link-decorator-face)))))
 
 (defun org-link-beautify--display-not-exist (start end description icon)
   "Display error color and ICON on START and END with DESCRIPTION."
