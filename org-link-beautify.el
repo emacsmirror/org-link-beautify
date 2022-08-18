@@ -616,13 +616,6 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
   (pcase type
     ("file"
      (cond
-      ;; depend on file extensions.
-      ((string-equal (file-name-extension path) "org") ; Org Mode file
-       (all-the-icons-fileicon "org" :face '(:foreground "LightGreen") :v-adjust -0.05))
-      ((member (file-name-extension path) '("md" "markdown")) ; Markdown file
-       (all-the-icons-fileicon "markdownlint" :face '(:foreground "DimGray")))
-      ((member (file-name-extension path) '("mm" "xmind")) ; MindMap file
-       (all-the-icons-fileicon "brain" :face '(:foreground "BlueViolet")))
       ((not (file-exists-p (expand-file-name path))) ; not exist file!
        (all-the-icons-faicon "ban" :face 'org-warning :v-adjust -0.05))
       ((file-directory-p path)          ; directory
