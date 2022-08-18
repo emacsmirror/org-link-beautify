@@ -247,7 +247,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
     (goto-char position)
     (and (org-in-regexp org-link-bracket-re) (match-string 2))))
 
-(defun org-link-beautify--warning-face (path)
+(defun org-link-beautify--warning-face-p (path)
   "Use `org-warning' face if link PATH does not exist."
   (if (and (not (file-remote-p path))
            (file-exists-p (expand-file-name path)))
@@ -620,10 +620,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
       ((not (file-exists-p (expand-file-name path))) ; not exist file
        (all-the-icons-faicon "ban" :face 'org-warning :v-adjust -0.05))
       ((file-directory-p path)          ; directory
-       (all-the-icons-icon-for-dir
-        "path"
-        :face (org-link-beautify--warning-face path)
-        :v-adjust 0))
+       (all-the-icons-icon-for-dir "path" :face (org-link-beautify--warning-face-p path) :v-adjust 0))
       ;; depend on file extensions.
       ;; MindMap files
       ((string-equal (file-name-extension path) "org")
@@ -634,7 +631,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
        (all-the-icons-fileicon "brain" :face '(:foreground "BlueViolet")))
       (t (all-the-icons-icon-for-file   ; other file types
           (format ".%s" extension)
-          :face (org-link-beautify--warning-face path)))))
+          :face (org-link-beautify--warning-face-p path)))))
     ("file+sys" (all-the-icons-faicon "link"))
     ("file+emacs" (all-the-icons-icon-for-mode 'emacs-lisp-mode))
     ("http" (all-the-icons-icon-for-url (concat "http:" path) :v-adjust -0.05))
