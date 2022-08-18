@@ -153,7 +153,7 @@ EPUB preview."
   :safe #'booleanp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-epub-preview-size nil
+(defcustom org-link-beautify-ebook-preview-size nil
   "The EPUB cover preview image size."
   :type 'number
   :safe #'numberp
@@ -393,7 +393,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
              (epub-file (expand-file-name (org-link-unescape file-path)))
              (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path epub-file))
              (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base epub-file))))
-             (thumbnail-size (or org-link-beautify-epub-preview-size 500)))
+             (thumbnail-size (or org-link-beautify-ebook-preview-size 500)))
         (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
         ;; DEBUG:
         ;; (message epub-file)
@@ -405,9 +405,9 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
               " *org-link-beautify epub-preview*"
               org-link-beautify-epub-preview
               epub-file thumbnail-file
-              ;; (if org-link-beautify-epub-preview-size
+              ;; (if org-link-beautify-ebook-preview-size
               ;;     "--size")
-              ;; (if org-link-beautify-epub-preview-size
+              ;; (if org-link-beautify-ebook-preview-size
               ;;     (number-to-string thumbnail-size))
               )
              (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
@@ -416,7 +416,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
              ;; DEBUG
              ;; (message epub-file)
              ;; (message thumbnail-file)
-             ;; (message (number-to-string org-link-beautify-epub-preview-size))
+             ;; (message (number-to-string org-link-beautify-ebook-preview-size))
              (make-process
               :name "org-link-beautify--epub-preview"
               :command (list org-link-beautify-epub-preview
