@@ -308,6 +308,55 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
 
 
 ;;; Preview functions
+;;; auto display inline images under current TAB cycle expanded "visible" subtree.
+(defun org-display-subtree-with-inline-images (&optional state)
+  "Toggle the display of inline images under current expanded visible subtree.
+INCLUDE-LINKED is passed to `org-display-inline-images'."
+  (interactive)
+  (when (and (display-graphic-p)
+             (derived-mode-p 'org-mode)
+             (memq state '(children subtree))
+             ;; (not (memq state '(overview folded contents)))
+             )
+    (save-excursion
+      (save-restriction
+        (org-narrow-to-subtree)
+        (let* ((beg (point-min))
+               (end (save-excursion (org-next-visible-heading 1) (point)))
+               (image-overlays (cl-intersection
+                                org-inline-image-overlays
+                                (overlays-in beg end)))
+               (display-inline-images-local
+                (lambda ()
+                  (org-display-inline-images t t beg end)
+                  (setq image-overlays (cl-intersection
+                                        org-inline-image-overlays
+                                        (overlays-in beg end)))
+                  (if (and (org-called-interactively-p) image-overlays)
+                      (message "%d images displayed inline"
+                               (length image-overlays)))))
+               (hide-inline-images-local
+                (lambda ()
+                  (org-remove-inline-images)
+                  (message "Inline image display turned off"))))
+          (if state
+              (pcase state
+                ('subtree
+                 (funcall display-inline-images-local))
+                ('children
+                 ;; If has nested headlines, also inline display images under sub-headlines.
+                 (setq end (point-max))
+                 (funcall display-inline-images-local))
+                ('folded
+                 (funcall hide-inline-images-local)))
+            (if image-overlays
+                (funcall hide-inline-images-local)
+              (funcall display-inline-images-local))))))))
+
+(add-hook 'org-cycle-hook #'org-display-subtree-with-inline-images)
+
+(define-key org-mode-map (kbd "C-c C-x C-v") 'org-display-subtree-with-inline-images)
+
 (defun org-link-beautify--preview-pdf (path start end &optional search-option)
   "Preview PDF file PATH and display on link between START and END."
   (if (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
