@@ -238,8 +238,11 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
 
 ;;; Common functions
 (defun org-link-beautify--get-element (position)
-  "Parse link at point, if any. Return the org element of link at the `POSITION'."
-  (org-with-point-at position (org-element-link-parser)))
+  "Return the org element of link at the `POSITION'."
+  (save-excursion
+    (goto-char position)
+    ;; Parse link at point, if any. replace (org-element-context) to improve performance.
+    (org-element-link-parser)))
 
 (defun org-link-beautify--get-link-description-fast (position)
   "Get the link description at `POSITION' (fuzzy but faster version)."
@@ -247,7 +250,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
     (goto-char position)
     (and (org-in-regexp org-link-bracket-re) (match-string 2))))
 
-(defun org-link-beautify--warning-face (path)
+(defun org-link-beautify--warning-face-p (path)
   "Use `org-warning' face if link PATH does not exist."
   (if (and (not (file-remote-p path))
            (file-exists-p (expand-file-name path)))
@@ -615,26 +618,22 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
   (pcase type
     ("file"
      (cond
+      ((file-directory-p path)          ; directory
+       (all-the-icons-icon-for-dir "path" :face (org-link-beautify--warning-face-p path) :v-adjust 0))
+      ;; depend on file extensions.
+      ((string-equal (file-name-extension path) "org") ; Org Mode file
+       (all-the-icons-fileicon "org" :face '(:foreground "LightGreen") :v-adjust -0.05))
+      ((member (file-name-extension path) '("md" "markdown")) ; Markdown file
+       (all-the-icons-fileicon "markdownlint" :face '(:foreground "DimGray")))
+      ((member (file-name-extension path) '("mm" "xmind")) ; MindMap file
+       (all-the-icons-fileicon "brain" :face '(:foreground "BlueViolet")))
+      ((not (file-exists-p (expand-file-name path))) ; not exist file!
+       (all-the-icons-faicon "ban" :face 'org-warning :v-adjust -0.05))
       ((file-remote-p path)             ; remote file
        (all-the-icons-faicon "server" :face 'org-warning))
-      ((not (file-exists-p (expand-file-name path))) ; not exist file
-       (all-the-icons-faicon "ban" :face 'org-warning :v-adjust -0.05))
-      ((file-directory-p path)          ; directory
-       (all-the-icons-icon-for-dir
-        "path"
-        :face (org-link-beautify--warning-face path)
-        :v-adjust 0))
-      ;; depend on file extensions.
-      ;; MindMap files
-      ((string-equal (file-name-extension path) "org")
-       (all-the-icons-fileicon "org" :face '(:foreground "LightGreen") :v-adjust -0.05))
-      ((member (file-name-extension path) '("md" "markdown"))
-       (all-the-icons-fileicon "markdownlint" :face '(:foreground "DimGray")))
-      ((member (file-name-extension path) '("mm" "xmind"))
-       (all-the-icons-fileicon "brain" :face '(:foreground "BlueViolet")))
       (t (all-the-icons-icon-for-file   ; other file types
           (format ".%s" extension)
-          :face (org-link-beautify--warning-face path)))))
+          :face (org-link-beautify--warning-face-p path)))))
     ("file+sys" (all-the-icons-faicon "link"))
     ("file+emacs" (all-the-icons-icon-for-mode 'emacs-lisp-mode))
     ("http" (all-the-icons-icon-for-url (concat "http:" path) :v-adjust -0.05))
@@ -741,9 +740,9 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                                 ;; when description not exist, use raw link for raw link case.
                                 raw-link))
                ;; DEBUG: (desc-debug (print description))
-               (icon (if (null (org-link-beautify--return-icon type path extension link-element)) ; handle when returned icon is `nil'.
-                         (all-the-icons-faicon "question" :v-adjust -0.05)
-                       (org-link-beautify--return-icon type path extension link-element)))
+               (icon (or (org-link-beautify--return-icon type path extension link-element)
+                         ;; handle when returned icon is `nil'.
+                         (all-the-icons-faicon "question" :v-adjust -0.05)))
                ;; DEBUG:
                ;; (icon-debug (print icon))
                )
