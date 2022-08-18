@@ -1,7 +1,7 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
 ;; Authors: stardiviner <numbchild@gmail.com>
-;; Package-Requires: ((emacs "27.1") (all-the-icons "5.0.0"))
+;; Package-Requires: ((emacs "28.1") (all-the-icons "5.0.0"))
 ;; Version: 1.2.2
 ;; Keywords: hypermedia
 ;; homepage: https://repo.or.cz/org-link-beautify.git
