@@ -628,7 +628,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
       ((file-directory-p path)          ; directory
        (all-the-icons-icon-for-dir "path" :face (org-link-beautify--warning-face-p path) :v-adjust 0))
       ((file-remote-p path)             ; remote file
-       (all-the-icons-faicon "server" :face 'org-warning))
+       (all-the-icons-faicon "server" :face 'org-priority))
       (t (all-the-icons-icon-for-file   ; other file types
           (format ".%s" extension)
           :face (org-link-beautify--warning-face-p path)))))
