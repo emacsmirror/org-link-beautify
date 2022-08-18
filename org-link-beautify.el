@@ -238,8 +238,11 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
 
 ;;; Common functions
 (defun org-link-beautify--get-element (position)
-  "Parse link at point, if any. Return the org element of link at the `POSITION'."
-  (org-with-point-at position (org-element-link-parser)))
+  "Return the org element of link at the `POSITION'."
+  (save-excursion
+    (goto-char position)
+    ;; Parse link at point, if any. replace (org-element-context) to improve performance.
+    (org-element-link-parser)))
 
 (defun org-link-beautify--get-link-description-fast (position)
   "Get the link description at `POSITION' (fuzzy but faster version)."
