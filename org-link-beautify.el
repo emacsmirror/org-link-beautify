@@ -43,7 +43,7 @@
 
 (defcustom org-link-beautify-condition-functions '(org-link-beautify--filter-org-mode
                                                    org-link-beautify--filter-larg-file)
-  "A list of functions to be executed as condition before really activate `org-link-beautify'.
+  "Functions be executed as condition before activate `org-link-beautify-mode'.
 Only if all functions evaluated as TRUE, then processed."
   :type 'list
   :safe #'listp)
@@ -218,12 +218,12 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
   :safe #'stringp)
 
 (defun org-link-beautify--python-script-run (python-script-file)
-  "Run Python script file through shell command."
+  "Run PYTHON-SCRIPT-FILE through shell command."
   (shell-command-to-string
    (format "%s %s" org-link-beautify-python-interpreter python-script-file)))
 
 (defun org-link-beautify--python-command-to-string (&rest code-lines)
-  "Run Python code lines through shell command."
+  "Run Python CODE-LINES through shell command."
   (shell-command-to-string
    (concat "python -c "
            ;; solve double quote character issue.
@@ -257,7 +257,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
       'org-link 'org-warning))
 
 (defun org-link-beautify--notify-generate-thumbnail-failed (source-file thumbnail-file)
-  "Notify user that org-link-beautify generating thumbnail file failed."
+  "Notify that generating THUMBNAIL-FILE for SOURCE-FILE failed."
   (message
    "[org-link-beautify] For file %s.\nCreate thumbnail %s failed."
    source-file thumbnail-file))
@@ -309,7 +309,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
 
 ;;; Preview functions
 (defun org-link-beautify--preview-pdf (path start end &optional search-option)
-  "Preview PDF file PATH and display on link between START and END."
+  "Preview PDF file PATH with optional SEARCH-OPTION on link between START and END."
   (if (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
       (let* ((file-path (match-string 1 path))
              ;; DEBUG:
@@ -491,7 +491,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     (org-link-beautify--display-content-block (shell-command-to-string cmd))))
 
 (defun org-link-beautify--preview-archive (path command start end)
-  "Preview files list of archive file PATH with COMMAND and display on link between START and END."
+  "Preview archive PATH content with COMMAND on link between START and END."
   (let* ((archive-file (expand-file-name (org-link-unescape path)))
          (preview-content (org-link-beautify--preview-archive-file archive-file command)))
     (org-link-beautify--add-overlay-marker (1+ end) (+ end 2))
@@ -946,13 +946,12 @@ Or clear org-link-beautify if headline STATE is folded."
   "Required by `define-globalized-minor-mode'."
   (org-link-beautify-mode 1))
 
-;; More than 400K characters.
 (defun org-link-beautify--filter-org-mode ()
-  "Only enable on org-mode major-mode buffers."
+  "Only enable on `org-mode' major-mode buffers."
   (eq major-mode 'org-mode))
 
-;;; Only enable `org-link-beautify-mode' on `org-mode' buffer.
 (defun org-link-beautify--filter-larg-file ()
+  "Filter large files more than 400K characters to improve performance."
   (< (buffer-size) 400000))
 
 ;;;###autoload
