@@ -549,19 +549,18 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
            (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file)))
         ("ffmpeg"
          ;; $ ffmpeg -ss 00:09:00 video.avi -vcodec png -vframes 1 -an -f rawvideo -s 119x64 out.png
-         ((executable-find "ffmpeg")
-          (start-process
-           "org-link-beautify--video-preview"
-           " *org-link-beautify video-preview*"
-           "ffmpeg"
-           "-s" "00:09:00" video-file
-           "-vcodec" "png"
-           "-vframes" "1"
-           "-an" "-f" "rawvideo"
-           "-s" (number-to-string thumbnail-size)
-           thumbnail-file)
-          (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
-            (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file))))))
+         (start-process
+          "org-link-beautify--video-preview"
+          " *org-link-beautify video-preview*"
+          "ffmpeg"
+          "-s" "00:09:00" video-file
+          "-vcodec" "png"
+          "-vframes" "1"
+          "-an" "-f" "rawvideo"
+          "-s" (number-to-string thumbnail-size)
+          thumbnail-file)
+         (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+           (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file)))))
     (org-link-beautify--add-overlay-marker start end)
     (org-link-beautify--add-keymap start end)
     (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end)))
