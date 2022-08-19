@@ -522,21 +522,22 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     (unless (file-exists-p thumbnail-file)
       (pcase org-link-beautify--video-thumbnailer
         ("qlmanage"
-         (start-process
-          "org-link-beautify--video-preview"
-          " *org-link-beautify video-preview*"
-          "qlmanage"
-          "-x"
-          "-t"
-          "-s" (number-to-string thumbnail-size)
-          video-file
-          "-o" thumbnails-dir)
-         ;; then rename [video.mp4.png] to [video.png]
-         (let ((original-thumbnail-file (concat thumbnails-dir (file-name-nondirectory video-file) ".png")))
-           (if (and (not org-link-beautify-enable-debug-p) (file-exists-p original-thumbnail-file))
-               (rename-file original-thumbnail-file thumbnail-file)
-             (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
-               (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file)))))
+         (let ((qlmanage-thumbnail-file (concat thumbnails-dir (file-name-nondirectory video-file) ".png")))
+           (unless (file-exists-p qlmanage-thumbnail-file)
+             (start-process
+              "org-link-beautify--video-preview"
+              " *org-link-beautify video-preview*"
+              "qlmanage"
+              "-x"
+              "-t"
+              "-s" (number-to-string thumbnail-size)
+              video-file
+              "-o" thumbnails-dir))
+           ;; then rename [video.mp4.png] to [video.png]
+           (when (not (file-exists-p thumbnail-file))
+             (rename-file qlmanage-thumbnail-file thumbnail-file))
+           (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+             (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file))))
         ("ffmpegthumbnailer"
          (start-process
           "org-link-beautify--video-preview"
