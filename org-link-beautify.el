@@ -377,24 +377,23 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
               "-singlefile"
               "-f" (number-to-string pdf-page-number)
               pdf-file (file-name-sans-extension thumbnail-file))
-             (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+             (when (or (not (file-exists-p thumbnail-file)) org-link-beautify-enable-debug-p)
                (org-link-beautify--notify-generate-thumbnail-failed pdf-file thumbnail-file)))
             ('pdf2svg
              (unless (eq org-link-beautify-pdf-preview-image-format 'svg)
                (warn "The pdf2svg only supports convert PDF to SVG format.
 Please adjust `org-link-beautify-pdf-preview-command' to `pdftocairo' or
 Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
-
              (start-process
               "org-link-beautify--pdf-preview"
               " *org-link-beautify pdf-preview*"
               "pdf2svg"
               pdf-file thumbnail-file (number-to-string pdf-page-number))
-             (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+             (when (or (not (file-exists-p thumbnail-file)) org-link-beautify-enable-debug-p)
                (org-link-beautify--notify-generate-thumbnail-failed pdf-file thumbnail-file)))))
         (org-link-beautify--add-overlay-marker start end)
         (org-link-beautify--add-keymap start end)
-        ;; display thumbnail-file only when it exist.
+        ;; display thumbnail-file only when it exist, otherwise it will break org-mode buffer fontification.
         (when (file-exists-p thumbnail-file)
           (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end)))))
 
@@ -424,7 +423,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
               ;; (if org-link-beautify-ebook-preview-size
               ;;     (number-to-string thumbnail-size))
               )
-             (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+             (when (or (not (file-exists-p thumbnail-file)) org-link-beautify-enable-debug-p)
                (org-link-beautify--notify-generate-thumbnail-failed epub-file thumbnail-file)))
             ('darwin                    ; for macOS "epub-thumbnailer" command
              ;; DEBUG
@@ -447,12 +446,14 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                             ))
               :stdout " *org-link-beautify epub-preview*"
               :stderr " *org-link-beautify epub-preview*")
-             (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+             (when (or (not (file-exists-p thumbnail-file)) org-link-beautify-enable-debug-p)
                (org-link-beautify--notify-generate-thumbnail-failed epub-file thumbnail-file)))
             (t (user-error "This system platform currently not supported by org-link-beautify.\n Please contribute code to support"))))
         (org-link-beautify--add-overlay-marker start end)
         (org-link-beautify--add-keymap start end)
-        (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end))))
+        ;; display thumbnail-file only when it exist, otherwise it will break org-mode buffer fontification.
+        (when (file-exists-p thumbnail-file)
+          (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end)))))
 
 (defvar org-link-beautify--kindle-cover
   (cond
@@ -487,14 +488,16 @@ You can install software `libmobi' to get command `mobitool'.")
                   " *org-link-beautify--kindle-preview*"
                   "mobitool" "-c" "-o" thumbnails-dir kindle-file))
                ;; then rename [file_cover.jpg] to [file.jpg]
-               (when (not (file-exists-p thumbnail-file))
+               (when (and (not (file-exists-p thumbnail-file)) (file-exists-p mobitool-cover-file))
                  (rename-file mobitool-cover-file thumbnail-file))
-               (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+               (when (or (not (file-exists-p thumbnail-file)) org-link-beautify-enable-debug-p)
                  (org-link-beautify--notify-generate-thumbnail-failed kindle-file thumbnail-file))))
             (_ (user-error "[org-link-beautify] Error: Can't find command tool to dump kindle ebook file cover."))))
         (org-link-beautify--add-overlay-marker start end)
         (org-link-beautify--add-keymap start end)
-        (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end))))
+        ;; display thumbnail-file only when it exist, otherwise it will break org-mode buffer fontification.
+        (when (file-exists-p thumbnail-file)
+          (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end)))))
 
 (defvar org-link-beautify--preview-text--noerror)
 
@@ -590,9 +593,9 @@ You can install software `libmobi' to get command `mobitool'.")
               video-file
               "-o" thumbnails-dir))
            ;; then rename [video.mp4.png] to [video.png]
-           (when (not (file-exists-p thumbnail-file))
+           (when (and (not (file-exists-p thumbnail-file)) (file-exists-p qlmanage-thumbnail-file))
              (rename-file qlmanage-thumbnail-file thumbnail-file))
-           (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+           (when (or (not (file-exists-p thumbnail-file)) org-link-beautify-enable-debug-p)
              (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file))))
         ("ffmpegthumbnailer"
          (start-process
@@ -602,7 +605,7 @@ You can install software `libmobi' to get command `mobitool'.")
           "-f" "-i" video-file
           "-s" (number-to-string thumbnail-size)
           "-o" thumbnail-file)
-         (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+         (when (or (not (file-exists-p thumbnail-file)) org-link-beautify-enable-debug-p)
            (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file)))
         ("ffmpeg"
          ;; $ ffmpeg -ss 00:09:00 video.avi -vcodec png -vframes 1 -an -f rawvideo -s 119x64 out.png
@@ -616,11 +619,13 @@ You can install software `libmobi' to get command `mobitool'.")
           "-an" "-f" "rawvideo"
           "-s" (number-to-string thumbnail-size)
           thumbnail-file)
-         (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+         (when (or (not (file-exists-p thumbnail-file)) org-link-beautify-enable-debug-p)
            (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file)))))
     (org-link-beautify--add-overlay-marker start end)
     (org-link-beautify--add-keymap start end)
-    (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end)))
+    ;; display thumbnail-file only when it exist, otherwise it will break org-mode buffer fontification.
+    (when (file-exists-p thumbnail-file)
+      (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end))))
 
 (defvar org-link-beautify--audio-thumbnailer
   (cond
@@ -654,9 +659,9 @@ You can install software `libmobi' to get command `mobitool'.")
               audio-file
               "-o" thumbnails-dir))
            ;; then rename [audio.mp3.png] to [audio.png]
-           (when (not (file-exists-p thumbnail-file))
+           (when (and (not (file-exists-p thumbnail-file)) (file-exists-p qlmanage-thumbnail-file))
              (rename-file qlmanage-thumbnail-file thumbnail-file))
-           (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+           (when (or (not (file-exists-p thumbnail-file)) org-link-beautify-enable-debug-p)
              (org-link-beautify--notify-generate-thumbnail-failed audio-file thumbnail-file))))
         ("audiowaveform"
          (start-process
@@ -665,14 +670,16 @@ You can install software `libmobi' to get command `mobitool'.")
           "audiowaveform"
           "-i" audio-file
           "-o" thumbnail-file)
-         (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+         (when (or (not (file-exists-p thumbnail-file)) org-link-beautify-enable-debug-p)
            (org-link-beautify--notify-generate-thumbnail-failed audio-file thumbnail-file)))
         ;; TODO: use ffmpeg to generate audio wave form preview image.
         ("ffmpeg"
          )))
     (org-link-beautify--add-overlay-marker start end)
     (org-link-beautify--add-keymap start end)
-    (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end)))
+    ;; display thumbnail-file only when it exist, otherwise it will break org-mode buffer fontification.
+    (when (file-exists-p thumbnail-file)
+      (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end))))
 
 (defun org-link-beautify--return-icon (type path extension &optional link-element)
   "Return icon for the link PATH smartly based on TYPE, EXTENSION, etc."
