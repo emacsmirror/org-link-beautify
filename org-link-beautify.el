@@ -655,7 +655,7 @@ You can install software `libmobi' to get command `mobitool'.")
               "qlmanage"
               "-x"
               "-t"
-              "-s" (number-to-string 100)
+              "-s" (number-to-string thumbnail-size)
               audio-file
               "-o" thumbnails-dir))
            ;; then rename [audio.mp3.png] to [audio.png]
