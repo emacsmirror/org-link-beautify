@@ -87,7 +87,7 @@ which represent to ~/.cache/thumbnails/."
   :safe #'booleanp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-audio-preview-list '("mp3" "wav" "flac" "ogg" "dat")
+(defcustom org-link-beautify-audio-preview-list '("mp3" "wav" "flac" "ogg" "m4a" "dat")
   "A list of audio file types be supported generating audio wave form image."
   :type 'list
   :safe #'listp
