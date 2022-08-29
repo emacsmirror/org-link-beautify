@@ -218,6 +218,12 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
   :safe #'stringp
   :group 'org-link-beautify)
 
+(defcustom org-link-beautify-url-preview nil
+  "Whether enable URL link preview?"
+  :type 'boolean
+  :safe #'booleanp
+  :group 'org-link-beautify)
+
 (defcustom org-link-beautify-enable-debug-p nil
   "Whether enable org-link-beautify print debug info."
   :type 'boolean
@@ -670,15 +676,52 @@ You can install software `libmobi' to get command `mobitool'.")
           "audiowaveform"
           "-i" audio-file
           "-o" thumbnail-file)
+(defvar org-link-beautify--url-screenshot-cmd
+  (cond
+   ((executable-find "webkit2png") "webkit2png")
+   ((executable-find "monolith") "monolith"))
+  "Find available URL web page screenshot command.")
+
+(defun org-link-beautify--preview-url-archive (url cmd-list)
+  "Construct process to run"
+  (let* ((process-name (format "org-link-beautify--url-screenshot %s" url))
+         (process-buffer (format " *org-link-beautify--url-screenshot %s*" url))
+         (proc (get-process process-name)))
+    (unless proc
+      (eval `(start-process ,process-name ,process-buffer ,@cmd-list)))))
+
+(defun org-link-beautify--preview-url (type path start end)
+  "Preview PATH with web page screenshot between START and END."
+  (let* ((url (concat type ":" path))
+         (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path (buffer-file-name)))
+         (thumbnail-filename (format "org-link-beautify URL screenshot %s.png" (time-stamp-string)))
+         (thumbnail-file (expand-file-name thumbnail-filename thumbnails-dir)))
+    ;; DEBUG: (message url) ; https://elpa.gnu.org/packages/kiwix.html (with `type')
+    (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
+    (unless (file-exists-p thumbnail-file)
+      (pcase org-link-beautify--url-screenshot-cmd
+        ;; TODO:
+        ("webkit2png"
+         (org-link-beautify--preview-url-archive url `("webkit2png" ,url "-o" ,thumbnail-file))
          (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
            (org-link-beautify--notify-generate-thumbnail-failed audio-file thumbnail-file)))
         ;; TODO: use ffmpeg to generate audio wave form preview image.
         ("ffmpeg"
          )))
+           (org-link-beautify--notify-generate-thumbnail-failed url thumbnail-file)))
+        ("monolith"
+         (let* ((thumbnail-file-html (concat (file-name-sans-extension thumbnail-file) ".html"))
+                (thumbnail-file thumbnail-file-html)
+                (cmd-list `("monolith" "--no-audio" "--no-video" ,url "--output" ,thumbnail-file-html)))
+           (message "[org-link-beautify] URL screenshot archive with 'monolith' for %s" url)
+           (org-link-beautify--preview-url-archive url cmd-list)
+           (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+             (org-link-beautify--notify-generate-thumbnail-failed url thumbnail-file))))))
     (org-link-beautify--add-overlay-marker start end)
     (org-link-beautify--add-keymap start end)
     ;; display thumbnail-file only when it exist, otherwise it will break org-mode buffer fontification.
     (when (file-exists-p thumbnail-file)
+      ;; FIXME: can't display thumbnail image of HTML archive file.
       (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end))))
 
 (defun org-link-beautify--return-icon (type path extension &optional link-element)
@@ -906,6 +949,10 @@ You can install software `libmobi' to get command `mobitool'.")
             ;; (message path)
             (org-link-beautify--add-overlay-marker start end)
             (org-link-beautify--display-not-exist start end description icon))
+           
+           ;; URL
+           ((and org-link-beautify-url-preview (or (equal type "https") (equal type "http")))
+            (org-link-beautify--preview-url type path start end))
            
            ;; general icons
            (t
