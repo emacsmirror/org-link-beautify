@@ -580,53 +580,41 @@ You can install software `libmobi' to get command `mobitool'.")
 (defun org-link-beautify--preview-video (path start end)
   "Preview video file PATH and display on link between START and END."
   (let* ((video-file (expand-file-name (org-link-unescape path)))
+         (video-filename (file-name-nondirectory video-file))
          (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path video-file))
          (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base video-file))))
-         (thumbnail-size (or org-link-beautify-video-preview-size 512)))
+         (thumbnail-size (or org-link-beautify-video-preview-size 512))
+         (proc-name (format "org-link-beautify--video-preview - %s" video-filename))
+         (proc-buffer (format " *org-link-beautify video-preview - %s*" video-filename))
+         (proc (get-process proc-name)))
     (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
     (unless (file-exists-p thumbnail-file)
-      (pcase org-link-beautify--video-thumbnailer
-        ("qlmanage"
-         (let ((qlmanage-thumbnail-file (concat thumbnails-dir (file-name-nondirectory video-file) ".png")))
-           (unless (file-exists-p qlmanage-thumbnail-file)
-             (start-process
-              "org-link-beautify--video-preview"
-              " *org-link-beautify video-preview*"
-              "qlmanage"
-              "-x"
-              "-t"
-              "-s" (number-to-string thumbnail-size)
-              video-file
-              "-o" thumbnails-dir))
-           ;; then rename [video.mp4.png] to [video.png]
-           (when (and (not (file-exists-p thumbnail-file)) (file-exists-p qlmanage-thumbnail-file))
-             (rename-file qlmanage-thumbnail-file thumbnail-file))
+      ;; detect process already running?
+      (unless proc
+        (pcase org-link-beautify--video-thumbnailer
+          ("qlmanage"
+           (let ((qlmanage-thumbnail-file (concat thumbnails-dir (file-name-nondirectory video-file) ".png")))
+             (unless (file-exists-p qlmanage-thumbnail-file)
+               (start-process proc-name proc-buffer
+                              "qlmanage" "-x" "-t" "-s" (number-to-string thumbnail-size) video-file "-o" thumbnails-dir))
+             ;; then rename [video.mp4.png] to [video.png]
+             (when (and (not (file-exists-p thumbnail-file)) (file-exists-p qlmanage-thumbnail-file))
+               (rename-file qlmanage-thumbnail-file thumbnail-file))
+             (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+               (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file))))
+          ("ffmpegthumbnailer"
+           (start-process proc-name proc-buffer
+                          "ffmpegthumbnailer" "-f" "-i" video-file "-s" (number-to-string thumbnail-size) "-o" thumbnail-file)
            (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
-             (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file))))
-        ("ffmpegthumbnailer"
-         (start-process
-          "org-link-beautify--video-preview"
-          " *org-link-beautify video-preview*"
-          "ffmpegthumbnailer"
-          "-f" "-i" video-file
-          "-s" (number-to-string thumbnail-size)
-          "-o" thumbnail-file)
-         (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
-           (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file)))
-        ("ffmpeg"
-         ;; $ ffmpeg -ss 00:09:00 video.avi -vcodec png -vframes 1 -an -f rawvideo -s 119x64 out.png
-         (start-process
-          "org-link-beautify--video-preview"
-          " *org-link-beautify video-preview*"
-          "ffmpeg"
-          "-s" "00:09:00" video-file
-          "-vcodec" "png"
-          "-vframes" "1"
-          "-an" "-f" "rawvideo"
-          "-s" (number-to-string thumbnail-size)
-          thumbnail-file)
-         (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
-           (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file)))))
+             (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file)))
+          ("ffmpeg"
+           ;; $ ffmpeg -ss 00:09:00 video.avi -vcodec png -vframes 1 -an -f rawvideo -s 119x64 out.png
+           (start-process
+            proc-name proc-buffer
+            "ffmpeg" "-s" "00:09:00" video-file "-vcodec" "png" "-vframes" "1" "-an" "-f" "rawvideo" "-s" (number-to-string thumbnail-size)
+            thumbnail-file)
+           (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+             (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file))))))
     (org-link-beautify--add-overlay-marker start end)
     (org-link-beautify--add-keymap start end)
     ;; display thumbnail-file only when it exist, otherwise it will break org-mode buffer fontification.
@@ -646,36 +634,41 @@ You can install software `libmobi' to get command `mobitool'.")
 (defun org-link-beautify--preview-audio (path start end)
   "Preview audio PATH with wave form image on link between START and END."
   (let* ((audio-file (expand-file-name (org-link-unescape path)))
+         (audio-filename (file-name-nondirectory audio-file))
          (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path audio-file))
          (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base audio-file))))
-         (thumbnail-size (or org-link-beautify-audio-preview-size 200)))
+         (thumbnail-size (or org-link-beautify-audio-preview-size 200))
+         (proc-name (format "org-link-beautify--audio-preview - %s" audio-filename))
+         (proc-buffer (format " *org-link-beautify audio preview - %s*" audio-filename))
+         (proc (get-process proc-name)))
     (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
     (unless (file-exists-p thumbnail-file)
-      (pcase org-link-beautify--audio-thumbnailer
-        ("qlmanage"
-         (let ((qlmanage-thumbnail-file (concat thumbnails-dir (file-name-nondirectory audio-file) ".png")))
-           (unless (file-exists-p qlmanage-thumbnail-file)
-             (start-process
-              "org-link-beautify--audio-preview"
-              " *org-link-beautify audio preview*"
-              "qlmanage"
-              "-x"
-              "-t"
-              "-s" (number-to-string thumbnail-size)
-              audio-file
-              "-o" thumbnails-dir))
-           ;; then rename [audio.mp3.png] to [audio.png]
-           (when (and (not (file-exists-p thumbnail-file)) (file-exists-p qlmanage-thumbnail-file))
-             (rename-file qlmanage-thumbnail-file thumbnail-file))
+      (unless proc
+        (pcase org-link-beautify--audio-thumbnailer
+          ("qlmanage"
+           (let ((qlmanage-thumbnail-file (concat thumbnails-dir (file-name-nondirectory audio-file) ".png")))
+             (unless (file-exists-p qlmanage-thumbnail-file)
+               (start-process proc-name proc-buffer
+                              "qlmanage" "-x" "-t" "-s" (number-to-string thumbnail-size) audio-file "-o" thumbnails-dir))
+             ;; then rename [audio.mp3.png] to [audio.png]
+             (when (and (not (file-exists-p thumbnail-file)) (file-exists-p qlmanage-thumbnail-file))
+               (rename-file qlmanage-thumbnail-file thumbnail-file))
+             (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+               (org-link-beautify--notify-generate-thumbnail-failed audio-file thumbnail-file))))
+          ("audiowaveform"
+           (start-process proc-name proc-buffer
+                          "audiowaveform" "-i" audio-file "-o" thumbnail-file)
            (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
-             (org-link-beautify--notify-generate-thumbnail-failed audio-file thumbnail-file))))
-        ("audiowaveform"
-         (start-process
-          "org-link-beautify--audio-preview"
-          " *org-link-beautify audio preview*" ; DEBUG: check out output buffer
-          "audiowaveform"
-          "-i" audio-file
-          "-o" thumbnail-file)
+             (org-link-beautify--notify-generate-thumbnail-failed audio-file thumbnail-file)))
+          ;; TODO: use ffmpeg to generate audio wave form preview image.
+          ("ffmpeg"
+           ))))
+    (org-link-beautify--add-overlay-marker start end)
+    (org-link-beautify--add-keymap start end)
+    ;; display thumbnail-file only when it exist, otherwise it will break org-mode buffer fontification.
+    (when (file-exists-p thumbnail-file)
+      (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end))))
+
 (defvar org-link-beautify--url-screenshot-cmd
   (cond
    ((executable-find "webkit2png") "webkit2png")
@@ -704,10 +697,6 @@ You can install software `libmobi' to get command `mobitool'.")
         ("webkit2png"
          (org-link-beautify--preview-url-archive url `("webkit2png" ,url "-o" ,thumbnail-file))
          (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
-           (org-link-beautify--notify-generate-thumbnail-failed audio-file thumbnail-file)))
-        ;; TODO: use ffmpeg to generate audio wave form preview image.
-        ("ffmpeg"
-         )))
            (org-link-beautify--notify-generate-thumbnail-failed url thumbnail-file)))
         ("monolith"
          (let* ((thumbnail-file-html (concat (file-name-sans-extension thumbnail-file) ".html"))
@@ -843,7 +832,7 @@ You can install software `libmobi' to get command `mobitool'.")
   ;; detect whether link is normal, skip other links in special places.
   (let ((link-element (org-link-beautify--get-element start))
         ;; DEBUG:
-        ;; (link-element-debug (print link-element))
+        ;; (link-element-debug (message link-element))
         )
     (when (eq (car link-element) 'link)
       (save-match-data
@@ -852,7 +841,7 @@ You can install software `libmobi' to get command `mobitool'.")
                ;; (raw-link-debug (print raw-link))
                (type (org-element-property :type link-element))
                ;; DEBUG:
-               ;; (type-debug (print type))
+               ;; (type-debug (message type))
                (extension (or (file-name-extension (org-link-unescape path)) "txt"))
                ;; the search part behind link separator "::"
                (search-option (org-element-property :search-option link-element))
