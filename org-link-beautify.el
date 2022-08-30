@@ -74,7 +74,7 @@ which represent to ~/.cache/thumbnails/."
   :group 'org-link-beautify)
 
 (defcustom org-link-beautify-video-preview-list
-  '("avi" "rmvb" "ogg" "ogv" "mp4" "mkv" "mov" "m4v" "webm" "flv")
+  '("rmvb" "ogg" "ogv" "mp4" "mkv" "mov" "m4v" "webm" "flv")
   "A list of video file types be supported with thumbnails."
   :type 'list
   :safe #'listp
