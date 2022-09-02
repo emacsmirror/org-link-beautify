@@ -767,6 +767,7 @@ You can install software `libmobi' to get command `mobitool'.")
     ("irc" (all-the-icons-faicon "comments-o" :v-adjust -0.05))
     ("doi" (all-the-icons-faicon "link"))
     ("org-contact" (all-the-icons-faicon "user" :v-adjust -0.05))
+    ("video" (all-the-icons-faicon "file-video-o" :v-adjust -0.05))
     
     ;; `org-element-context' will return "fuzzy" type when link not recognized.
     ;; ("fuzzy"
