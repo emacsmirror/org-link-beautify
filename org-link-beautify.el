@@ -865,8 +865,10 @@ You can install software `libmobi' to get command `mobitool'.")
           (cond
            ;; video thumbnail preview
            ;; [[file:/path/to/video.mp4]]
+           ;; [[video:/path/to/video.mp4]]
            ((and org-link-beautify-video-preview
-                 (equal type "file") (member extension org-link-beautify-video-preview-list))
+                 (member type '("file" "video"))
+                 (member extension org-link-beautify-video-preview-list))
             ;; DEBUG:
             ;; (user-error "[org-link-beautify] cond -> video file")
             (org-link-beautify--preview-video path start end))
