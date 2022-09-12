@@ -943,7 +943,7 @@ You can install software `libmobi' to get command `mobitool'.")
             (org-link-beautify--display-not-exist start end description icon))
            
            ;; URL
-           ((and org-link-beautify-url-preview (or (equal type "https") (equal type "http")))
+           ((and org-link-beautify-url-preview (org-url-p (concat type path)))
             (org-link-beautify--preview-url type path start end))
            
            ;; general icons
