@@ -256,6 +256,28 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
 ;;  "print(\"blah blah\")"
 ;;  "print('{}'.format(3))")
 
+;;; Invoke external JavaScript script file or code.
+(defcustom org-link-beautify-javascript-interpreter (executable-find "node")
+  "Specify the JavaScript interpreter to run org-link-beautify JavaScript scripts or code."
+  :type 'string
+  :safe #'stringp)
+
+(defun org-link-beautify--javascript-script-run (javascript-script-file)
+  "Run JAVASCRIPT-SCRIPT-FILE through shell command."
+  (shell-command-to-string
+   (format "%s %s" org-link-beautify-python-interpreter javascript-script-file)))
+
+(defun org-link-beautify--javascript-command-to-string (&rest code-lines)
+  "Run JavaScript CODE-LINES through shell command."
+  (shell-command-to-string
+   (concat "node --eval "
+           ;; solve double quote character issue.
+           "\"" (string-replace "\"" "\\\"" (string-join code-lines "\n")) "\"")))
+
+(org-link-beautify--javascript-command-to-string
+ "console.log(\"hello, world!\");"
+ "console.log(1 + 3);")
+
 ;;; Common functions
 (defun org-link-beautify--get-element (position)
   "Return the org element of link at the `POSITION'."
