@@ -35,6 +35,7 @@
 (require 'all-the-icons)
 (require 'color)
 (require 'cl-lib)
+(require 'time-stamp)
 
 (defgroup org-link-beautify nil
   "Customize group of org-link-beautify-mode."
@@ -224,6 +225,12 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
   :safe #'booleanp
   :group 'org-link-beautify)
 
+(defcustom org-link-beautify-url-preview-size 512
+  "The URL web page preview thumbnail size."
+  :type 'number
+  :safe #'numberp
+  :group 'org-link-beautify)
+
 (defcustom org-link-beautify-enable-debug-p nil
   "Whether enable org-link-beautify print debug info."
   :type 'boolean
@@ -233,7 +240,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
 
 ;;; Invoke external Python script file or code.
 (defcustom org-link-beautify-python-interpreter (executable-find "python3")
-  "Specify the Python interpreter to run org-link-beautify python scripts or code."
+  "Specify Python interpreter to run python scripts or code."
   :type 'string
   :safe #'stringp)
 
@@ -258,7 +265,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
 
 ;;; Invoke external JavaScript script file or code.
 (defcustom org-link-beautify-javascript-interpreter (executable-find "node")
-  "Specify the JavaScript interpreter to run org-link-beautify JavaScript scripts or code."
+  "Specify JavaScript interpreter to run JavaScript scripts or code."
   :type 'string
   :safe #'stringp)
 
@@ -305,7 +312,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
    source-file thumbnail-file))
 
 (defun org-link-beautify--add-overlay-marker (start end)
-  "Add 'org-link-beautify on link text-property. between START and END."
+  "Add \\='org-link-beautify on link text-property. between START and END."
   (put-text-property start end 'type 'org-link-beautify))
 
 (defun org-link-beautify--get-thumbnails-dir-path (file)
@@ -493,7 +500,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
 You can install software `libmobi' to get command `mobitool'.")
 
 (defun org-link-beautify--preview-kindle (path start end)
-  "Preview Kindle ebook files like mobi, azw3 PATH and display on link between START and END."
+  "Preview Kindle ebooks at PATH and display on link between START and END."
   (if (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
       (let* ((file-path (match-string 1 path))
              ;; DEBUG: (_ (lambda (message "--> HERE")))
@@ -683,8 +690,9 @@ You can install software `libmobi' to get command `mobitool'.")
            (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
              (org-link-beautify--notify-generate-thumbnail-failed audio-file thumbnail-file)))
           ;; TODO: use ffmpeg to generate audio wave form preview image.
-          ("ffmpeg"
-           ))))
+          ;; ("ffmpeg"
+          ;;  )
+          )))
     (org-link-beautify--add-overlay-marker start end)
     (org-link-beautify--add-keymap start end)
     ;; display thumbnail-file only when it exist, otherwise it will break org-mode buffer fontification.
@@ -710,7 +718,8 @@ You can install software `libmobi' to get command `mobitool'.")
   (let* ((url (concat type ":" path))
          (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path (buffer-file-name)))
          (thumbnail-filename (format "org-link-beautify URL screenshot %s.png" (time-stamp-string)))
-         (thumbnail-file (expand-file-name thumbnail-filename thumbnails-dir)))
+         (thumbnail-file (expand-file-name thumbnail-filename thumbnails-dir))
+         (thumbnail-size (or org-link-beautify-url-preview-size 512)))
     ;; DEBUG: (message url) ; https://elpa.gnu.org/packages/kiwix.html (with `type')
     (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
     (unless (file-exists-p thumbnail-file)
