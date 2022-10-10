@@ -432,15 +432,21 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
         (when (file-exists-p thumbnail-file)
           (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end)))))
 
-(defun org-link-beautify--preview-epub (path start end)
+(defun org-link-beautify--preview-epub (path start end &optional search-option)
   "Preview EPUB file PATH and display on link between START and END."
   (if (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
       (let* ((file-path (match-string 1 path))
              ;; DEBUG: (_ (lambda (message "--> HERE")))
-             (_epub-page-number (or (match-string 2 path) 1))
+             (epub-page-number (or (match-string 2 path) 1))
              (epub-file (expand-file-name (org-link-unescape file-path)))
              (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path epub-file))
-             (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base epub-file))))
+             (thumbnail-file (expand-file-name
+                              (format "%s%s.png" thumbnails-dir (file-name-base epub-file))))
+             (thumbnail-file (expand-file-name
+                              (concat
+                               (if (or (null epub-page-number) (= epub-page-number 1)) ; if have page number ::N specified.
+                                   (format "%s%s.png" thumbnails-dir (file-name-base epub-file))
+                                 (format "%s%s-P%s.png" thumbnails-dir (file-name-base epub-file) epub-page-number)))))
              (thumbnail-size (or org-link-beautify-ebook-preview-size 500)))
         (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
         ;; DEBUG:
@@ -499,15 +505,20 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
   "Find available kindle ebook cover dump command.
 You can install software `libmobi' to get command `mobitool'.")
 
-(defun org-link-beautify--preview-kindle (path start end)
+(defun org-link-beautify--preview-kindle (path start end &optional search-option)
   "Preview Kindle ebooks at PATH and display on link between START and END."
   (if (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
       (let* ((file-path (match-string 1 path))
              ;; DEBUG: (_ (lambda (message "--> HERE")))
-             (_mob-page-number (or (match-string 2 path) 1))
+             (kindle-page-number (or (match-string 2 path) 1))
              (kindle-file (expand-file-name (org-link-unescape file-path)))
              (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path kindle-file))
              (thumbnail-file (expand-file-name (format "%s%s.jpg" thumbnails-dir (file-name-base kindle-file))))
+             (thumbnail-file (expand-file-name
+                              (concat
+                               (if (or (null kindle-page-number) (= kindle-page-number 1)) ; if have page number ::N specified.
+                                   (format "%s%s.png" thumbnails-dir (file-name-base kindle-file))
+                                 (format "%s%s-P%s.png" thumbnails-dir (file-name-base kindle-file) kindle-page-number)))))
              (thumbnail-size (or org-link-beautify-ebook-preview-size 500)))
         (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
         ;; DEBUG:
