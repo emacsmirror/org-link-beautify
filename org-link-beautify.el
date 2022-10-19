@@ -333,7 +333,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
   (when (file-exists-p thumbnail)
     (put-text-property
      start end
-     'display (create-image thumbnail nil nil :ascent 'center :max-height thumbnail-size))
+     'display (create-image thumbnail nil nil :ascent 100 :max-height thumbnail-size))
     ;; Support mouse left click on image to open link.
     (make-local-variable 'image-map)
     (define-key image-map (kbd "<mouse-1>") 'org-open-at-point)))
