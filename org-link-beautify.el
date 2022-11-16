@@ -197,7 +197,7 @@ You can install software `libmobi' to get command `mobitool'."
   :safe #'booleanp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-archive-preview-alist
+(defcustom org-link-beautify-archive-preview-command-alist
   '(("zip" . "unzip -l")
     ("rar" . "unrar l")
     ("7z" . "7z l -ba") ; -ba - suppress headers; undocumented.
@@ -979,13 +979,13 @@ You can install software `libmobi' to get command `mobitool'.")
            ((and org-link-beautify-archive-preview
                  (equal type "file")
                  (file-exists-p path)
-                 (member extension (mapcar 'car org-link-beautify-archive-preview-alist)))
+                 (member extension (mapcar 'car org-link-beautify-archive-preview-command-alist)))
             ;; DEBUG:
             ;; (user-error "[org-link-beautify] cond -> archive file")
             ;; (if (null extension)
             ;;     (user-error "[org-link-beautify] archive file preview> extension: %s" extension))
             ;; (message "[org-link-beautify] archive file preview> path: %s" path)
-            (let ((command (cdr (assoc extension org-link-beautify-archive-preview-alist))))
+            (let ((command (cdr (assoc extension org-link-beautify-archive-preview-command-alist))))
               (org-link-beautify--preview-archive path command start end)))
            
            ;; file does not exist
