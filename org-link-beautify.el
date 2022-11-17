@@ -144,8 +144,8 @@ PDF preview."
 
 (defcustom org-link-beautify-epub-preview
   (cl-case system-type
-    ('gnu/linux (executable-find "gnome-epub-thumbnailer"))
-    ('darwin (executable-find "epub-thumbnailer")))
+    (gnu/linux (executable-find "gnome-epub-thumbnailer"))
+    (darwin (executable-find "epub-thumbnailer")))
   "Whether enable EPUB files cover preview?
 If command \"gnome-epub-thumbnailer\" is available, enable EPUB
 preview by default. You can set this option to nil to disable
@@ -156,8 +156,8 @@ EPUB preview."
 
 (defcustom org-link-beautify-kindle-preview
   (cl-case system-type
-    ('gnu/linux (executable-find "mobitool"))
-    ('darwin (executable-find "mobitool")))
+    (gnu/linux (executable-find "mobitool"))
+    (darwin (executable-find "mobitool")))
   "Whether enable Kindle ebook files cover preview?
 
 Enable Kindle ebook preview by default. You can set this option
@@ -318,9 +318,9 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
 (defun org-link-beautify--get-thumbnails-dir-path (file)
   "Return the FILE thumbnail directory's path."
   (cl-case org-link-beautify-thumbnails-dir
-    ('source-path
+    (source-path
      (concat (file-name-directory file) ".thumbnails/"))
-    ('user-home
+    (user-home
      (expand-file-name "~/.cache/thumbnails/"))))
 
 (defun org-link-beautify--ensure-thumbnails-dir (thumbnails-dir)
@@ -453,7 +453,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
         ;; (message epub-file)
         (unless (file-exists-p thumbnail-file)
           (cl-case system-type
-            ('gnu/linux                 ; for Linux "gnome-epub-thumbnailer"
+            (gnu/linux                 ; for Linux "gnome-epub-thumbnailer"
              (start-process
               "org-link-beautify--epub-preview"
               " *org-link-beautify epub-preview*"
@@ -466,7 +466,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
               )
              (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
                (org-link-beautify--notify-generate-thumbnail-failed epub-file thumbnail-file)))
-            ('darwin            ; for macOS "epub-thumbnailer" command
+            (darwin            ; for macOS "epub-thumbnailer" command
              ;; DEBUG
              ;; (message epub-file)
              ;; (message thumbnail-file)
