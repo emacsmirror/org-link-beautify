@@ -329,12 +329,14 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
   (unless (file-directory-p thumbnails-dir)
     (make-directory thumbnails-dir)))
 
-(defun org-link-beautify--display-thumbnail (thumbnail thumbnail-size start end)
-  "Display THUMBNAIL between START and END with size THUMBNAIL-SIZE when exist."
+(defun org-link-beautify--display-thumbnail (thumbnail thumbnail-size start end &optional border-width border-color)
+  "Display THUMBNAIL between START and END with THUMBNAIL-SIZE and in BORDER-WIDTH BORDER-COLOR when exist."
   (when (file-exists-p thumbnail)
     (put-text-property
      start end
      'display (create-image thumbnail nil nil :ascent 100 :max-height thumbnail-size))
+    (when border-color
+      (put-text-property start end 'face `(:box (:line-width ,(or border-width 1) :color ,border-color))))
     ;; Support mouse left click on image to open link.
     (make-local-variable 'image-map)
     (define-key image-map (kbd "<mouse-1>") 'org-open-at-point)))
@@ -660,7 +662,7 @@ You can install software `libmobi' to get command `mobitool'.")
     (org-link-beautify--add-keymap start end)
     ;; display thumbnail-file only when it exist, otherwise it will break org-mode buffer fontification.
     (when (file-exists-p thumbnail-file)
-      (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end))))
+      (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end 5 "SlateGray2"))))
 
 (defvar org-link-beautify--audio-thumbnailer
   (cond
