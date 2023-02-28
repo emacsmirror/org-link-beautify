@@ -775,8 +775,8 @@ You can install software `libmobi' to get command `mobitool'.")
       ((file-remote-p path)             ; remote file
        (all-the-icons-faicon "server" :face 'org-priority))
       (t (all-the-icons-icon-for-file   ; other file types
-          (format ".%s" extension)
-          :face (org-link-beautify--warning-face-p path)))))
+      ;; other file types
+      (t (all-the-icons-icon-for-file path))))
     ("file+sys" (all-the-icons-faicon "link"))
     ("file+emacs" (all-the-icons-icon-for-mode 'emacs-lisp-mode))
     ("http" (all-the-icons-icon-for-url (concat "http:" path) :v-adjust -0.05))
@@ -853,7 +853,7 @@ You can install software `libmobi' to get command `mobitool'.")
      (propertize description 'face 'org-link-beautify-link-description-face)
      (propertize "]" 'face 'org-link-beautify-link-decorator-face)
      (propertize "⌈" 'face 'org-link-beautify-link-decorator-face)
-     (propertize icon 'face 'org-link-beautify-link-icon-face)
+     (propertize icon)
      (propertize "⌋" 'face 'org-link-beautify-link-decorator-face)))))
 
 (defun org-link-beautify--display-not-exist (start end description icon)
