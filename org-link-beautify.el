@@ -774,7 +774,9 @@ You can install software `libmobi' to get command `mobitool'.")
        (all-the-icons-icon-for-dir "path" :face (org-link-beautify--warning-face-p path) :v-adjust 0))
       ((file-remote-p path)             ; remote file
        (all-the-icons-faicon "server" :face 'org-priority))
-      (t (all-the-icons-icon-for-file   ; other file types
+      ;; special file types
+      ;; ((equal (file-name-extension path) "ipynb")
+      ;;  (all-the-icons-fileicon "jupyter" :height 1.0  :face 'all-the-icons-dorange))
       ;; other file types
       (t (all-the-icons-icon-for-file path))))
     ("file+sys" (all-the-icons-faicon "link"))
