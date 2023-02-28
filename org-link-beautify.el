@@ -767,9 +767,12 @@ You can install software `libmobi' to get command `mobitool'.")
   ;; (message "DEBUG: (link-element) %s" link-element)
   (pcase type
     ("file"
+     ;; DEBUG:
+     ;; (message "[DEBUG] type: %s, path: %s, extension: %s" type path extension)
      (cond
-      ((not (file-exists-p (expand-file-name path))) ; not exist file!
-       (all-the-icons-faicon "ban" :face 'org-warning :v-adjust -0.05))
+      ;; FIXME: avoid other remote link like /docker: caused `file-exists-p' suspend Emacs.
+      ;; ((not (file-exists-p (expand-file-name path))) ; not exist file!
+      ;;  (all-the-icons-faicon "ban" :face 'org-warning :v-adjust -0.05))
       ((file-directory-p path)          ; directory
        (all-the-icons-icon-for-dir "path" :face (org-link-beautify--warning-face-p path) :v-adjust 0))
       ((file-remote-p path)             ; remote file
