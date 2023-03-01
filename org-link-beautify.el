@@ -827,10 +827,12 @@ You can install software `libmobi' to get command `mobitool'.")
     ;;    (let ((real-type (match-string 1 link-element)))
     ;;      (pcase real-type
     ;;        ))))
-    ;; (_
-    ;;  ;; DEBUG
-    ;;  (message "[org-link-beautify] link-element: %s" link-element))
-    ))
+
+    (_
+     ;; DEBUG
+     (message "[org-link-beautify] link-element: %s" link-element)
+     ;; handle when returned icon is `nil'.
+     (all-the-icons-faicon "question" :v-adjust -0.05 :face '(:foreground "DarkSeaGreen4")))))
 
 (defface org-link-beautify-link-decorator-face
   `((t :foreground ,(color-lighten-name (face-foreground 'shadow) 2)))
@@ -904,9 +906,7 @@ You can install software `libmobi' to get command `mobitool'.")
                                 ;; when description not exist, use raw link for raw link case.
                                 raw-link))
                ;; DEBUG: (desc-debug (print description))
-               (icon (or (org-link-beautify--return-icon type path extension link-element)
-                         ;; handle when returned icon is `nil'.
-                         (all-the-icons-faicon "question" :v-adjust -0.05)))
+               (icon (org-link-beautify--return-icon type path extension link-element))
                ;; DEBUG:
                ;; (icon-debug (print icon))
                )
