@@ -117,6 +117,13 @@ Supports video file link preview with thumbnail.
 
   https://github.com/marianosimone/epub-thumbnailer
 
+- EPUB file cover image preview with "epub-thumbnailer.py" script requires PIL/Pillow.
+
+  #+begin_src shell
+  python  -m pip install Pillow
+  python3 -m pip install Pillow
+  #+end_src
+
 ** MELPA
 
 * Usage
