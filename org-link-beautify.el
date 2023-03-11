@@ -638,8 +638,15 @@ You can install software `libmobi' to get command `mobitool'.")
           ("qlmanage"
            (let ((qlmanage-thumbnail-file (concat thumbnails-dir (file-name-nondirectory video-file) ".png")))
              (unless (file-exists-p qlmanage-thumbnail-file)
-               (start-process proc-name proc-buffer
-                              "qlmanage" "-x" "-t" "-s" (number-to-string thumbnail-size) video-file "-o" thumbnails-dir))
+               (let ((proc (start-process proc-name proc-buffer
+                                          "qlmanage" "-x" "-t" "-s" (number-to-string thumbnail-size) video-file "-o" thumbnails-dir))
+                     (proc-filter (lambda (proc output)
+                                    ;; * No thumbnail created for [FILE PATH]
+                                    (when (string-match "\\* No thumbnail created for.*" output)
+                                      (message
+                                       "[org-link-beautify] video preview FAILED on macOS QuickLook generating thumbnail for %s."
+                                       video-filename)))))
+                 (set-process-filter proc proc-filter)))
              ;; then rename [video.mp4.png] to [video.png]
              (when (and (not (file-exists-p thumbnail-file)) (file-exists-p qlmanage-thumbnail-file))
                (rename-file qlmanage-thumbnail-file thumbnail-file))
