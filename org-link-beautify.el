@@ -43,7 +43,7 @@
   :group 'org)
 
 (defcustom org-link-beautify-condition-functions '(org-link-beautify--filter-org-mode
-                                                   org-link-beautify--filter-larg-file)
+                                                   org-link-beautify--filter-large-file)
   "Functions be executed as condition before activate `org-link-beautify-mode'.
 Only if all functions evaluated as TRUE, then processed."
   :type 'list
@@ -1141,7 +1141,7 @@ Or clear org-link-beautify if headline STATE is folded."
   "Only enable on `org-mode' major-mode buffers."
   (eq major-mode 'org-mode))
 
-(defun org-link-beautify--filter-larg-file ()
+(defun org-link-beautify--filter-large-file ()
   "Filter large files more than 400K characters to improve performance."
   (< (buffer-size) 400000))
 
