@@ -1095,6 +1095,25 @@ Or clear org-link-beautify if headline STATE is folded."
 (define-key org-link-beautify-keymap [mouse-1] 'org-open-at-point)
 (define-key org-link-beautify-keymap (kbd "<mouse-1>") 'org-open-at-point)
 
+(defun org-link-beautify-copy-file-to-clipboard (&optional arg)
+  "Copy the Org link file at point to clipboard."
+  (interactive "P")
+  (let* ((path (org-element-property :path (org-element-context)))
+         (file-absolute-path (expand-file-name path)))
+    (cl-case system-type
+      ;; TODO:
+      (gnu/linux )
+      (darwin
+       (do-applescript
+        (format "tell app \"Finder\" to set the clipboard to ( POSIX file \"%s\" )"
+                file-absolute-path)))
+      ;; TODO:
+      (windows-nt ))
+    (message "Copied file [%s] to system clipboard." path)))
+
+(define-key org-link-beautify-keymap (kbd "c") 'org-link-beautify-copy-file-to-clipboard)
+;; (define-key org-link-beautify-keymap (kbd "C-c") 'org-link-beautify-copy-file-to-clipboard)
+;; (define-key org-link-beautify-keymap (kbd "M-w") 'org-link-beautify-copy-file-to-clipboard)
 
 ;;;###autoload
 (defun org-link-beautify-enable ()

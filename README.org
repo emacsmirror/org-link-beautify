@@ -61,6 +61,7 @@ Supports video file link preview with thumbnail.
   #+begin_src emacs-lisp :eval no
   (define-key org-link-beautify-keymap (kbd "RET") 'org-open-at-point)
   #+end_src
+- =[c]= :: =org-link-beautify-copy-file-to-clipboard=, copy the file at point link to system clipboard for pasting.
 - [X] preview text files like .org, .markdown (.md), .txt, and source code files etc (customized with ~org-link-beautify-text-preview-list~).
 - [X] preview archive files like .zip, .rar, .tar.gz, .tar.bz2, .7z etc.
 - [ ] preview URL with screenshot on web page (Still considering whether should add this feature.)
