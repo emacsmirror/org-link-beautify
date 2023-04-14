@@ -1053,7 +1053,15 @@ Or clear org-link-beautify if headline STATE is folded."
                  (end (save-excursion (org-next-visible-heading 1) (point))))
             (org-link-beautify--clear-text-properties begin end))))
     ;; clear in whole buffer
-    (org-link-beautify--clear-text-properties)))
+    (org-link-beautify--clear-text-properties))
+  ;; replace the whole Org buffer font-lock function `org-restart-font-lock'
+  ;; with a lightweight current headline scope only font-lock function.
+  (save-excursion
+    (save-restriction
+      (org-narrow-to-subtree)
+      (let* ((begin (point-min))
+             (end (save-excursion (org-next-visible-heading 1) (point))))
+        (jit-lock-refontify begin end)))))
 
 (defvar org-link-beautify--icon-spec-list
   '(;; mind map files
