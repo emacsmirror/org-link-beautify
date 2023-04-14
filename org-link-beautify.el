@@ -1053,8 +1053,7 @@ Or clear org-link-beautify if headline STATE is folded."
                  (end (save-excursion (org-next-visible-heading 1) (point))))
             (org-link-beautify--clear-text-properties begin end))))
     ;; clear in whole buffer
-    (org-link-beautify--clear-text-properties))
-  (org-restart-font-lock))
+    (org-link-beautify--clear-text-properties)))
 
 (defvar org-link-beautify--icon-spec-list
   '(;; mind map files
