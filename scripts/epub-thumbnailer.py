@@ -112,7 +112,6 @@ def extract_cover(cover_path):
     if cover_path:
         cover = epub.open(cover_path)
         im = Image.open(BytesIO(cover.read()))
-        # DeprecationWarning: ANTIALIAS is deprecated and will be removed in Pillow 10 (2023-07-01). Use LANCZOS or Resampling.LANCZOS instead.
         im.thumbnail((size, size), Image.LANCZOS)
         if im.mode == "CMYK":
             im = im.convert("RGB")
