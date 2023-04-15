@@ -280,6 +280,18 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
  "console.log(1 + 3);")
 
 ;;; Common functions
+;; replace the whole Org buffer font-lock function `org-restart-font-lock'
+;; with a lightweight `jit-lock-refontify' current headline scope only
+;; font-lock function.
+(defmacro org-link-beautify--subtree-scope-wrap (body)
+  "Wrap the BODY to executed in scope of current subtree to get BEGIN and END position."
+  `(save-excursion
+     (save-restriction
+       (org-narrow-to-subtree)
+       (let* ((begin (point-min))
+              (end (save-excursion (org-next-visible-heading 1) (point))))
+         ,body))))
+
 (defun org-link-beautify--get-element (position)
   "Return the org element of link at the `POSITION'."
   (save-excursion
@@ -1021,15 +1033,24 @@ You can install software `libmobi' to get command `mobitool'.")
 (defun org-link-beautify-headline-cycle (&optional state)
   "Function to be executed on `org-cycle-hook' STATE."
   (pcase state
-    ('subtree (ignore))
-    ('children (ignore))
-    ('folded
-     (org-link-beautify-clear state))
+    ('subtree (org-link-beautify--refontify state))
+    ('children (org-link-beautify--refontify state))
+    ('folded (org-link-beautify--clear state))
+    ('overview (org-link-beautify--clear state))
     (_ (ignore))))
+
+(defun org-link-beautify--refontify (&optional state)
+  ;; replace the whole Org buffer font-lock function `org-restart-font-lock'
+  ;; with a lightweight `jit-lock-refontify' current headline scope only
+  ;; font-lock function.
+  (when (or (eq state 'children) (eq state 'subtree))
+    (org-link-beautify--subtree-scope-wrap
+     (jit-lock-refontify begin end))))
 
 ;;; toggle org-link-beautify text-properties
 (defun org-link-beautify--clear-text-properties (&optional begin end)
-  "Clear all org-link-beautify text-properties between BEGIN and END."
+  "Clear all org-link-beautify text-properties between BEGIN and END.
+If BEGIN and END is ommited, the default value is `point-min' and `point-max'."
   (let ((point (or begin (point-min)))
         (bmp (buffer-modified-p)))
     (while (setq point (next-single-property-change point 'display))
@@ -1041,27 +1062,16 @@ You can install software `libmobi' to get command `mobitool'.")
 	     '(display t))))
     (set-buffer-modified-p bmp)))
 
-(defun org-link-beautify-clear (&optional state)
-  "Clear the text-properties of `org-link-beautify' globally.
-Or clear org-link-beautify if headline STATE is folded."
-  (if (eq state 'folded)
-      ;; clear in current folded headline
-      (save-excursion
-        (save-restriction
-          (org-narrow-to-subtree)
-          (let* ((begin (point-min))
-                 (end (save-excursion (org-next-visible-heading 1) (point))))
-            (org-link-beautify--clear-text-properties begin end))))
-    ;; clear in whole buffer
-    (org-link-beautify--clear-text-properties))
-  ;; replace the whole Org buffer font-lock function `org-restart-font-lock'
-  ;; with a lightweight current headline scope only font-lock function.
-  (save-excursion
-    (save-restriction
-      (org-narrow-to-subtree)
-      (let* ((begin (point-min))
-             (end (save-excursion (org-next-visible-heading 1) (point))))
-        (jit-lock-refontify begin end)))))
+(defun org-link-beautify--clear (&optional state)
+  "Clear the text-properties of `org-link-beautify' under STATE headline subtree."
+  (cond
+   ((eq state 'folded)
+    ;; clear in current folded headline
+    (org-link-beautify--subtree-scope-wrap
+     (org-link-beautify--clear-text-properties begin end)))
+   ((eq state 'overview)
+    ;; clear whole buffer
+    (org-link-beautify--clear-text-properties))))
 
 (defvar org-link-beautify--icon-spec-list
   '(;; mind map files
@@ -1139,7 +1149,7 @@ Or clear org-link-beautify if headline STATE is folded."
   (dolist (link-type (mapcar #'car org-link-parameters))
     (org-link-set-parameters link-type :activate-func t))
   (remove-hook 'org-cycle-hook #'org-link-beautify-headline-cycle)
-  (org-link-beautify-clear))
+  (org-link-beautify--clear))
 
 ;;;###autoload
 (define-minor-mode org-link-beautify-mode
