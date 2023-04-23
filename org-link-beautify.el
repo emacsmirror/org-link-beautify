@@ -1,7 +1,7 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
 ;; Authors: stardiviner <numbchild@gmail.com>
-;; Package-Requires: ((emacs "28.1") (all-the-icons "5.0.0"))
+;; Package-Requires: ((emacs "28.1") (nerd-icons "0.0.1"))
 ;; Version: 1.2.2
 ;; Keywords: hypermedia
 ;; homepage: https://repo.or.cz/org-link-beautify.git
@@ -32,7 +32,7 @@
 (require 'org)
 (require 'org-element)
 (require 'org-crypt)
-(require 'all-the-icons)
+(require 'nerd-icons)
 (require 'color)
 (require 'cl-lib)
 (require 'time-stamp)
@@ -783,53 +783,54 @@ You can install software `libmobi' to get command `mobitool'.")
      ;; (message "[DEBUG] type: %s, path: %s, extension: %s" type path extension)
      (cond
       ;; FIXME: avoid other remote link like /docker: caused `file-exists-p' suspend Emacs.
+      ;; make sure the link prefix is `file'.
       ;; ((not (file-exists-p (expand-file-name path))) ; not exist file!
-      ;;  (all-the-icons-faicon "ban" :face 'org-warning :v-adjust -0.05))
+      ;;  (nerd-icons-codicon "nf-cod-error" :face 'nerd-icons-red-alt))
       ((file-directory-p path)          ; directory
-       (all-the-icons-icon-for-dir "path" :face (org-link-beautify--warning-face-p path) :v-adjust 0))
+       (nerd-icons-octicon "nf-oct-file_directory" :face (org-link-beautify--warning-face-p path)))
       ((file-remote-p path)             ; remote file
-       (all-the-icons-faicon "server" :face 'org-priority))
+       (nerd-icons-codicon "nf-cod-remote_explorer" :face 'nerd-icons-lred))
       ;; special file types
       ;; ((equal (file-name-extension path) "ipynb")
-      ;;  (all-the-icons-fileicon "jupyter" :height 1.0  :face 'all-the-icons-dorange))
+      ;;  (nerd-icons-icon-for-file "file.ipynb"))
       ;; other file types
-      (t (all-the-icons-icon-for-file path))))
-    ("file+sys" (all-the-icons-faicon "link" :face '(:foreground "blue")))
-    ("file+emacs" (all-the-icons-icon-for-mode 'emacs-lisp-mode))
-    ("http"  (all-the-icons-icon-for-url (concat "http:"  path) :v-adjust -0.05))
-    ("https" (all-the-icons-icon-for-url (concat "https:" path) :v-adjust -0.05))
-    ("ftp" (all-the-icons-faicon "link" :face '(:foreground "orange")))
-    ;; ("telnet" (all-the-icons-material "settings_ethernet" :face '(:foreground "chocolate1")))
-    ("custom-id" (all-the-icons-faicon "search-plus" :face '(:foreground "DeepSkyBlue")))
-    ("coderef" (all-the-icons-faicon "code" :face '(:foreground "cyan2")))
-    ("id" (all-the-icons-faicon "link" :face '(:foreground "MediumPurple1")))
-    ("attachment" (all-the-icons-faicon "file-archive-o" :face '(:foreground "yellow1")))
-    ("elisp" (all-the-icons-icon-for-mode 'emacs-lisp-mode :v-adjust -0.05))
-    ("eshell" (all-the-icons-icon-for-mode 'eshell-mode))
-    ("shell" (all-the-icons-icon-for-mode 'shell-mode))
-    ("man" (all-the-icons-faicon "info-circle" :v-adjust -0.05 :face '(:foreground "SlateGray3")))
-    ("info" (all-the-icons-faicon "info" :v-adjust -0.05 :face '(:foreground "SlateGray3")))
-    ("help" (all-the-icons-faicon "info" :v-adjust -0.05 :face '(:foreground "SlateGray3")))
+      (t (nerd-icons-icon-for-file path))))
+    ("file+sys" (nerd-icons-mdicon "nf-md-file_cog_outline" :face 'nerd-icons-lred))
+    ("file+emacs" (nerd-icons-icon-for-mode 'emacs-lisp-mode))
+    ("http" (nerd-icons-icon-for-url (concat "http:" path)))
+    ("https" (nerd-icons-icon-for-url (concat "https:" path)))
+    ("ftp" (nerd-icons-mdicon "nf-md-file_link_outline" :face 'nerd-icons-orange))
+    ("telnet" (nerd-icons-mdicon "nf-md-link_box_variant_outline" :face 'nerd-icons-blue))
+    ("custom-id" (nerd-icons-mdicon "nf-md-text_box_search_outline" :face 'nerd-icons-blue))
+    ("id" (nerd-icons-mdicon "nf-md-text_search" :face 'nerd-icons-blue))
+    ("coderef" (nerd-icons-codicon "nf-cod-references" :face 'nerd-icons-cyan))
+    ("attachment" (nerd-icons-mdicon "nf-md-attachment" :face 'nerd-icons-lorange))
+    ("elisp" (nerd-icons-icon-for-file "file.el"))
+    ("eshell" (nerd-icons-icon-for-mode 'eshell-mode))
+    ("shell" (nerd-icons-icon-for-mode 'shell-mode))
+    ("man" (nerd-icons-mdicon "nf-md-file_document_outline" :face 'nerd-icons-lblue))
+    ("info" (nerd-icons-mdicon "nf-md-information_outline" :face 'nerd-icons-lblue))
+    ("help" (nerd-icons-mdicon "nf-md-help_circle_outline" :face 'nerd-icons-lblue))
     ;; Org Mode external link types
-    ("eaf" (all-the-icons-faicon "cubes" :v-adjust -0.05 :face '(:foreground "DodgerBlue"))) ; emacs-application-framework
-    ("eww" (all-the-icons-icon-for-mode 'eww-mode))
-    ("chrome" (all-the-icons-faicon "chrome" :v-adjust -0.05 :face '(:foreground "DodgerBlue")))
-    ("mu4e" (all-the-icons-faicon "envelope" :v-adjust -0.05 :face '(:foreground "gray")))
-    ("git" (all-the-icons-faicon "git-square" :v-adjust -0.05 :face '(:foreground "HotPink")))
-    ("orgit" (all-the-icons-faicon "git-square" :v-adjust -0.05 :face '(:foreground "DeepPink")))
-    ("orgit-rev" (all-the-icons-octicon "git-commit" :face '(:foreground "pink")))
-    ("orgit-log" (all-the-icons-octicon "git-branch" :face '(:foreground "orange")))
-    ("pdf" (all-the-icons-icon-for-file ".pdf"))
-    ("grep" (all-the-icons-icon-for-mode 'grep-mode))
-    ("occur" (all-the-icons-icon-for-mode 'occur-mode))
-    ("rss" (all-the-icons-faicon "rss" :face '(:foreground "tan1")))
-    ("elfeed" (all-the-icons-faicon "rss" :face '(:foreground "DarkGreen")))
-    ("wikipedia" (all-the-icons-faicon "wikipedia-w" :face '(:foreground "NavajoWhite")))
-    ("mailto" (all-the-icons-faicon "envelope-o" :v-adjust -0.05 :face '(:foreground "SteelBlue")))
-    ("irc" (all-the-icons-faicon "comments-o" :v-adjust -0.05 :face '(:foreground "chocolate4")))
-    ("doi" (all-the-icons-faicon "link" :face '(:foreground "gray")))
-    ("org-contact" (all-the-icons-faicon "user" :v-adjust -0.05 :face '(:foreground "MediumPurple3")))
-    ("video" (all-the-icons-faicon "file-video-o" :v-adjust -0.05 :face '(:foreground "CadetBlue2")))
+    ("eaf" (nerd-icons-mdicon "nf-md-apps" :face 'nerd-icons-blue)) ; emacs-application-framework
+    ("eww" (nerd-icons-icon-for-mode 'eww-mode))
+    ("chrome" (nerd-icons-mdicon "nf-md-google_chrome" :face 'nerd-icons-lorange))
+    ("mu4e" (nerd-icons-mdicon "nf-md-email_search_outline" :face 'nerd-icons-blue))
+    ("git" (nerd-icons-mdicon "nf-md-git" :face 'nerd-icons-lorange))
+    ("orgit" (nerd-icons-faicon "nf-fa-git" :face 'nerd-icons-red))
+    ("orgit-rev" (nerd-icons-devicon "nf-dev-git_commit" :face 'nerd-icons-silver))
+    ("orgit-log" (nerd-icons-octicon "nf-oct-diff" :face 'nerd-icons-silver))
+    ("pdf" (nerd-icons-icon-for-file "file.pdf"))
+    ("grep" (nerd-icons-mdicon "nf-md-selection_search" :face 'nerd-icons-green))
+    ("occur" (nerd-icons-mdicon "nf-md-selection_multiple" :face 'nerd-icons-green))
+    ("rss" (nerd-icons-mdicon "nf-md-rss" :face 'nerd-icons-lorange))
+    ("elfeed" (nerd-icons-mdicon "nf-md-rss" :face 'nerd-icons-green))
+    ("wikipedia" (nerd-icons-mdicon "nf-md-wikipedia" :face 'nerd-icons-dsilver))
+    ("mailto" (nerd-icons-mdicon "nf-md-email_send_outline" :face 'nerd-icons-lblue))
+    ("irc" (nerd-icons-mdicon "nf-md-chat" :face 'nerd-icons-blue-alt))
+    ("doi" (nerd-icons-mdicon "nf-md-file_document_plus_outline" :face 'nerd-icons-green))
+    ("org-contact" (nerd-icons-mdicon "nf-md-contacts_outline" :face 'nerd-icons-purple-alt))
+    ("video" (nerd-icons-faicon "nf-fa-file_video_o" :face 'nerd-icons-blue))
     
     ;; `org-element-context' will return "fuzzy" type when link not recognized.
     ;; ("fuzzy"
@@ -844,7 +845,7 @@ You can install software `libmobi' to get command `mobitool'.")
      ;; DEBUG
      (message "[org-link-beautify] link-element: %s" link-element)
      ;; handle when returned icon is `nil'.
-     (all-the-icons-faicon "question" :v-adjust -0.05 :face '(:foreground "DarkSeaGreen4")))))
+     (nerd-icons-mdicon "nf-md-progress_question" :face 'nerd-icons-lyellow))))
 
 (defface org-link-beautify-link-decorator-face
   `((t :foreground ,(color-lighten-name (face-foreground 'shadow) 2)))
@@ -1073,35 +1074,6 @@ If BEGIN and END is ommited, the default value is `point-min' and `point-max'."
     ;; clear whole buffer
     (org-link-beautify--clear-text-properties))))
 
-(defvar org-link-beautify--icon-spec-list
-  '(;; mind map files
-    ("\\.mm" all-the-icons-fileicon "brain" :face all-the-icons-lpink)
-    ("\\.xmind" all-the-icons-fileicon "brain" :face all-the-icons-lpink)
-    ;; archive files
-    ("\\.zip" all-the-icons-faicon "file-archive-o" :face all-the-icons-yellow)
-    ("\\.rar" all-the-icons-faicon "file-archive-o" :face all-the-icons-yellow)
-    ("\\.7z" all-the-icons-faicon "file-archive-o" :face all-the-icons-yellow)
-    ("\\.gz" all-the-icons-faicon "file-archive-o" :face all-the-icons-yellow)
-    ("\\.bz2" all-the-icons-faicon "file-archive-o" :face all-the-icons-yellow)
-    ("\\.tar" all-the-icons-faicon "file-archive-o" :face all-the-icons-yellow)
-    ("\\.tar.gz" all-the-icons-faicon "file-archive-o" :face all-the-icons-yellow)
-    ("\\.tar.bz2" all-the-icons-faicon "file-archive-o" :face all-the-icons-yellow)
-    ("\\.xz" all-the-icons-faicon "file-archive-o" :face all-the-icons-yellow)
-    ("\\.zst" all-the-icons-faicon "file-archive-o" :face all-the-icons-yellow))
-  "A list of icon spec to be used by `org-link-beautify--add-more-icons-support'.")
-
-;;; add more missing icons to `all-the-icons'.
-(defun org-link-beautify--add-more-icons-support ()
-  "Add more icons for file types."
-  (dolist (icon-spec org-link-beautify--icon-spec-list)
-    (add-to-list 'all-the-icons-regexp-icon-alist icon-spec)))
-
-(defun org-link-beautify--remove-more-icons-support ()
-  "Remove added extra icons support for file types from `org-link-beautify'."
-  (dolist (icon-spec org-link-beautify--icon-spec-list)
-    (setq all-the-icons-regexp-icon-alist
-          (delete icon-spec all-the-icons-regexp-icon-alist))))
-
 (defvar org-link-beautify-keymap (make-sparse-keymap))
 
 (defun org-link-beautify--add-keymap (start end)
@@ -1136,7 +1108,6 @@ If BEGIN and END is ommited, the default value is `point-min' and `point-max'."
 (defun org-link-beautify-enable ()
   "Enable `org-link-beautify'."
   (when (display-graphic-p)
-    (org-link-beautify--add-more-icons-support)
     (dolist (link-type (mapcar #'car org-link-parameters))
       (org-link-set-parameters link-type :activate-func #'org-link-beautify-display))
     (add-hook 'org-cycle-hook #'org-link-beautify-headline-cycle)
@@ -1145,7 +1116,6 @@ If BEGIN and END is ommited, the default value is `point-min' and `point-max'."
 ;;;###autoload
 (defun org-link-beautify-disable ()
   "Disable `org-link-beautify'."
-  (org-link-beautify--remove-more-icons-support)
   (dolist (link-type (mapcar #'car org-link-parameters))
     (org-link-set-parameters link-type :activate-func t))
   (remove-hook 'org-cycle-hook #'org-link-beautify-headline-cycle)

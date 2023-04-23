@@ -70,8 +70,7 @@ Supports video file link preview with thumbnail.
 
 ** Requirements
 
-- all-the-icons :: This Emacs package icons use "[[https://github.com/domtronn/all-the-icons.el][all-the-icons]]". If you got icon
-  problem. You need to make sure all-the-icons *AND FONTS* installed correctly.
+- nerd-icons :: 
 
 - video thumbnail feature needs package "=ffmpegthumbnailer="
 
