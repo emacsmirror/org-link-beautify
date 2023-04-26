@@ -43,10 +43,10 @@ Supports video file link preview with thumbnail.
   #+end_src
 
   Currently support PDF link types:
-  + pdfview:
-  + docview:
-  + eaf:pdfviewer::
-  + file:
+  + =pdfview:=
+  + =docview:=
+  + =eaf:pdfviewer::=
+  + =file:=
 - [X] display thumbnail for video file link
   + [X] support Linux video thumbnail with "=ffmpegthumbnailer="
   + [X] support macOS video thumbnail with "=qlmanage="
