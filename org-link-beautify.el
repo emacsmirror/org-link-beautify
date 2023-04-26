@@ -341,10 +341,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
      start end
      'display (create-image thumbnail nil nil :ascent 100 :max-height thumbnail-size))
     (when border-color
-      (put-text-property start end 'face `(:box (:line-width ,(or border-width 1) :color ,border-color))))
-    ;; Support mouse left click on image to open link.
-    (make-local-variable 'image-map)
-    (define-key image-map (kbd "<mouse-1>") 'org-open-at-point)))
+      (put-text-property start end 'face `(:box (:line-width ,(or border-width 1) :color ,border-color))))))
 
 (defun org-link-beautify--display-content-block (content)
   "Display CONTENT string as a block with beautified frame border."
@@ -1111,7 +1108,10 @@ If BEGIN and END is ommited, the default value is `point-min' and `point-max'."
     (dolist (link-type (mapcar #'car org-link-parameters))
       (org-link-set-parameters link-type :activate-func #'org-link-beautify-display))
     (add-hook 'org-cycle-hook #'org-link-beautify-headline-cycle)
-    (org-restart-font-lock)))
+    (org-restart-font-lock)
+    ;; Support mouse left click on image to open link.
+    (make-local-variable 'image-map)
+    (define-key image-map (kbd "<mouse-1>") 'org-open-at-point)))
 
 ;;;###autoload
 (defun org-link-beautify-disable ()
