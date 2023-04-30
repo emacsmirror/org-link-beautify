@@ -1097,9 +1097,7 @@ If BEGIN and END is ommited, the default value is `point-min' and `point-max'."
       (windows-nt ))
     (message "Copied file [%s] to system clipboard." path)))
 
-(define-key org-link-beautify-keymap (kbd "c") 'org-link-beautify-copy-file-to-clipboard)
-;; (define-key org-link-beautify-keymap (kbd "C-c") 'org-link-beautify-copy-file-to-clipboard)
-;; (define-key org-link-beautify-keymap (kbd "M-w") 'org-link-beautify-copy-file-to-clipboard)
+(define-key org-link-beautify-keymap (kbd "M-w") 'org-link-beautify-copy-file-to-clipboard)
 
 ;;;###autoload
 (defun org-link-beautify-enable ()
