@@ -485,12 +485,12 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                              (number-to-string thumbnail-size))
               :buffer " *org-link-beautify epub-preview*"
               :sentinel (lambda (proc event)
-                          (message (format "> proc: %s\n> event: %s" proc event))
-                          (when (and org-link-beautify-enable-debug-p (string= event "finished\n"))
-                            (message "org-link-beautify epub preview Process DONE!")
-                            (kill-buffer (process-buffer proc))
-                            ;; (kill-process proc)
-                            ))
+                          (if org-link-beautify-enable-debug-p
+                              (message (format "> proc: %s\n> event: %s" proc event))
+                            (when (string= event "finished\n")
+                              (kill-buffer (process-buffer proc))
+                              ;; (kill-process proc)
+                              )))
               :stdout " *org-link-beautify epub-preview*"
               :stderr " *org-link-beautify epub-preview*")
              (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
