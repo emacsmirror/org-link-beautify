@@ -434,8 +434,9 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
         (org-link-beautify--add-overlay-marker start end)
         (org-link-beautify--add-keymap start end)
         ;; display thumbnail-file only when it exist, otherwise it will break org-mode buffer fontification.
-        (when (file-exists-p thumbnail-file)
-          (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end)))))
+        (if (file-exists-p thumbnail-file)
+            (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end)
+          'error))))
 
 (defun org-link-beautify--preview-epub (path start end &optional search-option)
   "Preview EPUB file PATH and display on link between START and END."
@@ -498,8 +499,9 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
         (org-link-beautify--add-overlay-marker start end)
         (org-link-beautify--add-keymap start end)
         ;; display thumbnail-file only when it exist, otherwise it will break org-mode buffer fontification.
-        (when (file-exists-p thumbnail-file)
-          (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end)))))
+        (if (file-exists-p thumbnail-file)
+            (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end)
+          'error))))
 
 (defvar org-link-beautify--kindle-cover
   (cond
@@ -547,8 +549,9 @@ You can install software `libmobi' to get command `mobitool'.")
         (org-link-beautify--add-overlay-marker start end)
         (org-link-beautify--add-keymap start end)
         ;; display thumbnail-file only when it exist, otherwise it will break org-mode buffer fontification.
-        (when (file-exists-p thumbnail-file)
-          (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end)))))
+        (if (file-exists-p thumbnail-file)
+            (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end)
+          'error))))
 
 (defvar org-link-beautify--preview-text--noerror)
 
@@ -670,8 +673,9 @@ You can install software `libmobi' to get command `mobitool'.")
     (org-link-beautify--add-overlay-marker start end)
     (org-link-beautify--add-keymap start end)
     ;; display thumbnail-file only when it exist, otherwise it will break org-mode buffer fontification.
-    (when (file-exists-p thumbnail-file)
-      (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end 5 "SlateGray2"))))
+    (if (file-exists-p thumbnail-file)
+        (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end 5 "SlateGray2")
+      'error)))
 
 (defvar org-link-beautify--audio-thumbnailer
   (cond
@@ -719,8 +723,9 @@ You can install software `libmobi' to get command `mobitool'.")
     (org-link-beautify--add-overlay-marker start end)
     (org-link-beautify--add-keymap start end)
     ;; display thumbnail-file only when it exist, otherwise it will break org-mode buffer fontification.
-    (when (file-exists-p thumbnail-file)
-      (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end))))
+    (if (file-exists-p thumbnail-file)
+        (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end)
+      'error)))
 
 (defvar org-link-beautify--url-screenshot-cmd
   (cond
@@ -763,9 +768,10 @@ You can install software `libmobi' to get command `mobitool'.")
     (org-link-beautify--add-overlay-marker start end)
     (org-link-beautify--add-keymap start end)
     ;; display thumbnail-file only when it exist, otherwise it will break org-mode buffer fontification.
-    (when (file-exists-p thumbnail-file)
-      ;; FIXME: can't display thumbnail image of HTML archive file.
-      (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end))))
+    (if (file-exists-p thumbnail-file)
+        ;; FIXME: can't display thumbnail image of HTML archive file.
+        (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end)
+      'error)))
 
 (defun org-link-beautify--return-icon (type path extension &optional link-element)
   "Return icon for the link PATH smartly based on TYPE, EXTENSION, etc."
@@ -932,7 +938,11 @@ You can install software `libmobi' to get command `mobitool'.")
                  (member extension org-link-beautify-video-preview-list))
             ;; DEBUG:
             ;; (user-error "[org-link-beautify] cond -> video file")
-            (org-link-beautify--preview-video path start end))
+            (when (eq (org-link-beautify--preview-video path start end) 'error)
+              ;; Display icon if thumbnail not available.
+              (org-link-beautify--add-overlay-marker start end)
+              (org-link-beautify--add-keymap start end)
+              (org-link-beautify--display-icon start end description icon)))
            
            ;; audio wave form image preview
            ;; [[file:/path/to/audio.mp3]]
@@ -942,7 +952,11 @@ You can install software `libmobi' to get command `mobitool'.")
                  (member extension org-link-beautify-audio-preview-list))
             ;; DEBUG:
             ;; (user-error "[org-link-beautify] cond -> audio file")
-            (org-link-beautify--preview-audio path start end))
+            (when (eq (org-link-beautify--preview-audio path start end) 'error)
+              ;; Display icon if thumbnail not available.
+              (org-link-beautify--add-overlay-marker start end)
+              (org-link-beautify--add-keymap start end)
+              (org-link-beautify--display-icon start end description icon)))
            
            ;; PDF file preview
            ;; [[file:/path/to/filename.pdf]]
@@ -958,12 +972,15 @@ You can install software `libmobi' to get command `mobitool'.")
             ;; DEBUG:
             ;; (user-error "[org-link-beautify] cond -> PDF file")
             ;; (message "org-link-beautify: PDF file previewing [%s], link-type: [%s], search-option: [%s] (type: %s)," path type search-option (type-of search-option))
-            (org-link-beautify--preview-pdf
-             (if (equal type "eaf")
-                 (replace-regexp-in-string "pdf::" "" path)
-               path)
-             start end
-             search-option))
+            (when (eq (org-link-beautify--preview-pdf
+                       (if (equal type "eaf") (replace-regexp-in-string "pdf::" "" path) path)
+                       start end
+                       search-option)
+                      'error)
+              ;; Display icon if thumbnail not available.
+              (org-link-beautify--add-overlay-marker start end)
+              (org-link-beautify--add-keymap start end)
+              (org-link-beautify--display-icon start end description icon)))
            
            ;; EPUB file cover preview
            ((and org-link-beautify-epub-preview
@@ -972,7 +989,11 @@ You can install software `libmobi' to get command `mobitool'.")
                  (string= extension "epub"))
             ;; DEBUG:
             ;; (user-error "[org-link-beautify] cond -> epub file")
-            (org-link-beautify--preview-epub path start end))
+            (when (eq (org-link-beautify--preview-epub path start end) 'error)
+              ;; Display icon if thumbnail not available.
+              (org-link-beautify--add-overlay-marker start end)
+              (org-link-beautify--add-keymap start end)
+              (org-link-beautify--display-icon start end description icon)))
 
            ;; kindle ebook file cover preview
            ((and org-link-beautify-kindle-preview
@@ -981,7 +1002,11 @@ You can install software `libmobi' to get command `mobitool'.")
                  (or (string= extension "mobi") (string= extension "azw3")))
             ;; DEBUG:
             ;; (user-error "[org-link-beautify] cond -> epub file")
-            (org-link-beautify--preview-kindle path start end))
+            (when (eq (org-link-beautify--preview-kindle path start end) 'error)
+              ;; Display icon if thumbnail not available.
+              (org-link-beautify--add-overlay-marker start end)
+              (org-link-beautify--add-keymap start end)
+              (org-link-beautify--display-icon start end description icon)))
            
            
            ;; text content preview
