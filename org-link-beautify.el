@@ -834,6 +834,7 @@ You can install software `libmobi' to get command `mobitool'.")
     ("doi" (nerd-icons-mdicon "nf-md-file_document_plus_outline" :face 'nerd-icons-green))
     ("org-contact" (nerd-icons-mdicon "nf-md-contacts_outline" :face 'nerd-icons-purple-alt))
     ("video" (nerd-icons-faicon "nf-fa-file_video_o" :face 'nerd-icons-blue))
+    ("audio" (nerd-icons-faicon "nf-fa-file_audio_o" :face 'nerd-icons-blue))
     
     ;; `org-element-context' will return "fuzzy" type when link not recognized.
     ;; ("fuzzy"
@@ -946,8 +947,9 @@ You can install software `libmobi' to get command `mobitool'.")
            
            ;; audio wave form image preview
            ;; [[file:/path/to/audio.mp3]]
+           ;; [[audio:/path/to/audio.mp3]]
            ((and org-link-beautify-audio-preview
-                 (equal type "file")
+                 (equal type "file" "audio")
                  (file-exists-p path)
                  (member extension org-link-beautify-audio-preview-list))
             ;; DEBUG:
