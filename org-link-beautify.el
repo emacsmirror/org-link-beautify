@@ -1096,6 +1096,9 @@ If BEGIN and END is ommited, the default value is `point-min' and `point-max'."
      (org-link-beautify--clear-text-properties begin end)))
    ((eq state 'overview)
     ;; clear whole buffer
+    (org-link-beautify--clear-text-properties))
+   (t
+    ;; clear whole buffer when minor mode disabled.
     (org-link-beautify--clear-text-properties))))
 
 (defvar org-link-beautify-keymap (make-sparse-keymap))
