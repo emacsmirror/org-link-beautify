@@ -389,14 +389,13 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
              (pdf-file (expand-file-name (org-link-unescape file-path)))
              (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path pdf-file))
              (thumbnail-file (expand-file-name
-                              (concat
-                               (if (= pdf-page-number 1) ; if have page number ::N specified.
-                                   (format "%s%s.%s"
-                                           thumbnails-dir (file-name-base pdf-file)
-                                           (symbol-name org-link-beautify-pdf-preview-image-format))
-                                 (format "%s%s-P%s.%s"
-                                         thumbnails-dir (file-name-base pdf-file) pdf-page-number
-                                         (symbol-name org-link-beautify-pdf-preview-image-format))))))
+                              (if (= pdf-page-number 1) ; if have page number ::N specified.
+                                  (format "%s%s.%s"
+                                          thumbnails-dir (file-name-base pdf-file)
+                                          (symbol-name org-link-beautify-pdf-preview-image-format))
+                                (format "%s%s-P%s.%s"
+                                        thumbnails-dir (file-name-base pdf-file) pdf-page-number
+                                        (symbol-name org-link-beautify-pdf-preview-image-format)))))
              (thumbnail-size (or org-link-beautify-pdf-preview-size 512)))
         (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
         (unless (file-exists-p thumbnail-file)
@@ -447,12 +446,9 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
              (epub-file (expand-file-name (org-link-unescape file-path)))
              (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path epub-file))
              (thumbnail-file (expand-file-name
-                              (format "%s%s.png" thumbnails-dir (file-name-base epub-file))))
-             (thumbnail-file (expand-file-name
-                              (concat
-                               (if (or (null epub-page-number) (= epub-page-number 1)) ; if have page number ::N specified.
-                                   (format "%s%s.png" thumbnails-dir (file-name-base epub-file))
-                                 (format "%s%s-P%s.png" thumbnails-dir (file-name-base epub-file) epub-page-number)))))
+                              (if (or (null epub-page-number) (= epub-page-number 1)) ; if have page number ::N specified.
+                                  (format "%s%s.png" thumbnails-dir (file-name-base epub-file))
+                                (format "%s%s-P%s.png" thumbnails-dir (file-name-base epub-file) epub-page-number))))
              (thumbnail-size (or org-link-beautify-ebook-preview-size 500)))
         (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
         ;; DEBUG:
@@ -522,10 +518,9 @@ You can install software `libmobi' to get command `mobitool'.")
              (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path kindle-file))
              (thumbnail-file (expand-file-name (format "%s%s.jpg" thumbnails-dir (file-name-base kindle-file))))
              (thumbnail-file (expand-file-name
-                              (concat
-                               (if (or (null kindle-page-number) (= kindle-page-number 1)) ; if have page number ::N specified.
-                                   (format "%s%s.png" thumbnails-dir (file-name-base kindle-file))
-                                 (format "%s%s-P%s.png" thumbnails-dir (file-name-base kindle-file) kindle-page-number)))))
+                              (if (or (null kindle-page-number) (= kindle-page-number 1)) ; if have page number ::N specified.
+                                  (format "%s%s.png" thumbnails-dir (file-name-base kindle-file))
+                                (format "%s%s-P%s.png" thumbnails-dir (file-name-base kindle-file) kindle-page-number))))
              (thumbnail-size (or org-link-beautify-ebook-preview-size 500)))
         (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
         ;; DEBUG:
