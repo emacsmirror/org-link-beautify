@@ -517,15 +517,15 @@ You can install software `libmobi' to get command `mobitool'.")
              (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path kindle-file))
              (thumbnail-file (expand-file-name
                               (if (or (null kindle-page-number) (= kindle-page-number 1)) ; if have page number ::N specified.
-                                  (format "%s%s.png" thumbnails-dir (file-name-base kindle-file))
-                                (format "%s%s-P%s.png" thumbnails-dir (file-name-base kindle-file) kindle-page-number))))
+                                  (format "%s%s.jpg" thumbnails-dir (file-name-base kindle-file))
+                                (format "%s%s-P%s.jpg" thumbnails-dir (file-name-base kindle-file) kindle-page-number))))
              (thumbnail-size (or org-link-beautify-ebook-preview-size 500)))
         (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
         ;; DEBUG:
         ;; (message kindle-file)
         (unless (file-exists-p thumbnail-file)
           (pcase org-link-beautify--kindle-cover
-            ("mobitool"
+            ("mobitool" ; NOTE: mobitool command-line tool dump covert image filename can't be specified.
              (let ((mobitool-cover-file (concat thumbnails-dir (file-name-base kindle-file) "_cover.jpg")))
                (unless (file-exists-p mobitool-cover-file)
                  (message "[org-link-beautify] preview kindle ebook file %s" kindle-file)
