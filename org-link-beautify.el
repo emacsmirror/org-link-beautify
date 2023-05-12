@@ -372,8 +372,8 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
   (if (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
       (let* ((file-path (match-string 1 path))
              ;; DEBUG:
-             ;; (_ (lambda (message "--> HERE org-link-beautify (pdf): path: %s" path)))
-             ;; (_ (lambda (message "--> HERE org-link-beautify (pdf): search-option: %s" search-option)))
+             ;; (_ (lambda () (message "--> DEBUG: org-link-beautify (pdf): path: %s" path)))
+             ;; (_ (lambda () (message "--> DEBUG: org-link-beautify (pdf): search-option: %s" search-option)))
              (pdf-page-number (if search-option
                                   (string-to-number
                                    (cond
@@ -446,7 +446,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
   "Preview EPUB file PATH and display on link between START and END."
   (if (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
       (let* ((file-path (match-string 1 path))
-             ;; DEBUG: (_ (lambda (message "--> HERE")))
+             ;; DEBUG: (_ (lambda () (message "--> DEBUG: ")))
              (epub-page-number (or (match-string 2 path) 1))
              (epub-file (expand-file-name (org-link-unescape file-path)))
              (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path epub-file))
@@ -517,7 +517,7 @@ You can install software `libmobi' to get command `mobitool'.")
   "Preview Kindle ebooks at PATH and display on link between START and END."
   (if (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
       (let* ((file-path (match-string 1 path))
-             ;; DEBUG: (_ (lambda (message "--> HERE")))
+             ;; DEBUG: (_ (lambda () (message "--> DEBUG: ")))
              (kindle-page-number (or (match-string 2 path) 1))
              (kindle-file (expand-file-name (org-link-unescape file-path)))
              (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path kindle-file))
