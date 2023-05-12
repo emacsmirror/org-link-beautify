@@ -1,7 +1,7 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
 ;; Authors: stardiviner <numbchild@gmail.com>
-;; Package-Requires: ((emacs "28.1") (nerd-icons "0.0.1"))
+;; Package-Requires: ((emacs "28.1") (nerd-icons "0.0.1") (fb2-reader "0.1.1"))
 ;; Version: 1.2.2
 ;; Keywords: hypermedia
 ;; homepage: https://repo.or.cz/org-link-beautify.git
@@ -157,6 +157,12 @@ Enable Kindle ebook preview by default. You can set this option
 to nil to disable EPUB preview.
 
 You can install software `libmobi' to get command `mobitool'."
+  :type 'boolean
+  :safe #'booleanp
+  :group 'org-link-beautify)
+
+(defcustom org-link-beautify-fictionbook2-preview (featurep 'fb2-reader)
+  "Whether enable FictionBook2 ebook files covert preview?"
   :type 'boolean
   :safe #'booleanp
   :group 'org-link-beautify)
@@ -545,6 +551,52 @@ You can install software `libmobi' to get command `mobitool'.")
         (if (file-exists-p thumbnail-file)
             (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end)
           'error))))
+
+(defun org-link-beautify--fictionbook2-extract-cover (file-path)
+  "Extract cover image data for FILE."
+  (let* ((fb2-file-path file-path)
+         ;; `fb2-reader-mode'
+         (book (unless (fb2-reader-parse-file-as-xml fb2-file-path)
+                 (fb2-reader-parse-file-as-html fb2-file-path)))
+         ;; `fb2-reader-splash-screen'
+         (cover-item (fb2-reader--get-cover book))
+         ;; `fb2-reader-splash-cover': (fb2-reader-splash-cover book cover-item)
+         (attrs (cl-second (cl-third cover-item)))
+         (img-data (fb2-reader--extract-image-data book attrs))
+         (type (cl-first img-data))
+         (data (cl-second img-data))
+         ;; `fb2-reader--insert-image': (fb2-reader--insert-image data-str type-str nil t)
+         (type-symbol (alist-get type '(("image/jpeg" . jpeg) ("image/png" . png))))
+         (data-decoded (base64-decode-string data))
+         (img-raw (fb2-reader--create-image data-decoded type-symbol))
+         (image (create-image data-decoded type-symbol 't)))
+    image))
+
+(defun org-link-beautify--fictionbook2-save-cover (image file-path)
+  ;; TODO: how to save image data into image file?
+  ;; `image-save': This writes the original image data to a file.
+  (with-temp-buffer
+    (insert (plist-get (cdr image) :data))
+    (write-region (point-min) (point-max) file-path)))
+
+(defun org-link-beautify--preview-fictionbook2 (path start end &optional search-option)
+  "Preview FictionBook2 ebooks at PATH and display on link between START and END."
+  (require 'fb2-reader)
+  (let* ((fb2-file-path (expand-file-name (org-link-unescape path)))
+         ;; (_ (lambda () (message "--> DEBUG: %s" fb2-file-path)))
+         (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path fb2-file-path))
+         (thumbnail-file-path (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base fb2-file-path))))
+         (thumbnail-size (or org-link-beautify-ebook-preview-size 500)))
+    (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
+    (unless (file-exists-p thumbnail-file-path)
+      (let ((cover-image (org-link-beautify--fictionbook2-extract-cover fb2-file-path)))
+        (org-link-beautify--fictionbook2-save-cover cover-image thumbnail-file-path)))
+    (org-link-beautify--add-overlay-marker start end)
+    (org-link-beautify--add-keymap start end)
+    ;; display thumbnail-file-path only when it exist, otherwise it will break org-mode buffer fontification.
+    (if (file-exists-p thumbnail-file-path)
+        (org-link-beautify--display-thumbnail thumbnail-file-path thumbnail-size start end)
+      'error)))
 
 (defvar org-link-beautify--preview-text--noerror)
 
@@ -1003,6 +1055,19 @@ You can install software `libmobi' to get command `mobitool'.")
               (org-link-beautify--add-keymap start end)
               (org-link-beautify--display-icon start end description icon)))
            
+           ;; FictionBook2 (.fb2, .fb2.zip) file cover preview
+           ((and org-link-beautify-fictionbook2-preview
+                 (equal type "file")
+                 (file-exists-p path)
+                 (or (string= extension "fb2")
+                     (string= extension "zip")))
+            ;; DEBUG:
+            ;; (user-error "[org-link-beautify] cond -> FictionBook2 (.fb2, .fb2.zip) file")
+            (when (eq (org-link-beautify--preview-fictionbook2 path start end) 'error)
+              ;; Display icon if thumbnail not available.
+              (org-link-beautify--add-overlay-marker start end)
+              (org-link-beautify--add-keymap start end)
+              (org-link-beautify--display-icon start end description icon)))
            
            ;; text content preview
            ((and org-link-beautify-text-preview

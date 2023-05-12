@@ -65,6 +65,7 @@ Supports video file link preview with thumbnail.
 - [X] preview text files like .org, .markdown (.md), .txt, and source code files etc (customized with ~org-link-beautify-text-preview-list~).
 - [X] preview archive files like .zip, .rar, .tar.gz, .tar.bz2, .7z etc.
 - [ ] preview URL with screenshot on web page (Still considering whether should add this feature.)
+- [ ] preview FictionBook2 (.fb2, .fb2.zip) covert image
 
 * Install
 
