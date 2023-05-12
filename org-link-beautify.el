@@ -515,7 +515,6 @@ You can install software `libmobi' to get command `mobitool'.")
              (kindle-page-number (or (match-string 2 path) 1))
              (kindle-file (expand-file-name (org-link-unescape file-path)))
              (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path kindle-file))
-             (thumbnail-file (expand-file-name (format "%s%s.jpg" thumbnails-dir (file-name-base kindle-file))))
              (thumbnail-file (expand-file-name
                               (if (or (null kindle-page-number) (= kindle-page-number 1)) ; if have page number ::N specified.
                                   (format "%s%s.png" thumbnails-dir (file-name-base kindle-file))
