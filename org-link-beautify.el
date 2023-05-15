@@ -73,6 +73,20 @@ which represent to ~/.cache/thumbnails/."
   :safe #'listp
   :group 'org-link-beautify)
 
+(defcustom org-link-beautify-subtitle-preview t
+  "Whether enable subtitle files previewing?"
+  :type 'boolean
+  :safe #'booleanp
+  :group 'org-link-beautify)
+
+;;; https://en.wikipedia.org/wiki/Subtitles
+(defcustom org-link-beautify-subtitle-preview-list
+  '("ass" "srt" "sub" "vtt" "ssf")
+  "A list of subtitle file types support previewing."
+  :type 'list
+  :safe #'listp
+  :group 'org-link-beautify)
+
 (defcustom org-link-beautify-audio-preview (or (executable-find "audiowaveform")
                                                (executable-find "qlmanage"))
   "Whether enable audio files wave form preview?"
@@ -722,6 +736,17 @@ You can install software `libmobi' to get command `mobitool'.")
         (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end 5 "SlateGray2")
       'error)))
 
+(defun org-link-beautify--preview-subtitle (path start end &optional lines)
+  "Preview subtitle file PATH and display on link between START and END."
+  ;; display preview only when it exist, otherwise it will break org-mode buffer fontification.
+  (org-link-beautify--preview-text path start end (or lines 20)))
+
+;;; TEST:
+;; (org-link-beautify--preview-subtitle
+;;  (expand-file-name "/path/to/subtitle.ass")
+;;  nil nil
+;;  3)
+
 (defvar org-link-beautify--audio-thumbnailer
   (cond
    ;; for macOS, use `qlmanage'
@@ -985,6 +1010,21 @@ You can install software `libmobi' to get command `mobitool'.")
             ;; DEBUG:
             ;; (user-error "[org-link-beautify] cond -> video file")
             (when (eq (org-link-beautify--preview-video path start end) 'error)
+              ;; Display icon if thumbnail not available.
+              (org-link-beautify--add-overlay-marker start end)
+              (org-link-beautify--add-keymap start end)
+              (org-link-beautify--display-icon start end description icon)))
+
+           ;; subtitle, closed caption preview
+           ;; [[file:/path/to/subtitle.ass]]
+           ;; [[file:/path/to/subtitle.srt]]
+           ((and org-link-beautify-subtitle-preview
+                 (member type '("file"))
+                 (file-exists-p path)
+                 (member extension org-link-beautify-subtitle-preview-list))
+            ;; DEBUG:
+            ;; (user-error "[org-link-beautify] cond -> subtitle file")
+            (when (eq (org-link-beautify--preview-subtitle path start end) 'error)
               ;; Display icon if thumbnail not available.
               (org-link-beautify--add-overlay-marker start end)
               (org-link-beautify--add-keymap start end)
