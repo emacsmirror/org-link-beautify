@@ -362,8 +362,8 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
     (when border-color
       (put-text-property start end 'face `(:box (:line-width ,(or border-width 1) :color ,border-color))))))
 
-(defun org-link-beautify--display-content-block (content)
-  "Display CONTENT string as a block with beautified frame border."
+(defun org-link-beautify--display-content-block (lines-list)
+  "Display LINES-LIST string as a block with beautified frame border."
   (format
    "
 ┏━§ ✂ %s
@@ -374,8 +374,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
    (mapconcat
     (lambda (line)
       (concat "┃" line))
-    ;; split lines of content into list of lines.
-    (split-string content "\n")
+    lines-list
     "\n")
    (make-string (- fill-column 6) ?━)))
 
@@ -660,7 +659,9 @@ You can install software `libmobi' to get command `mobitool'.")
 (defun org-link-beautify--preview-archive-file (file command)
   "Return the files list inside of archive FILE with COMMAND."
   (let ((cmd (format "%s '%s'" command file)))
-    (org-link-beautify--display-content-block (shell-command-to-string cmd))))
+    (org-link-beautify--display-content-block
+     ;; split large string content into list of lines.
+     (split-string (shell-command-to-string cmd) "\n"))))
 
 (defun org-link-beautify--preview-archive (path command start end)
   "Preview archive PATH content with COMMAND on link between START and END."
