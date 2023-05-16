@@ -567,23 +567,24 @@ You can install software `libmobi' to get command `mobitool'.")
 
 (defun org-link-beautify--fictionbook2-extract-cover (file-path)
   "Extract cover image data for FILE."
-  (when-let* ((fb2-file-path file-path)
-              ;; `fb2-reader-mode'
-              (book (or (fb2-reader-parse-file-as-xml fb2-file-path)
-                        (fb2-reader-parse-file-as-html fb2-file-path)))
-              ;; `fb2-reader-splash-screen'
-              (cover-item (fb2-reader--get-cover book))
-              ;; `fb2-reader-splash-cover': (fb2-reader-splash-cover book cover-item)
-              (attrs (cl-second (cl-third cover-item)))
-              (img-data (fb2-reader--extract-image-data book attrs))
-              (type (cl-first img-data))
-              (data (cl-second img-data))
-              ;; `fb2-reader--insert-image': (fb2-reader--insert-image data-str type-str nil t)
-              (type-symbol (alist-get type '(("image/jpeg" . jpeg) ("image/png" . png))))
-              (data-decoded (base64-decode-string data))
-              (img-raw (fb2-reader--create-image data-decoded type-symbol))
-              (image (create-image data-decoded type-symbol 't)))
-    image))
+  (if-let* ((fb2-file-path file-path)
+            ;; `fb2-reader-mode'
+            (book (or (fb2-reader-parse-file-as-xml fb2-file-path)
+                      (fb2-reader-parse-file-as-html fb2-file-path)))
+            ;; `fb2-reader-splash-screen'
+            (cover-item (fb2-reader--get-cover book))
+            ;; `fb2-reader-splash-cover': (fb2-reader-splash-cover book cover-item)
+            (attrs (cl-second (cl-third cover-item)))
+            (img-data (fb2-reader--extract-image-data book attrs))
+            (type (cl-first img-data))
+            (data (cl-second img-data))
+            ;; `fb2-reader--insert-image': (fb2-reader--insert-image data-str type-str nil t)
+            (type-symbol (alist-get type '(("image/jpeg" . jpeg) ("image/png" . png))))
+            (data-decoded (base64-decode-string data))
+            (img-raw (fb2-reader--create-image data-decoded type-symbol))
+            (image (create-image data-decoded type-symbol 't)))
+      image
+    'no-cover))
 
 (defun org-link-beautify--fictionbook2-save-cover (image file-path)
   ;; TODO: how to save image data into image file?
@@ -602,14 +603,25 @@ You can install software `libmobi' to get command `mobitool'.")
          (thumbnail-size (or org-link-beautify-ebook-preview-size 500)))
     (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
     (unless (file-exists-p thumbnail-file-path)
-      (when-let ((cover-image (org-link-beautify--fictionbook2-extract-cover fb2-file-path)))
-        (org-link-beautify--fictionbook2-save-cover cover-image thumbnail-file-path)))
+      (let ((cover-image (org-link-beautify--fictionbook2-extract-cover fb2-file-path)))
+        (if (eq cover-image 'no-cover)
+            (message "[org-link-beautify] FictionBook2 preview failed to extract cover image.")
+          (org-link-beautify--fictionbook2-save-cover cover-image thumbnail-file-path))))
     (org-link-beautify--add-overlay-marker start end)
     (org-link-beautify--add-keymap start end)
     ;; display thumbnail-file-path only when it exist, otherwise it will break org-mode buffer fontification.
     (if (file-exists-p thumbnail-file-path)
         (org-link-beautify--display-thumbnail thumbnail-file-path thumbnail-size start end)
       'error)))
+
+;;; TEST: [M-:] eval bellowing code on FictionBook2 link.
+;; (let* ((context (org-element-context))
+;;        (beg (org-element-property :begin context))
+;;        (end (org-element-property :end context))
+;;        (path (org-element-property :path context)))
+;;   (org-link-beautify--preview-fictionbook2
+;;    path
+;;    beg end))
 
 (defvar org-link-beautify--preview-text--noerror)
 
