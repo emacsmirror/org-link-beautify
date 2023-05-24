@@ -746,7 +746,10 @@ You can install software `libmobi' to get command `mobitool'.")
     (org-link-beautify--add-keymap start end)
     ;; display thumbnail-file only when it exist, otherwise it will break org-mode buffer fontification.
     (if (file-exists-p thumbnail-file)
-        (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end 5 "SlateGray2")
+        (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end
+                                              5 (cl-case (frame-parameter nil 'background-mode)
+                                                  (light (color-darken-name (face-background 'default) 10))
+                                                  (dark (color-lighten-name (face-background 'default) 5))))
       'error)))
 
 (defun org-link-beautify--preview-subtitle (path start end &optional lines)
