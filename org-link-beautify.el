@@ -41,6 +41,13 @@
   :prefix "org-link-beautify-"
   :group 'org)
 
+(defcustom org-link-beautify-async-preview nil
+  "Use async thread to run preview display function.
+This will improve package performance without blocking Emacs."
+  :type 'boolean
+  :safe #'booleanp
+  :group 'org-link-beautify)
+
 (defcustom org-link-beautify-video-preview (or (executable-find "ffmpegthumbnailer")
                                                (executable-find "qlmanage")
                                                (executable-find "ffmpeg"))
@@ -1030,7 +1037,7 @@ You can install software `libmobi' to get command `mobitool'.")
               (org-link-beautify--add-overlay-marker start end)
               (org-link-beautify--add-keymap start end)
               (org-link-beautify--display-icon start end description icon)))
-
+           
            ;; subtitle, closed caption preview
            ;; [[file:/path/to/subtitle.ass]]
            ;; [[file:/path/to/subtitle.srt]]
@@ -1168,6 +1175,13 @@ You can install software `libmobi' to get command `mobitool'.")
             (org-link-beautify--add-keymap start end)
             (org-link-beautify--display-icon start end description icon))))))))
 
+(defun org-link-beautify-display-async (start end path bracket-p)
+  "Run function `org-link-beautify-display' in async thread to avoid suspend Emacs."
+  ;; DEBUG: (message "[org-link-beautify] running preview function in async thread for %s" path)
+  (make-thread
+   (lambda () (org-link-beautify-display start end path bracket-p))
+   (make-temp-name "org-link-beautify-display-thread-")))
+
 ;;; hook on headline expand
 (defun org-link-beautify-headline-cycle (&optional state)
   "Function to be executed on `org-cycle-hook' STATE."
@@ -1248,7 +1262,9 @@ If BEGIN and END is ommited, the default value is `point-min' and `point-max'."
   "Enable `org-link-beautify'."
   (when (display-graphic-p)
     (dolist (link-type (mapcar #'car org-link-parameters))
-      (org-link-set-parameters link-type :activate-func #'org-link-beautify-display))
+      (if org-link-beautify-async-preview
+          (org-link-set-parameters link-type :activate-func #'org-link-beautify-display-async)
+        (org-link-set-parameters link-type :activate-func #'org-link-beautify-display)))
     (add-hook 'org-cycle-hook #'org-link-beautify-headline-cycle)
     (org-restart-font-lock)
     ;; Support mouse left click on image to open link.

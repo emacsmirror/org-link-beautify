@@ -134,14 +134,21 @@ Supports video file link preview with thumbnail.
 (org-link-beautify-mode 1) ; (ref:toggle org-link-beautify-mode)
 #+end_src
 
-** If you want better better performance
+* Performance
 
-You can toggle this option carefully to improve Org ~org-activate-links~
-performance:
+If you want better better performance. You can do bellowing options:
 
-#+begin_src emacs-lisp
-(setq org-element-use-cache t)
-#+end_src
+- Enable option ~org-link-beautify-async-preview~
+
+  #+begin_src emacs-lisp
+  (setq org-link-beautify-async-preview t)
+  #+end_src
+
+- You can toggle this option carefully to improve Org ~org-activate-links~ performance:
+
+  #+begin_src emacs-lisp
+  (setq org-element-use-cache t)
+  #+end_src
 
 * Link examples
 
