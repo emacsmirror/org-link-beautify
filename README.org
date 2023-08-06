@@ -25,7 +25,7 @@ Supports video file link preview with thumbnail.
 #+ATTR_HTML: :width 600px
 [[file:video-thumbnail.png]]
 
-* Features [17/18]
+* Features [18/22]
 
 - [X] Only display org-link-beautify preview images (and icons) when headline
   expanded. This will reduce Emacs memory and improve performance!!!
@@ -47,6 +47,7 @@ Supports video file link preview with thumbnail.
   + =docview:=
   + =eaf:pdfviewer::=
   + =file:=
+- [X] support image link preview
 - [X] display thumbnail for video file link
   + [X] support Linux video thumbnail with "=ffmpegthumbnailer="
   + [X] support macOS video thumbnail with "=qlmanage="

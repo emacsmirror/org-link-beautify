@@ -48,14 +48,6 @@ This will improve package performance without blocking Emacs."
   :safe #'booleanp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-video-preview (or (executable-find "ffmpegthumbnailer")
-                                               (executable-find "qlmanage")
-                                               (executable-find "ffmpeg"))
-  "Whether enable video files thumbnail preview?"
-  :type 'boolean
-  :safe #'booleanp
-  :group 'org-link-beautify)
-
 (defcustom org-link-beautify-thumbnails-dir 'source-path
   "The directory of generated thumbnails.
 
@@ -65,6 +57,27 @@ preview thumbnails. Or you can set this option to ‘'user-home’
 which represent to ~/.cache/thumbnails/."
   :type 'symbol
   :safe #'symbolp
+  :group 'org-link-beautify)
+
+(defcustom org-link-beautify-image-preview nil
+  "Whether enable image files thumbnail preview?"
+  :type 'boolean
+  :safe #'booleanp
+  :group 'org-link-beautify)
+
+(defcustom org-link-beautify-image-preview-list
+  '("jpg" "jpeg" "png" "gif" "webp")
+  "A list of image file types be supported with thumbnails."
+  :type 'list
+  :safe #'listp
+  :group 'org-link-beautify)
+
+(defcustom org-link-beautify-video-preview (or (executable-find "ffmpegthumbnailer")
+                                               (executable-find "qlmanage")
+                                               (executable-find "ffmpeg"))
+  "Whether enable video files thumbnail preview?"
+  :type 'boolean
+  :safe #'booleanp
   :group 'org-link-beautify)
 
 (defcustom org-link-beautify-video-preview-size 512
@@ -693,6 +706,22 @@ You can install software `libmobi' to get command `mobitool'.")
   ;; Fix elisp compiler warning: Unused lexical argument `start'.
   (ignore start))
 
+(defun org-link-beautify--preview-image (path start end)
+  "Preview image file PATH and display on link between START and END."
+  (let* ((image-file (expand-file-name (org-link-unescape path)))
+         (thumbnail-size (or (cond
+                              ((listp org-image-actual-width)
+                               (car org-image-actual-width))
+                              ((numberp org-image-actual-width)
+                               org-image-actual-width))
+                             (org-display-inline-image--width
+                              (org-element-lineage
+			                   (save-match-data (org-element-context))
+			                   'link t)))))
+    (put-text-property
+     start end
+     'display (create-image image-file nil nil :ascent 100 :width thumbnail-size))))
+
 (defvar org-link-beautify--video-thumbnailer
   (cond
    ;; for macOS, use `qlmanage'
@@ -1023,6 +1052,20 @@ You can install software `libmobi' to get command `mobitool'.")
           ;; Fix elisp compiler warning: Unused lexical argument `bracket-p'.
           (ignore bracket-p)
           (cond
+           ;; image thumbnail preview
+           ;; [[file:/path/to/image.jpg]]
+           ((and org-link-beautify-image-preview
+                 (member type '("file" "attachment"))
+                 (file-exists-p path)
+                 (member extension org-link-beautify-image-preview-list))
+            ;; DEBUG:
+            ;; (user-error "[org-link-beautify] cond -> image file")
+            (when (eq (org-link-beautify--preview-image path start end) 'error)
+              ;; Display icon if thumbnail not available.
+              (org-link-beautify--add-overlay-marker start end)
+              (org-link-beautify--add-keymap start end)
+              (org-link-beautify--display-icon start end description icon)))
+           
            ;; video thumbnail preview
            ;; [[file:/path/to/video.mp4]]
            ;; [[video:/path/to/video.mp4]]
@@ -1053,7 +1096,7 @@ You can install software `libmobi' to get command `mobitool'.")
               (org-link-beautify--add-keymap start end)
               (org-link-beautify--display-icon start end description icon)))
            
-           ;; audio wave form image preview
+           ;; audio wave form preview
            ;; [[file:/path/to/audio.mp3]]
            ;; [[audio:/path/to/audio.mp3]]
            ((and org-link-beautify-audio-preview
