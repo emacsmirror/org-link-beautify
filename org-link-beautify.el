@@ -1102,7 +1102,7 @@ You can install software `libmobi' to get command `mobitool'.")
            ;; [[file:/path/to/audio.mp3]]
            ;; [[audio:/path/to/audio.mp3]]
            ((and org-link-beautify-audio-preview
-                 (equal type "file" "audio")
+                 (member type '("file" "audio"))
                  (file-exists-p path)
                  (member extension org-link-beautify-audio-preview-list))
             ;; DEBUG:
@@ -1119,10 +1119,7 @@ You can install software `libmobi' to get command `mobitool'.")
            ;; [[pdfview:/path/to/filename.pdf::15]]
            ((and org-link-beautify-pdf-preview
                  (or (and (equal type "file") (string= extension "pdf"))
-                     (equal type "pdf")
-                     (equal type "pdfview")
-                     (equal type "docview")
-                     (equal type "eaf"))
+                     (member type '("pdf" "pdfview" "docview" "eaf")))
                  (file-exists-p path))
             ;; DEBUG:
             ;; (user-error "[org-link-beautify] cond -> PDF file")
