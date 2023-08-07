@@ -375,7 +375,9 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
 
 (defun org-link-beautify--display-thumbnail (thumbnail thumbnail-size start end &optional border-width border-color)
   "Display THUMBNAIL between START and END with THUMBNAIL-SIZE and in BORDER-WIDTH BORDER-COLOR when exist."
-  (when (file-exists-p thumbnail)
+  (when (and (file-exists-p thumbnail)
+             ;; If thumbnail image already displayed, don't re-display thumbnail.
+             (not (eq (car (get-text-property start 'display)) 'image)))
     (put-text-property
      start end
      'display (create-image thumbnail nil nil :ascent 100 :max-height thumbnail-size))
