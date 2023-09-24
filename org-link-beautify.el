@@ -589,8 +589,8 @@ You can install software `libmobi' to get command `mobitool'.")
                   "org-link-beautify--kindle-preview"
                   " *org-link-beautify kindle-preview*"
                   "mobitool" "-c" "-o" thumbnails-dir kindle-file))
-               ;; then rename [file_cover.jpg] to [file.jpg]
-               (when (and (not (file-exists-p thumbnail-file)) (file-exists-p mobitool-cover-file))
+               ;; then rename [file.extension.jpg] to [file.jpg]
+               (when (file-exists-p mobitool-cover-file)
                  (rename-file mobitool-cover-file thumbnail-file))
                (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
                  (org-link-beautify--notify-generate-thumbnail-failed kindle-file thumbnail-file))))
@@ -656,7 +656,7 @@ You can install software `libmobi' to get command `mobitool'.")
                 :stdout " *org-link-beautify comic-preview*"
                 :stderr " *org-link-beautify comic-preview*")
                ;; then rename [file.extension.png] to [file.png]
-               (when (and (not (file-exists-p thumbnail-file)) (file-exists-p qlmanage-thumbnail-file))
+               (when (file-exists-p qlmanage-thumbnail-file)
                  (rename-file qlmanage-thumbnail-file thumbnail-file))
                (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
                  (org-link-beautify--notify-generate-thumbnail-failed comic-file thumbnail-file))))
@@ -843,8 +843,8 @@ You can install software `libmobi' to get command `mobitool'.")
                                        "[org-link-beautify] video preview FAILED on macOS QuickLook generating thumbnail for %s."
                                        video-filename)))))
                  (set-process-filter proc proc-filter)))
-             ;; then rename [video.mp4.png] to [video.png]
-             (when (and (not (file-exists-p thumbnail-file)) (file-exists-p qlmanage-thumbnail-file))
+             ;; then rename [file.extension.png] to [file.png]
+             (when (file-exists-p qlmanage-thumbnail-file)
                (rename-file qlmanage-thumbnail-file thumbnail-file))
              (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
                (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file))))
@@ -911,8 +911,8 @@ You can install software `libmobi' to get command `mobitool'.")
              (unless (file-exists-p qlmanage-thumbnail-file)
                (start-process proc-name proc-buffer
                               "qlmanage" "-x" "-t" "-s" (number-to-string thumbnail-size) audio-file "-o" thumbnails-dir))
-             ;; then rename [audio.mp3.png] to [audio.png]
-             (when (and (not (file-exists-p thumbnail-file)) (file-exists-p qlmanage-thumbnail-file))
+             ;; then rename [file.extension.png] to [file.png]
+             (when (file-exists-p qlmanage-thumbnail-file)
                (rename-file qlmanage-thumbnail-file thumbnail-file))
              (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
                (org-link-beautify--notify-generate-thumbnail-failed audio-file thumbnail-file))))
