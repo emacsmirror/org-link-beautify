@@ -1232,7 +1232,7 @@ You can install software `libmobi' to get command `mobitool'.")
            ((and org-link-beautify-kindle-preview
                  (equal type "file")
                  (file-exists-p path)
-                 (or (string= extension "mobi") (string= extension "azw3")))
+                 (member extension '("mobi" "azw3")))
             ;; DEBUG:
             ;; (user-error "[org-link-beautify] cond -> epub file")
             (when (eq (org-link-beautify--preview-kindle path start end) 'error)
