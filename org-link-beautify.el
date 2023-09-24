@@ -587,7 +587,7 @@ You can install software `libmobi' to get command `mobitool'.")
                  (message "[org-link-beautify] preview kindle ebook file %s" kindle-file)
                  (start-process
                   "org-link-beautify--kindle-preview"
-                  " *org-link-beautify--kindle-preview*"
+                  " *org-link-beautify kindle-preview*"
                   "mobitool" "-c" "-o" thumbnails-dir kindle-file))
                ;; then rename [file_cover.jpg] to [file.jpg]
                (when (and (not (file-exists-p thumbnail-file)) (file-exists-p mobitool-cover-file))
