@@ -207,6 +207,21 @@ You can install software `libmobi' to get command `mobitool'."
   :safe #'numberp
   :group 'org-link-beautify)
 
+(defcustom org-link-beautify-comic-preview
+  (cl-case system-type
+    (darwin (executable-find "qlmanage")))
+  "Whether enable CDisplay Archived Comic Book Formats cover preview.
+File extensions like (.cbr, .cbz, .cb7, .cba etc)."
+  :type 'boolean
+  :safe #'booleanp
+  :group 'org-link-beautify)
+
+(defcustom org-link-beautify-comic-preview-size 500
+  "The CDisplay Archived Comic Book Formats cover preview image size."
+  :type 'number
+  :safe #'numberp
+  :group 'org-link-beautify)
+
 (defcustom org-link-beautify-text-preview nil
   "Whether enable text files content preview?"
   :type 'boolean
@@ -580,6 +595,72 @@ You can install software `libmobi' to get command `mobitool'.")
                (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
                  (org-link-beautify--notify-generate-thumbnail-failed kindle-file thumbnail-file))))
             (_ (user-error "[org-link-beautify] Error: Can't find command tool to dump kindle ebook file cover."))))
+        (org-link-beautify--add-overlay-marker start end)
+        (org-link-beautify--add-keymap start end)
+        ;; display thumbnail-file only when it exist, otherwise it will break org-mode buffer fontification.
+        (if (file-exists-p thumbnail-file)
+            (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end)
+          'error))))
+
+(defun org-link-beautify--preview-comic (path start end &optional search-option)
+  "Preview CDisplay Archived Comic Book file PATH and display on link between START and END."
+  (if (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
+      (let* ((file-path (match-string 1 path))
+             ;; DEBUG: (_ (lambda () (message "--> DEBUG: ")))
+             (comic-file (expand-file-name (org-link-unescape file-path)))
+             (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path comic-file))
+             (thumbnail-file (expand-file-name
+                              (format "%s%s.png" thumbnails-dir (file-name-base comic-file))))
+             (thumbnail-size (or org-link-beautify-comic-preview-size 1080)))
+        (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
+        ;; DEBUG:
+        ;; (message comic-file)
+        (unless (file-exists-p thumbnail-file)
+          (cl-case system-type
+            ;; TODO:
+            ;; (gnu/linux
+            ;;  (start-process
+            ;;   "org-link-beautify--comic-preview"
+            ;;   " *org-link-beautify comic-preview*"
+            ;;   org-link-beautify-comic-preview
+            ;;   comic-file thumbnail-file
+            ;;   ;; (if org-link-beautify-comic-preview-size
+            ;;   ;;     "--size")
+            ;;   ;; (if org-link-beautify-comic-preview-size
+            ;;   ;;     (number-to-string thumbnail-size))
+            ;;   )
+            ;;  (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+            ;;    (org-link-beautify--notify-generate-thumbnail-failed comic-file thumbnail-file)))
+            (darwin            ; for macOS "qlmanage" command
+             ;; DEBUG
+             ;; (message comic-file)
+             ;; (message thumbnail-file)
+             ;; (message (number-to-string org-link-beautify-comic-preview-size))
+             ;; $ qlmanage -t "ラセン恐怖閣-マリコとニジロー1-DL版.cbz" - 2.0 -s 1080 -o ".thumbnails"
+             (let ((qlmanage-thumbnail-file (concat thumbnails-dir (file-name-nondirectory comic-file) ".png")))
+               (make-process
+                :name "org-link-beautify--comic-preview"
+                :command (list org-link-beautify-comic-preview
+                               "-t"
+                               comic-file
+                               "-o" thumbnails-dir
+                               "-s" (number-to-string thumbnail-size))
+                :buffer " *org-link-beautify comic-preview*"
+                :sentinel (lambda (proc event)
+                            (if org-link-beautify-enable-debug-p
+                                (message (format "> proc: %s\n> event: %s" proc event))
+                              ;; (when (string= event "finished\n")
+                              ;;   (kill-buffer (process-buffer proc))
+                              ;;   (kill-process proc))
+                              ))
+                :stdout " *org-link-beautify comic-preview*"
+                :stderr " *org-link-beautify comic-preview*")
+               ;; then rename [file.extension.png] to [file.png]
+               (when (and (not (file-exists-p thumbnail-file)) (file-exists-p qlmanage-thumbnail-file))
+                 (rename-file qlmanage-thumbnail-file thumbnail-file))
+               (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+                 (org-link-beautify--notify-generate-thumbnail-failed comic-file thumbnail-file))))
+            (t (user-error "This system platform currently not supported by org-link-beautify.\n Please contribute code to support"))))
         (org-link-beautify--add-overlay-marker start end)
         (org-link-beautify--add-keymap start end)
         ;; display thumbnail-file only when it exist, otherwise it will break org-mode buffer fontification.
@@ -1160,6 +1241,19 @@ You can install software `libmobi' to get command `mobitool'.")
               (org-link-beautify--add-keymap start end)
               (org-link-beautify--display-icon start end description icon)))
            
+           ;; CDisplay Archived Comic Book Formats cover preview
+           ((and org-link-beautify-comic-preview
+                 (equal type "file")
+                 (file-exists-p path)
+                 (member extension '("cbr" "cbz" "cb7" "cba")))
+            ;; DEBUG:
+            ;; (user-error "[org-link-beautify] cond -> comic file")
+            (when (eq (org-link-beautify--preview-comic path start end) 'error)
+              ;; Display icon if thumbnail not available.
+              (org-link-beautify--add-overlay-marker start end)
+              (org-link-beautify--add-keymap start end)
+              (org-link-beautify--display-icon start end description icon)))
+
            ;; FictionBook2 (.fb2, .fb2.zip) file cover preview
            ((and org-link-beautify-fictionbook2-preview
                  (equal type "file")
