@@ -535,15 +535,14 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
                              thumbnail-file
                              (number-to-string thumbnail-size))
               :buffer " *org-link-beautify epub-preview*"
+              :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
               :sentinel (lambda (proc event)
                           (if org-link-beautify-enable-debug-p
                               (message (format "> proc: %s\n> event: %s" proc event))
                             ;; (when (string= event "finished\n")
                             ;;   (kill-buffer (process-buffer proc))
                             ;;   (kill-process proc))
-                            ))
-              :stdout " *org-link-beautify epub-preview*"
-              :stderr " *org-link-beautify epub-preview*")
+                            )))
              (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
                (org-link-beautify--notify-generate-thumbnail-failed epub-file thumbnail-file)))
             (t (user-error "This system platform currently not supported by org-link-beautify.\n Please contribute code to support"))))
@@ -646,15 +645,14 @@ You can install software `libmobi' to get command `mobitool'.")
                                "-o" thumbnails-dir
                                "-s" (number-to-string thumbnail-size))
                 :buffer " *org-link-beautify comic-preview*"
+                :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
                 :sentinel (lambda (proc event)
                             (if org-link-beautify-enable-debug-p
                                 (message (format "> proc: %s\n> event: %s" proc event))
                               ;; (when (string= event "finished\n")
                               ;;   (kill-buffer (process-buffer proc))
                               ;;   (kill-process proc))
-                              ))
-                :stdout " *org-link-beautify comic-preview*"
-                :stderr " *org-link-beautify comic-preview*")
+                              )))
                ;; then rename [file.extension.png] to [file.png]
                (when (file-exists-p qlmanage-thumbnail-file)
                  (rename-file qlmanage-thumbnail-file thumbnail-file))
