@@ -67,7 +67,8 @@ which represent to ~/.cache/thumbnails/."
   :group 'org-link-beautify)
 
 (defcustom org-link-beautify-display-overlay-info nil
-  "Whether display link info with Emacs overlay over link thumbnail."
+  "Whether display link info with Emacs overlay over link thumbnail.
+NOTE: overlays may mess up buffer when you cut text etc."
   :type 'boolean
   :safe #'booleanp
   :group 'org-link-beautify)
@@ -410,7 +411,8 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
         (setq ov-name (make-symbol (concat "org-link-beautify--overlay-" (format "%010d" (random 10000000000)))))
         (set-variable (symbol-value 'ov-name) (make-overlay beginning end))
         ;; display filename
-        (overlay-put (symbol-value (symbol-value 'ov-name)) 'before-string str-text-property)))))
+        (overlay-put (symbol-value (symbol-value 'ov-name)) 'before-string str-text-property)
+        (overlay-put (symbol-value (symbol-value 'ov-name)) 'evaporate t)))))
 
 ;;; TEST:
 ;; (org-link-beautify--add-overlay-info "/path/to/thumbnail.png" (+ (point) 1) (+ (point) 2))
