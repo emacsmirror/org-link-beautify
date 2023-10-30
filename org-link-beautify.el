@@ -382,7 +382,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
          (filename (file-name-nondirectory thumbnail))
          ;; Insert an overlay new line.
          ;; -> Prepend a "\n" *newline character* before the /overlay/ ~'before-string~ string.
-         (str (concat "\n" filename)))
+         (str-text-property (concat "\n" "🔗 " (propertize filename 'face 'font-lock-doc-markup-face))))
     ;; Detect whether overlay already exist? To avoid insert duplicated overlays many times.
     ;; (unless (overlay-get (symbol-value 'ov-name) 'before-string) ...)
     (unless (seq-some
@@ -396,7 +396,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
       (setq ov-name (make-symbol (concat "org-link-beautify--overlay-" (format "%010d" (random 10000000000)))))
       (set-variable (symbol-value 'ov-name) (make-overlay beginning end))
       ;; display filename
-      (overlay-put (symbol-value (symbol-value 'ov-name)) 'before-string str))))
+      (overlay-put (symbol-value (symbol-value 'ov-name)) 'before-string str-text-property))))
 
 ;;; TEST:
 ;; (org-link-beautify--add-overlay-info "/path/to/thumbnail.png" (+ (point) 1) (+ (point) 2))
