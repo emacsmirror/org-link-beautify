@@ -66,6 +66,12 @@ which represent to ~/.cache/thumbnails/."
   :safe #'symbolp
   :group 'org-link-beautify)
 
+(defcustom org-link-beautify-display-overlay-info nil
+  "Whether display link info with Emacs overlay over link thumbnail."
+  :type 'boolean
+  :safe #'booleanp
+  :group 'org-link-beautify)
+
 (defcustom org-link-beautify-image-preview nil
   "Whether enable image files thumbnail preview?"
   :type 'boolean
@@ -384,26 +390,27 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
 
 (defun org-link-beautify--add-overlay-info (thumbnail start end)
   "Display info over the link. Put the overlay on START instead of END."
-  (let* ((beginning (- start 1))
-         (end (- start 1))
-         (filename (file-name-nondirectory thumbnail))
-         ;; Insert an overlay new line.
-         ;; -> Prepend a "\n" *newline character* before the /overlay/ ~'before-string~ string.
-         (str-text-property (concat "\n" "🔗 " (propertize filename 'face 'font-lock-doc-markup-face))))
-    ;; Detect whether overlay already exist? To avoid insert duplicated overlays many times.
-    ;; (unless (overlay-get (symbol-value 'ov-name) 'before-string) ...)
-    (unless (seq-some
-             (lambda (element) (not (null element)))
-             (mapcar
-              (lambda (plist)
-                (plist-get plist 'before-string))
-              (mapcar 'overlay-properties
-                      (overlays-in beginning end))))
-      ;; Make random overlay object symbol names to store different overlays.
-      (setq ov-name (make-symbol (concat "org-link-beautify--overlay-" (format "%010d" (random 10000000000)))))
-      (set-variable (symbol-value 'ov-name) (make-overlay beginning end))
-      ;; display filename
-      (overlay-put (symbol-value (symbol-value 'ov-name)) 'before-string str-text-property))))
+  (when org-link-beautify-display-overlay-info
+    (let* ((beginning (- start 1))
+           (end (- start 1))
+           (filename (file-name-nondirectory thumbnail))
+           ;; Insert an overlay new line.
+           ;; -> Prepend a "\n" *newline character* before the /overlay/ ~'before-string~ string.
+           (str-text-property (concat "\n" "🔗 " (propertize filename 'face 'font-lock-doc-markup-face))))
+      ;; Detect whether overlay already exist? To avoid insert duplicated overlays many times.
+      ;; (unless (overlay-get (symbol-value 'ov-name) 'before-string) ...)
+      (unless (seq-some
+               (lambda (element) (not (null element)))
+               (mapcar
+                (lambda (plist)
+                  (plist-get plist 'before-string))
+                (mapcar 'overlay-properties
+                        (overlays-in beginning end))))
+        ;; Make random overlay object symbol names to store different overlays.
+        (setq ov-name (make-symbol (concat "org-link-beautify--overlay-" (format "%010d" (random 10000000000)))))
+        (set-variable (symbol-value 'ov-name) (make-overlay beginning end))
+        ;; display filename
+        (overlay-put (symbol-value (symbol-value 'ov-name)) 'before-string str-text-property)))))
 
 ;;; TEST:
 ;; (org-link-beautify--add-overlay-info "/path/to/thumbnail.png" (+ (point) 1) (+ (point) 2))
