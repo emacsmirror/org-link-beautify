@@ -375,6 +375,33 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
   "Add \\='org-link-beautify on link text-property. between START and END."
   (put-text-property start end 'type 'org-link-beautify))
 
+(defun org-link-beautify--add-overlay-info (thumbnail start end)
+  "Display info over the link. Put the overlay on START instead of END."
+  (let* ((beginning (- start 1))
+         (end (- start 1))
+         (filename (file-name-nondirectory thumbnail))
+         ;; Insert an overlay new line.
+         ;; -> Prepend a "\n" *newline character* before the /overlay/ ~'before-string~ string.
+         (str (concat "\n" filename)))
+    ;; Detect whether overlay already exist? To avoid insert duplicated overlays many times.
+    ;; (unless (overlay-get (symbol-value 'ov-name) 'before-string) ...)
+    (unless (seq-some
+             (lambda (element) (not (null element)))
+             (mapcar
+              (lambda (plist)
+                (plist-get plist 'before-string))
+              (mapcar 'overlay-properties
+                      (overlays-in beginning end))))
+      ;; Make random overlay object symbol names to store different overlays.
+      (setq ov-name (make-symbol (concat "org-link-beautify--overlay-" (format "%010d" (random 10000000000)))))
+      (set-variable (symbol-value 'ov-name) (make-overlay beginning end))
+      ;; display filename
+      (overlay-put (symbol-value (symbol-value 'ov-name)) 'before-string str))))
+
+;;; TEST:
+;; (org-link-beautify--add-overlay-info "/path/to/thumbnail.png" (+ (point) 1) (+ (point) 2))
+;; (remove-overlays (point) (+ (point) 1)) ; clear displayed overlays.
+
 (defun org-link-beautify--get-thumbnails-dir-path (file)
   "Return the FILE thumbnail directory's path."
   (cl-case org-link-beautify-thumbnails-dir
@@ -485,6 +512,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
               pdf-file thumbnail-file (number-to-string pdf-page-number))
              (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
                (org-link-beautify--notify-generate-thumbnail-failed pdf-file thumbnail-file)))))
+        (org-link-beautify--add-overlay-info thumbnail-file start end)
         (org-link-beautify--add-text-property-marker start end)
         (org-link-beautify--add-keymap start end)
         ;; display thumbnail-file only when it exist, otherwise it will break org-mode buffer fontification.
@@ -546,6 +574,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
              (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
                (org-link-beautify--notify-generate-thumbnail-failed epub-file thumbnail-file)))
             (t (user-error "This system platform currently not supported by org-link-beautify.\n Please contribute code to support"))))
+        (org-link-beautify--add-overlay-info thumbnail-file start end)
         (org-link-beautify--add-text-property-marker start end)
         (org-link-beautify--add-keymap start end)
         ;; display thumbnail-file only when it exist, otherwise it will break org-mode buffer fontification.
@@ -594,6 +623,7 @@ You can install software `libmobi' to get command `mobitool'.")
                (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
                  (org-link-beautify--notify-generate-thumbnail-failed kindle-file thumbnail-file))))
             (_ (user-error "[org-link-beautify] Error: Can't find command tool to dump kindle ebook file cover."))))
+        (org-link-beautify--add-overlay-info thumbnail-file start end)
         (org-link-beautify--add-text-property-marker start end)
         (org-link-beautify--add-keymap start end)
         ;; display thumbnail-file only when it exist, otherwise it will break org-mode buffer fontification.
@@ -659,6 +689,7 @@ You can install software `libmobi' to get command `mobitool'.")
                (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
                  (org-link-beautify--notify-generate-thumbnail-failed comic-file thumbnail-file))))
             (t (user-error "This system platform currently not supported by org-link-beautify.\n Please contribute code to support"))))
+        (org-link-beautify--add-overlay-info thumbnail-file start end)
         (org-link-beautify--add-text-property-marker start end)
         (org-link-beautify--add-keymap start end)
         ;; display thumbnail-file only when it exist, otherwise it will break org-mode buffer fontification.
@@ -708,6 +739,7 @@ You can install software `libmobi' to get command `mobitool'.")
         (if (eq cover-image 'no-cover)
             (message "[org-link-beautify] FictionBook2 preview failed to extract cover image.")
           (org-link-beautify--fictionbook2-save-cover cover-image thumbnail-file-path))))
+    (org-link-beautify--add-overlay-info thumbnail-file start end)
     (org-link-beautify--add-text-property-marker start end)
     (org-link-beautify--add-keymap start end)
     ;; display thumbnail-file-path only when it exist, otherwise it will break org-mode buffer fontification.
@@ -859,6 +891,7 @@ You can install software `libmobi' to get command `mobitool'.")
             "-vcodec" "png" "-an" "-f" "rawvideo" "-s" (number-to-string thumbnail-size) thumbnail-file)
            (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
              (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file))))))
+    (org-link-beautify--add-overlay-info thumbnail-file start end)
     (org-link-beautify--add-text-property-marker start end)
     (org-link-beautify--add-keymap start end)
     ;; display thumbnail-file only when it exist, otherwise it will break org-mode buffer fontification.
@@ -923,6 +956,7 @@ You can install software `libmobi' to get command `mobitool'.")
           ;; ("ffmpeg"
           ;;  )
           )))
+    (org-link-beautify--add-overlay-info thumbnail-file start end)
     (org-link-beautify--add-text-property-marker start end)
     (org-link-beautify--add-keymap start end)
     ;; display thumbnail-file only when it exist, otherwise it will break org-mode buffer fontification.
