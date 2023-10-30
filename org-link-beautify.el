@@ -36,6 +36,13 @@
 (require 'cl-lib)
 (require 'time-stamp)
 
+;; (require 'fb2-reader)
+(declare-function fb2-reader--create-image "fb2-reader" (data type &rest props))
+(declare-function fb2-reader--extract-image-data "fb2-reader" (book attributes &optional tags))
+(declare-function fb2-reader--get-cover "fb2-reader" (book))
+(declare-function fb2-reader-parse-file-as-html "fb2-reader" (file))
+(declare-function fb2-reader-parse-file-as-xml "fb2-reader" (file))
+
 (defgroup org-link-beautify nil
   "Customize group of org-link-beautify-mode."
   :prefix "org-link-beautify-"
