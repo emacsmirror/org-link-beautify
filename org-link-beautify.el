@@ -1078,6 +1078,7 @@ You can install software `libmobi' to get command `mobitool'.")
     ("orgit-rev" (nerd-icons-devicon "nf-dev-git_commit" :face 'nerd-icons-silver))
     ("orgit-log" (nerd-icons-octicon "nf-oct-diff" :face 'nerd-icons-silver))
     ("pdf" (nerd-icons-icon-for-file "file.pdf"))
+    ("nov" (nerd-icons-icon-for-file "file.epub")) ; for Emacs package "nov.el" link type `nov:'
     ("grep" (nerd-icons-mdicon "nf-md-selection_search" :face 'nerd-icons-green))
     ("occur" (nerd-icons-mdicon "nf-md-selection_multiple" :face 'nerd-icons-green))
     ("rss" (nerd-icons-mdicon "nf-md-rss" :face 'nerd-icons-lorange))
