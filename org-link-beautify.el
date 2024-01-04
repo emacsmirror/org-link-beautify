@@ -1090,6 +1090,8 @@ You can install software `libmobi' to get command `mobitool'.")
     ("org-contact" (nerd-icons-mdicon "nf-md-contacts_outline" :face 'nerd-icons-purple-alt))
     ("video" (nerd-icons-faicon "nf-fa-file_video_o" :face 'nerd-icons-blue))
     ("audio" (nerd-icons-faicon "nf-fa-file_audio_o" :face 'nerd-icons-blue))
+    ("javascript" (nerd-icons-mdicon "nf-md-language_javascript" :face 'nerd-icons-yellow))
+    ("js" (nerd-icons-mdicon "nf-md-language_javascript" :face 'nerd-icons-yellow))
     
     ;; `org-element-context' will return "fuzzy" type when link not recognized.
     ;; ("fuzzy"
