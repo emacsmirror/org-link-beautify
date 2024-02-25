@@ -1446,6 +1446,17 @@ If BEGIN and END is ommited, the default value is `point-min' and `point-max'."
 
 (define-key org-link-beautify-keymap (kbd "M-w") 'org-link-beautify-copy-file-to-clipboard)
 
+(defun org-link-beautify-display-qrcode-for-url (&optional arg)
+  "Display QR code for Org link at point in new buffer."
+  (interactive)
+  (let ((url (org-element-property-raw :raw-link (org-element-context))))
+    (if (featurep 'qrencode)
+        (qrencode-string url)
+      (warn "Emacs package 'qrencode' is required, install it with `package-install'!"))
+    (message "Display QR code for Org link URL in new buffer.")))
+
+(define-key org-link-beautify-keymap (kbd "M-q") 'org-link-beautify-display-qrcode-for-url)
+
 ;;;###autoload
 (defun org-link-beautify-enable ()
   "Enable `org-link-beautify'."

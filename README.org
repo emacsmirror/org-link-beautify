@@ -59,10 +59,12 @@ Supports video file link preview with thumbnail.
 - [X] preview CDisplay Archived Comic Book Formats (.cbr, .cbz, cb7, .cba etc) cover
 - [X] add keymap on link text-property, available keybindings:
   + =[Enter]= :: =org-open-at-point=, so you can press =[Enter]= to open link.
-  You can add more keybindings with following similar config:
-  #+begin_src emacs-lisp :eval no
-  (define-key org-link-beautify-keymap (kbd "RET") 'org-open-at-point)
-  #+end_src
+    You can add more keybindings with following similar config:
+    #+begin_src emacs-lisp :eval no
+    (define-key org-link-beautify-keymap (kbd "RET") 'org-open-at-point)
+    #+end_src
+  + =[M-w]= :: copy file in link at point
+  + =[M-q]= :: display QR code for link URL at point
 - =[c]= :: =org-link-beautify-copy-file-to-clipboard=, copy the file at point link to system clipboard for pasting.
 - [X] preview text files like .org, .markdown (.md), .txt, and source code files etc (customized with ~org-link-beautify-text-preview-list~).
 - [X] preview archive files like .zip, .rar, .tar.gz, .tar.bz2, .7z etc.
