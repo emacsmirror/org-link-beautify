@@ -1428,23 +1428,35 @@ If BEGIN and END is ommited, the default value is `point-min' and `point-max'."
 (define-key org-link-beautify-keymap [mouse-1] 'org-open-at-point)
 (define-key org-link-beautify-keymap (kbd "<mouse-1>") 'org-open-at-point)
 
-(defun org-link-beautify-copy-file-to-clipboard (&optional arg)
-  "Copy the Org link file at point to clipboard."
-  (interactive "P")
-  (let* ((path (org-element-property :path (org-element-context)))
-         (file-absolute-path (expand-file-name path)))
-    (cl-case system-type
-      ;; TODO:
-      (gnu/linux )
-      (darwin
-       (do-applescript
-        (format "tell app \"Finder\" to set the clipboard to ( POSIX file \"%s\" )"
-                file-absolute-path)))
-      ;; TODO:
-      (windows-nt ))
-    (message "Copied file [%s] to system clipboard." path)))
+(defun org-link-beautify-copy-file-to-clipboard (file)
+  "Copy the FILE on path to clipboard.
+The argument FILE must be the absolute path."
+  (cl-case system-type
+    (darwin
+     (do-applescript
+      (format "tell app \"Finder\" to set the clipboard to ( POSIX file \"%s\" )" file)))
+    ;; TODO:
+    (gnu/linux )
+    ;; TODO:
+    (windows-nt ))
+  (message "Copied file [%s] to system clipboard."
+           (string-truncate-left file (/ (window-width) 2))))
 
-(define-key org-link-beautify-keymap (kbd "M-w") 'org-link-beautify-copy-file-to-clipboard)
+(defun org-link-beautify-copy-file (&optional arg)
+  "Copy the Org link file at point."
+  (interactive "P")
+  (if (or (region-active-p) mark-active)
+      (let ((region-text (buffer-substring-no-properties
+                          (region-beginning) (region-end))))
+        (kill-new region-text))
+    (let ((element (org-element-context)))
+      (if (and (eq (car element) 'link)
+               (string-equal (org-element-property :type element) "file"))
+          (let ((file-path (expand-file-name (org-element-property :path element))))
+            (org-link-beautify-copy-file-to-clipboard file-path))
+        (message "[org-link-beautify] No action executed on link.")))))
+
+(define-key org-link-beautify-keymap (kbd "M-w") 'org-link-beautify-copy-file)
 
 (defun org-link-beautify-display-qrcode-for-url (&optional arg)
   "Display QR code for Org link at point in new buffer."
