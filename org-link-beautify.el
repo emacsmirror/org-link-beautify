@@ -1134,9 +1134,9 @@ You can install software `libmobi' to get command `mobitool'.")
      (propertize "[" 'face 'org-link-beautify-link-decorator-face)
      (propertize description 'face 'org-link-beautify-link-description-face)
      (propertize "]" 'face 'org-link-beautify-link-decorator-face)
-     (propertize "⌈" 'face 'org-link-beautify-link-decorator-face)
-     (propertize icon)
-     (propertize "⌋" 'face 'org-link-beautify-link-decorator-face)))))
+     (propertize "⌈" 'face '(:inherit 'org-link-beautify-link-decorator-face :underline nil))
+     (propertize icon 'face `(:inherit ,(plist-get (get-text-property 0 'face icon) :inherit) :underline nil))
+     (propertize "⌋" 'face '(:inherit 'org-link-beautify-link-decorator-face :underline nil))))))
 
 (defun org-link-beautify--display-not-exist (start end description icon)
   "Display error color and ICON on START and END with DESCRIPTION."
