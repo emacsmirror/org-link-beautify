@@ -31,6 +31,7 @@
 (require 'ol)
 (require 'org)
 (require 'org-element)
+(require 'org-element-ast)
 (require 'nerd-icons)
 (require 'color)
 (require 'cl-lib)
