@@ -1112,7 +1112,8 @@ You can install software `libmobi' to get command `mobitool'.")
      (nerd-icons-mdicon "nf-md-progress_question" :face 'nerd-icons-lyellow))))
 
 (defface org-link-beautify-link-decorator-face
-  `((t :foreground ,(color-lighten-name (face-foreground 'shadow) 2)))
+  `((t :foreground ,(color-lighten-name (face-foreground 'shadow) 2)
+       :underline nil))
   "Face for org-link-beautify link decorator."
   :group 'org-link-beautify)
 
@@ -1135,11 +1136,11 @@ You can install software `libmobi' to get command `mobitool'.")
     (propertize "[" 'face 'org-link-beautify-link-decorator-face)
     (propertize description 'face 'org-link-beautify-link-description-face)
     (propertize "]" 'face 'org-link-beautify-link-decorator-face)
-    (propertize "⌈" 'face '(:inherit 'org-link-beautify-link-decorator-face :underline nil))
+    (propertize "⌈" 'face 'org-link-beautify-link-decorator-face)
     (propertize icon 'face `(:inherit ,(or (plist-get (get-text-property 0 'face icon) :inherit)
                                            'org-link-beautify-link-icon-face)
                                       :underline nil))
-    (propertize "⌋" 'face '(:inherit 'org-link-beautify-link-decorator-face :underline nil)))))
+    (propertize "⌋" 'face 'org-link-beautify-link-decorator-face))))
 
 (defun org-link-beautify--display-not-exist (start end description icon)
   "Display error color and ICON on START and END with DESCRIPTION."
