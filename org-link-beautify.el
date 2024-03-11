@@ -1131,30 +1131,28 @@ You can install software `libmobi' to get command `mobitool'.")
   (put-text-property
    start end
    'display
-   (propertize
-    (concat
-     (propertize "[" 'face 'org-link-beautify-link-decorator-face)
-     (propertize description 'face 'org-link-beautify-link-description-face)
-     (propertize "]" 'face 'org-link-beautify-link-decorator-face)
-     (propertize "⌈" 'face '(:inherit 'org-link-beautify-link-decorator-face :underline nil))
-     (propertize icon 'face `(:inherit ,(or (plist-get (get-text-property 0 'face icon) :inherit)
-                                            'org-link-beautify-link-icon-face)
-                                       :underline nil))
-     (propertize "⌋" 'face '(:inherit 'org-link-beautify-link-decorator-face :underline nil))))))
+   (concat
+    (propertize "[" 'face 'org-link-beautify-link-decorator-face)
+    (propertize description 'face 'org-link-beautify-link-description-face)
+    (propertize "]" 'face 'org-link-beautify-link-decorator-face)
+    (propertize "⌈" 'face '(:inherit 'org-link-beautify-link-decorator-face :underline nil))
+    (propertize icon 'face `(:inherit ,(or (plist-get (get-text-property 0 'face icon) :inherit)
+                                           'org-link-beautify-link-icon-face)
+                                      :underline nil))
+    (propertize "⌋" 'face '(:inherit 'org-link-beautify-link-decorator-face :underline nil)))))
 
 (defun org-link-beautify--display-not-exist (start end description icon)
   "Display error color and ICON on START and END with DESCRIPTION."
   (put-text-property
    start end
    'display
-   (propertize
-    (concat
-     (propertize "[" 'face '(:inherit nil :underline nil :foreground "black"))
-     (propertize description 'face '(:underline t :foreground "red" :strike-through t))
-     (propertize "]" 'face '(:inherit nil :underline nil :foreground "black"))
-     (propertize "(" 'face '(:inherit nil :underline nil :foreground "black"))
-     (propertize icon 'face '(:inherit nil :underline nil :foreground "orange red"))
-     (propertize ")" 'face '(:inherit nil :underline nil :foreground "black"))))))
+   (concat
+    (propertize "[" 'face '(:inherit nil :underline nil :foreground "black"))
+    (propertize description 'face '(:underline t :foreground "red" :strike-through t))
+    (propertize "]" 'face '(:inherit nil :underline nil :foreground "black"))
+    (propertize "(" 'face '(:inherit nil :underline nil :foreground "black"))
+    (propertize icon 'face '(:inherit nil :underline nil :foreground "orange red"))
+    (propertize ")" 'face '(:inherit nil :underline nil :foreground "black")))))
 
 (defun org-link-beautify-display (start end path bracket-p)
   "Display icon for the link type based on PATH from START to END."
