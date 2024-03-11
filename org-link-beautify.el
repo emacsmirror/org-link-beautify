@@ -1,7 +1,7 @@
 ;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
 ;; Authors: stardiviner <numbchild@gmail.com>
-;; Package-Requires: ((emacs "28.1") (nerd-icons "0.0.1") (fb2-reader "0.1.1"))
+;; Package-Requires: ((emacs "28.1") (nerd-icons "0.0.1") (fb2-reader "0.1.1") (qrencode "1.2"))
 ;; Version: 1.2.2
 ;; Keywords: hypermedia
 ;; homepage: https://repo.or.cz/org-link-beautify.git
@@ -35,6 +35,7 @@
 (require 'color)
 (require 'cl-lib)
 (require 'time-stamp)
+(require 'qrencode)
 
 ;; (require 'fb2-reader)
 (declare-function fb2-reader--create-image "fb2-reader" (data type &rest props))
@@ -1462,7 +1463,7 @@ The argument FILE must be the absolute path."
   "Display QR code for Org link at point in new buffer."
   (interactive)
   (let ((url (org-element-property-raw :raw-link (org-element-context))))
-    (if (featurep 'qrencode)
+    (if (require 'qrencode nil t)
         (qrencode-string url)
       (warn "Emacs package 'qrencode' is required, install it with `package-install'!"))
     (message "Display QR code for Org link URL in new buffer.")))
