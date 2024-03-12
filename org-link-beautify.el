@@ -2,7 +2,7 @@
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "28.1") (nerd-icons "0.0.1") (fb2-reader "0.1.1") (qrencode "1.2"))
-;; Version: 1.2.2
+;; Version: 1.2.3
 ;; Keywords: hypermedia
 ;; homepage: https://repo.or.cz/org-link-beautify.git
 
