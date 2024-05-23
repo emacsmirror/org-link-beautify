@@ -1501,6 +1501,7 @@ The argument FILE must be the absolute path."
   :global t
   :init-value nil
   :lighter nil
+  :keymap org-link-beautify-keymap
   (if org-link-beautify-mode
       (org-link-beautify-enable)
     (org-link-beautify-disable)))
