@@ -1475,11 +1475,11 @@ The argument FILE must be the absolute path."
   "Display QR code for Org link at point in new buffer."
   (interactive)
   (when (eq major-mode 'org-mode)
-    (let ((url (org-element-property-raw :raw-link (org-element-context))))
-      (if (require 'qrencode nil t)
-          (qrencode-string url)
-        (warn "Emacs package 'qrencode' is required, install it with `package-install'!"))
-      (message "Display QR code for Org link URL in new buffer."))))
+    (if-let ((url (org-element-property-raw :raw-link (org-element-context))))
+        (if (require 'qrencode nil t)
+            (qrencode-string url)
+          (warn "Emacs package 'qrencode' is required, install it with `package-install'!"))
+      (org-fill-paragraph))))
 
 (define-key org-link-beautify-keymap (kbd "M-q") 'org-link-beautify-display-qrcode-for-url)
 
