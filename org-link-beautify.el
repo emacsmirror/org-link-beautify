@@ -1453,7 +1453,7 @@ The argument FILE must be the absolute path."
   (message "Copied file [%s] to system clipboard."
            (string-truncate-left file (/ (window-width) 2))))
 
-(defun org-link-beautify-copy-file ()
+(defun org-link-beautify-copy-file (&optional args)
   "Copy the Org link file at point."
   (interactive "P")
   (when (eq major-mode 'org-mode)
@@ -1470,7 +1470,7 @@ The argument FILE must be the absolute path."
 
 (define-key org-link-beautify-keymap (kbd "M-w") 'org-link-beautify-copy-file)
 
-(defun org-link-beautify-display-qrcode-for-url ()
+(defun org-link-beautify-display-qrcode-for-url (&optional args)
   "Display QR code for Org link at point in new buffer."
   (interactive)
   (when (eq major-mode 'org-mode)
