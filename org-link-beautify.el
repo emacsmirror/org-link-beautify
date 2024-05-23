@@ -1478,7 +1478,8 @@ The argument FILE must be the absolute path."
     (if-let ((url (org-element-property-raw :raw-link (org-element-context))))
         (if (require 'qrencode nil t)
             (qrencode-string url)
-          (warn "Emacs package 'qrencode' is required, install it with `package-install'!"))
+          (package-install 'qrencode)
+          (qrencode-string url))
       (org-fill-paragraph))))
 
 (define-key org-link-beautify-keymap (kbd "M-q") 'org-link-beautify-display-qrcode-for-url)
