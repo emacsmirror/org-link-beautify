@@ -1460,7 +1460,8 @@ The argument FILE must be the absolute path."
     (if (or (region-active-p) mark-active)
         (let ((region-text (buffer-substring-no-properties
                             (region-beginning) (region-end))))
-          (kill-new region-text))
+          (kill-new region-text)
+          (deactivate-mark))
       (let ((element (org-element-context)))
         (if (and (eq (car element) 'link)
                  (string-equal (org-element-property :type element) "file"))
