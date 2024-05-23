@@ -1427,9 +1427,15 @@ If BEGIN and END is ommited, the default value is `point-min' and `point-max'."
   "Add keymap on link text-property. between START and END."
   (put-text-property start end 'keymap org-link-beautify-keymap))
 
-(define-key org-link-beautify-keymap (kbd "RET") 'org-open-at-point)
-(define-key org-link-beautify-keymap [mouse-1] 'org-open-at-point)
-(define-key org-link-beautify-keymap (kbd "<mouse-1>") 'org-open-at-point)
+(defun org-link-beautify-open-at-point ()
+  "Execute `org-open-at-point' only in `org-mode'."
+  (interactive)
+  (when (eq major-mode 'org-mode)
+    (org-open-at-point)))
+
+(define-key org-link-beautify-keymap (kbd "RET") 'org-link-beautify-open-at-point)
+(define-key org-link-beautify-keymap [mouse-1] 'org-link-beautify-open-at-point)
+(define-key org-link-beautify-keymap (kbd "<mouse-1>") 'org-link-beautify-open-at-point)
 
 (defun org-link-beautify-copy-file-to-clipboard (file)
   "Copy the FILE on path to clipboard.
@@ -1445,30 +1451,32 @@ The argument FILE must be the absolute path."
   (message "Copied file [%s] to system clipboard."
            (string-truncate-left file (/ (window-width) 2))))
 
-(defun org-link-beautify-copy-file (&optional arg)
+(defun org-link-beautify-copy-file ()
   "Copy the Org link file at point."
   (interactive "P")
-  (if (or (region-active-p) mark-active)
-      (let ((region-text (buffer-substring-no-properties
-                          (region-beginning) (region-end))))
-        (kill-new region-text))
-    (let ((element (org-element-context)))
-      (if (and (eq (car element) 'link)
-               (string-equal (org-element-property :type element) "file"))
-          (let ((file-path (expand-file-name (org-element-property :path element))))
-            (org-link-beautify-copy-file-to-clipboard file-path))
-        (message "[org-link-beautify] No action executed on link.")))))
+  (when (eq major-mode 'org-mode)
+    (if (or (region-active-p) mark-active)
+        (let ((region-text (buffer-substring-no-properties
+                            (region-beginning) (region-end))))
+          (kill-new region-text))
+      (let ((element (org-element-context)))
+        (if (and (eq (car element) 'link)
+                 (string-equal (org-element-property :type element) "file"))
+            (let ((file-path (expand-file-name (org-element-property :path element))))
+              (org-link-beautify-copy-file-to-clipboard file-path))
+          (message "[org-link-beautify] No action executed on link."))))))
 
 (define-key org-link-beautify-keymap (kbd "M-w") 'org-link-beautify-copy-file)
 
-(defun org-link-beautify-display-qrcode-for-url (&optional arg)
+(defun org-link-beautify-display-qrcode-for-url ()
   "Display QR code for Org link at point in new buffer."
   (interactive)
-  (let ((url (org-element-property-raw :raw-link (org-element-context))))
-    (if (require 'qrencode nil t)
-        (qrencode-string url)
-      (warn "Emacs package 'qrencode' is required, install it with `package-install'!"))
-    (message "Display QR code for Org link URL in new buffer.")))
+  (when (eq major-mode 'org-mode)
+    (let ((url (org-element-property-raw :raw-link (org-element-context))))
+      (if (require 'qrencode nil t)
+          (qrencode-string url)
+        (warn "Emacs package 'qrencode' is required, install it with `package-install'!"))
+      (message "Display QR code for Org link URL in new buffer."))))
 
 (define-key org-link-beautify-keymap (kbd "M-q") 'org-link-beautify-display-qrcode-for-url)
 
@@ -1502,7 +1510,7 @@ The argument FILE must be the absolute path."
   :init-value nil
   :lighter nil
   :keymap org-link-beautify-keymap
-  (if org-link-beautify-mode
+  (if (and org-link-beautify-mode (eq major-mode 'org-mode))
       (org-link-beautify-enable)
     (org-link-beautify-disable)))
 
