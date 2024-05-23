@@ -24,7 +24,9 @@
 
 ;; Usage:
 ;;
-;; (org-link-beautify-mode 1)
+;; (use-package org-link-beautify
+;;   :ensure t
+;;   :hook (org-mode . org-link-beautify-mode))
 
 ;;; Code:
 
@@ -1506,11 +1508,11 @@ The argument FILE must be the absolute path."
 (define-minor-mode org-link-beautify-mode
   "A minor mode to beautify Org Mode links with icons, and inline preview etc."
   :group 'org-link-beautify
-  :global t
+  :global nil
   :init-value nil
   :lighter nil
   :keymap org-link-beautify-keymap
-  (if (and org-link-beautify-mode (eq major-mode 'org-mode))
+  (if org-link-beautify-mode
       (org-link-beautify-enable)
     (org-link-beautify-disable)))
 
