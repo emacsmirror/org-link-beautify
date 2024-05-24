@@ -1110,7 +1110,10 @@ You can install software `libmobi' to get command `mobitool'.")
 
     (_
      ;; DEBUG
-     (message "[org-link-beautify] link-element: %s" link-element)
+     (let ((link-type (org-element-property :type link-element))
+           (link-path (org-element-property :path link-element)))
+       (message "[org-link-beautify] link-type: '%s', link-path: '%s' not matched.
+You can add it into source code." link-type link-path))
      ;; handle when returned icon is `nil'.
      (nerd-icons-mdicon "nf-md-progress_question" :face 'nerd-icons-lyellow))))
 
