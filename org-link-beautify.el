@@ -1100,21 +1100,20 @@ You can install software `libmobi' to get command `mobitool'.")
     ("vscode" (nerd-icons-mdicon "nf-md-microsoft_visual_studio_code" :face 'nerd-icons-blue-alt))
     
     ;; `org-element-context' will return "fuzzy" type when link not recognized.
-    ;; ("fuzzy"
-    ;;  ;; DEBUG
-    ;;  (message "[org-link-beautify] link-element: %s" link-element)
-    ;;  (when (string-match ".*:.*" link-element) ; extract the "real" link type for "fuzzy" type.
-    ;;    (let ((real-type (match-string 1 link-element)))
-    ;;      (pcase real-type
-    ;;        ))))
+    ("fuzzy"
+     (when (string-match "\\([^:]*\\):\\(.*\\)" path) ; extract the "real" link type for "fuzzy" type in :path.
+       (let ((real-type (match-string 1 path)))
+         (pcase real-type
+           ;; (link (:standard-properties [92824 nil 92863 92940 92942 0 nil nil nil nil nil nil ...] :type "fuzzy" :type-explicit-p nil :path "mu4e:msgid:m2zgotun61.fsf@numbchild" :format bracket :raw-link "mu4e:msgid:m2zgotun61.fsf@numbchild" ...))
+           ("mu4e" (nerd-icons-mdicon "nf-md-email_search_outline" :face 'nerd-icons-blue))
+           (_
+            ;; DEBUG:
+            (message "[org-link-beautify] type: %s, path: %s, extension: %s, link-element: %s" type path extension link-element))))))
 
     (_
      ;; DEBUG
-     (let ((link-type (org-element-property :type link-element))
-           (link-path (org-element-property :path link-element)))
-       (message "[org-link-beautify] link-type: '%s', link-path: '%s' not matched.
-You can add it into source code." link-type link-path))
-     ;; handle when returned icon is `nil'.
+     (message "[org-link-beautify] type: %s, path: %s, extension: %s, link-element: %s" type path extension link-element)
+     ;; handle when returned link type is `nil'.
      (nerd-icons-mdicon "nf-md-progress_question" :face 'nerd-icons-lyellow))))
 
 (defface org-link-beautify-link-decorator-face
@@ -1177,6 +1176,9 @@ You can add it into source code." link-type link-path))
                ;; DEBUG:
                ;; (raw-link-debug (print raw-link))
                (type (org-element-property :type link-element))
+               ;; DEBUG:
+               ;; (type-debug (message path))
+               (path (org-element-property :path link-element))
                ;; DEBUG:
                ;; (type-debug (message type))
                (extension (or (file-name-extension (org-link-unescape path)) "txt"))
