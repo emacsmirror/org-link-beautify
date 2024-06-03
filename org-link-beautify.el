@@ -1463,7 +1463,7 @@ The argument FILE must be the absolute path."
 (defun org-link-beautify-copy-file (&optional args)
   "Copy the Org link file at point."
   (interactive "P")
-  (when (eq major-mode 'org-mode)
+  (when (derived-mode-p 'org-mode)
     (if (or (region-active-p) mark-active)
         (let ((region-text (buffer-substring-no-properties
                             (region-beginning) (region-end))))
@@ -1481,7 +1481,7 @@ The argument FILE must be the absolute path."
 (defun org-link-beautify-display-qrcode-for-url (&optional args)
   "Display QR code for Org link at point in new buffer in ARGS."
   (interactive)
-  (when (eq major-mode 'org-mode)
+  (when (derived-mode-p 'org-mode)
     (if-let ((url (org-element-property-raw :raw-link (org-element-context))))
         (if (require 'qrencode nil t)
             (qrencode-string url)
