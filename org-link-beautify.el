@@ -1491,6 +1491,22 @@ The argument FILE must be the absolute path."
 
 (define-key org-link-beautify-keymap (kbd "M-q") 'org-link-beautify-display-qrcode-for-url)
 
+(defun org-link-beautify-goto-file-in-dired ()
+  "Open Dired and goto the link file position."
+  (interactive)
+  (when (derived-mode-p 'org-mode)
+    (let* ((file-path (org-element-property :path (org-element-context)))
+           (file-name (file-name-nondirectory file-path)))
+      (org-attach-reveal)
+      (search-forward file-name)
+      (dired-move-to-filename) ; move point to beginning of filename.
+      (if (and (featurep 'dwim-shell-command) (featurep 'dwim-shell-commands))
+          (progn
+            (message "Jumped to position of link file, now you can execute `dwim-shell-command' commands")
+            (execute-extended-command nil (read-extended-command-1 nil "dwim-shell-commands")))
+        (user-error "Jumped to position of link file.
+Package `dwim-shell-command' is missing, please install it")))))
+
 ;;;###autoload
 (defun org-link-beautify-enable ()
   "Enable `org-link-beautify'."
