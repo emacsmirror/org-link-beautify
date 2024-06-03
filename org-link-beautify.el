@@ -1479,7 +1479,7 @@ The argument FILE must be the absolute path."
 (define-key org-link-beautify-keymap (kbd "M-w") 'org-link-beautify-copy-file)
 
 (defun org-link-beautify-display-qrcode-for-url (&optional args)
-  "Display QR code for Org link at point in new buffer."
+  "Display QR code for Org link at point in new buffer in ARGS."
   (interactive)
   (when (eq major-mode 'org-mode)
     (if-let ((url (org-element-property-raw :raw-link (org-element-context))))
