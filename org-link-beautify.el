@@ -839,9 +839,12 @@ You can install software `libmobi' to get command `mobitool'.")
   ;; Fix elisp compiler warning: Unused lexical argument `start'.
   (ignore start))
 
-(defun org-link-beautify--preview-image (path start end)
-  "Preview image file PATH and display on link between START and END."
-  (let* ((image-file (expand-file-name (org-link-unescape path)))
+(defun org-link-beautify--preview-image (type path start end)
+  "Preview image file PATH and display on link TYPE between START and END."
+  (let* ((image-file (pcase type
+                       ("file" (expand-file-name (org-link-unescape path)))
+                       ("image" (expand-file-name (org-link-unescape path)))
+                       ("attachment" (expand-file-name (org-link-unescape path) (org-attach-dir)))))
          (thumbnail-size (or (cond
                               ((listp org-image-actual-width)
                                (car org-image-actual-width))
@@ -866,9 +869,13 @@ You can install software `libmobi' to get command `mobitool'.")
    ((executable-find "ffmpeg") "ffmpeg"))
   "Find available video thumbnailer command.")
 
-(defun org-link-beautify--preview-video (path start end)
-  "Preview video file PATH and display on link between START and END."
-  (let* ((video-file (expand-file-name (org-link-unescape path)))
+(defun org-link-beautify--preview-video (type path start end)
+  "Preview video file PATH and display on link TYPE between START and END."
+  ;; DEBUG: (message "type: %s, path: %s, start: %s, end: %s" type path start end)
+  (let* ((video-file (pcase type
+                       ("file" (expand-file-name (org-link-unescape path)))
+                       ("video" (expand-file-name (org-link-unescape path)))
+                       ("attachment" (expand-file-name (org-link-unescape path) (org-attach-dir)))))
          (video-filename (file-name-nondirectory video-file))
          (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path video-file))
          (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base video-file))))
@@ -945,7 +952,10 @@ You can install software `libmobi' to get command `mobitool'.")
 
 (defun org-link-beautify--preview-audio (path start end)
   "Preview audio PATH with wave form image on link between START and END."
-  (let* ((audio-file (expand-file-name (org-link-unescape path)))
+  (let* ((audio-file (pcase type
+                       ("file" (expand-file-name (org-link-unescape path)))
+                       ("audio" (expand-file-name (org-link-unescape path)))
+                       ("attachment" (expand-file-name (org-link-unescape path) (org-attach-dir)))))
          (audio-filename (file-name-nondirectory audio-file))
          (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path audio-file))
          (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base audio-file))))
@@ -1204,11 +1214,15 @@ You can install software `libmobi' to get command `mobitool'.")
            ;; [[file:/path/to/image.jpg]]
            ((and org-link-beautify-image-preview
                  (member type '("file" "attachment"))
-                 (file-exists-p path)
+                 (cond
+                  ((member type '("file" "image"))
+                   (file-exists-p path))
+                  ((string-equal type "attachment")
+                   (file-exists-p (expand-file-name (org-link-unescape path) (org-attach-dir)))))
                  (member extension org-link-beautify-image-preview-list))
             ;; DEBUG:
             ;; (user-error "[org-link-beautify] cond -> image file")
-            (when (eq (org-link-beautify--preview-image path start end) 'error)
+            (when (eq (org-link-beautify--preview-image type path start end) 'error)
               ;; Display icon if thumbnail not available.
               (org-link-beautify--add-text-property-marker start end)
               (org-link-beautify--add-keymap start end)
@@ -1218,12 +1232,16 @@ You can install software `libmobi' to get command `mobitool'.")
            ;; [[file:/path/to/video.mp4]]
            ;; [[video:/path/to/video.mp4]]
            ((and org-link-beautify-video-preview
-                 (member type '("file" "video"))
-                 (file-exists-p path)
+                 (member type '("file" "video" "attachment"))
+                 (cond
+                  ((member type '("file" "video"))
+                   (file-exists-p path))
+                  ((string-equal type "attachment")
+                   (file-exists-p (expand-file-name (org-link-unescape path) (org-attach-dir)))))
                  (member extension org-link-beautify-video-preview-list))
             ;; DEBUG:
             ;; (user-error "[org-link-beautify] cond -> video file")
-            (when (eq (org-link-beautify--preview-video path start end) 'error)
+            (when (eq (org-link-beautify--preview-video type path start end) 'error)
               ;; Display icon if thumbnail not available.
               (org-link-beautify--add-text-property-marker start end)
               (org-link-beautify--add-keymap start end)
@@ -1249,11 +1267,15 @@ You can install software `libmobi' to get command `mobitool'.")
            ;; [[audio:/path/to/audio.mp3]]
            ((and org-link-beautify-audio-preview
                  (member type '("file" "audio"))
-                 (file-exists-p path)
+                 (cond
+                  ((member type '("file" "audio"))
+                   (file-exists-p path))
+                  ((string-equal type "attachment")
+                   (file-exists-p (expand-file-name (org-link-unescape path) (org-attach-dir)))))
                  (member extension org-link-beautify-audio-preview-list))
             ;; DEBUG:
             ;; (user-error "[org-link-beautify] cond -> audio file")
-            (when (eq (org-link-beautify--preview-audio path start end) 'error)
+            (when (eq (org-link-beautify--preview-audio type path start end) 'error)
               ;; Display icon if thumbnail not available.
               (org-link-beautify--add-text-property-marker start end)
               (org-link-beautify--add-keymap start end)
