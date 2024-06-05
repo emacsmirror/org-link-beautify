@@ -891,13 +891,14 @@ You can install software `libmobi' to get command `mobitool'.")
           ("qlmanage"
            (let ((qlmanage-thumbnail-file (concat thumbnails-dir (file-name-nondirectory video-file) ".png")))
              (unless (file-exists-p qlmanage-thumbnail-file)
-               (let ((proc (start-process proc-name proc-buffer
-                                          "qlmanage" "-x" "-t" "-s" (number-to-string thumbnail-size) video-file "-o" thumbnails-dir))
+               (let ((proc (start-process
+                            proc-name proc-buffer
+                            "qlmanage" "-x" "-t" "-s" (number-to-string thumbnail-size) video-file "-o" thumbnails-dir))
                      (proc-filter (lambda (proc output)
                                     ;; * No thumbnail created for [FILE PATH]
                                     (when (string-match "\\* No thumbnail created for.*" output)
                                       (message
-                                       "[org-link-beautify] video preview FAILED on macOS QuickLook generating thumbnail for %s."
+                                       "[org-link-beautify] video preview FAILED on macOS QuickLook generating thumbnail for %s"
                                        video-filename)))))
                  (set-process-filter proc proc-filter)))
              ;; then rename [file.extension.png] to [file.png]
@@ -906,8 +907,9 @@ You can install software `libmobi' to get command `mobitool'.")
              (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
                (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file))))
           ("ffmpegthumbnailer"
-           (start-process proc-name proc-buffer
-                          "ffmpegthumbnailer" "-f" "-i" video-file "-s" (number-to-string thumbnail-size) "-o" thumbnail-file)
+           (start-process
+            proc-name proc-buffer
+            "ffmpegthumbnailer" "-f" "-i" video-file "-s" (number-to-string thumbnail-size) "-o" thumbnail-file)
            (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
              (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file)))
           ("ffmpeg"
@@ -923,10 +925,11 @@ You can install software `libmobi' to get command `mobitool'.")
     (org-link-beautify--add-keymap start end)
     ;; display thumbnail-file only when it exist, otherwise it will break org-mode buffer fontification.
     (if (file-exists-p thumbnail-file)
-        (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end
-                                              5 (cl-case (frame-parameter nil 'background-mode)
-                                                  (light (color-darken-name (face-background 'default) 10))
-                                                  (dark (color-lighten-name (face-background 'default) 5))))
+        (org-link-beautify--display-thumbnail
+         thumbnail-file thumbnail-size start end
+         5 (cl-case (frame-parameter nil 'background-mode)
+             (light (color-darken-name (face-background 'default) 10))
+             (dark (color-lighten-name (face-background 'default) 5))))
       'error)))
 
 (defun org-link-beautify--preview-subtitle (path start end &optional lines)
