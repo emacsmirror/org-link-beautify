@@ -1515,7 +1515,9 @@ The argument FILE must be the absolute path."
             (qrencode-string url)
           (package-install 'qrencode)
           (qrencode-string url))
-      (org-fill-paragraph))))
+      (if (or (region-active-p) mark-active)
+          (org-fill-paragraph t t)
+        (org-fill-paragraph)))))
 
 (define-key org-link-beautify-keymap (kbd "M-q") 'org-link-beautify-display-qrcode-for-url)
 
