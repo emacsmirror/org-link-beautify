@@ -1113,6 +1113,7 @@ You can install software `libmobi' to get command `mobitool'.")
     ;; org-media-note link types
     ("videocite" (nerd-icons-faicon "nf-fa-file_video_o" :face 'nerd-icons-blue-alt))
     ("audiocite" (nerd-icons-faicon "nf-fa-file_audio_o" :face 'nerd-icons-blue-alt))
+    ("epub" (nerd-icons-mdicon "nf-md-book_open_page_variant_outline" :face 'nerd-icons-blue-alt))
     ("javascript" (nerd-icons-mdicon "nf-md-language_javascript" :face 'nerd-icons-yellow))
     ("js" (nerd-icons-mdicon "nf-md-language_javascript" :face 'nerd-icons-yellow))
     ("vscode" (nerd-icons-mdicon "nf-md-microsoft_visual_studio_code" :face 'nerd-icons-blue-alt))
