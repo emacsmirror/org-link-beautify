@@ -1117,6 +1117,7 @@ You can install software `libmobi' to get command `mobitool'.")
     ("javascript" (nerd-icons-mdicon "nf-md-language_javascript" :face 'nerd-icons-yellow))
     ("js" (nerd-icons-mdicon "nf-md-language_javascript" :face 'nerd-icons-yellow))
     ("vscode" (nerd-icons-mdicon "nf-md-microsoft_visual_studio_code" :face 'nerd-icons-blue-alt))
+    ("macappstores" (nerd-icons-mdicon "nf-md-apple" :face 'nerd-icons-silver))
     
     ;; `org-element-context' will return "fuzzy" type when link not recognized.
     ("fuzzy"
