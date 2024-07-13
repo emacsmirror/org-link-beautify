@@ -48,7 +48,7 @@
 (declare-function fb2-reader-parse-file-as-xml "fb2-reader" (file))
 
 (defgroup org-link-beautify nil
-  "Customize group of org-link-beautify-mode."
+  "Customize group of `org-link-beautify-mode'."
   :prefix "org-link-beautify-"
   :group 'org)
 
@@ -394,7 +394,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
   (put-text-property start end 'type 'org-link-beautify))
 
 (defun org-link-beautify--add-overlay-info (thumbnail start end)
-  "Display info over the link. Put the overlay on START instead of END."
+  "Display info over the link. Put the THUMBNAIL overlay on START instead of END."
   (when org-link-beautify-display-overlay-info
     (let* ((beginning (- start 1))
            (end (- start 1))
@@ -541,7 +541,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
           'error))))
 
 (defun org-link-beautify--preview-epub (path start end &optional search-option)
-  "Preview EPUB file PATH and display on link between START and END."
+  "Preview EPUB file at PATH and display SEARCH-OPTION on link between START and END."
   (if (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
       (let* ((file-path (match-string 1 path))
              ;; DEBUG: (_ (lambda () (message "--> DEBUG: ")))
@@ -612,7 +612,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
 You can install software `libmobi' to get command `mobitool'.")
 
 (defun org-link-beautify--preview-kindle (path start end &optional search-option)
-  "Preview Kindle ebooks at PATH and display on link between START and END."
+  "Preview Kindle ebooks at PATH and display SEARCH-OPTION on link between START and END."
   (if (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
       (let* ((file-path (match-string 1 path))
              ;; DEBUG: (_ (lambda () (message "--> DEBUG: ")))
@@ -642,7 +642,7 @@ You can install software `libmobi' to get command `mobitool'.")
                  (rename-file mobitool-cover-file thumbnail-file))
                (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
                  (org-link-beautify--notify-generate-thumbnail-failed kindle-file thumbnail-file))))
-            (_ (user-error "[org-link-beautify] Error: Can't find command tool to dump kindle ebook file cover."))))
+            (_ (user-error "[org-link-beautify] Error: Can't find command tool to dump kindle ebook file cover"))))
         (org-link-beautify--add-overlay-info thumbnail-file start end)
         (org-link-beautify--add-text-property-marker start end)
         (org-link-beautify--add-keymap start end)
@@ -652,7 +652,7 @@ You can install software `libmobi' to get command `mobitool'.")
           'error))))
 
 (defun org-link-beautify--preview-comic (path start end &optional search-option)
-  "Preview CDisplay Archived Comic Book file PATH and display on link between START and END."
+  "Preview CDisplay Archived Comic Book file at PATH and display SEARCH-OPTION on link between START and END."
   (if (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
       (let* ((file-path (match-string 1 path))
              ;; DEBUG: (_ (lambda () (message "--> DEBUG: ")))
@@ -718,7 +718,7 @@ You can install software `libmobi' to get command `mobitool'.")
           'error))))
 
 (defun org-link-beautify--fictionbook2-extract-cover (file-path)
-  "Extract cover image data for FILE."
+  "Extract cover image data for FictionBook2 at FILE-PATH."
   (if-let* ((fb2-file-path file-path)
             ;; `fb2-reader-mode'
             (book (or (fb2-reader-parse-file-as-xml fb2-file-path)
@@ -739,6 +739,7 @@ You can install software `libmobi' to get command `mobitool'.")
     'no-cover))
 
 (defun org-link-beautify--fictionbook2-save-cover (image file-path)
+  "Save FictionBook2 cover IMAGE to FILE-PATH."
   ;; TODO: how to save image data into image file?
   ;; `image-save': This writes the original image data to a file.
   (with-temp-buffer
@@ -746,7 +747,7 @@ You can install software `libmobi' to get command `mobitool'.")
     (write-region (point-min) (point-max) file-path)))
 
 (defun org-link-beautify--preview-fictionbook2 (path start end &optional search-option)
-  "Preview FictionBook2 ebooks at PATH and display on link between START and END."
+  "Preview FictionBook2 ebooks at PATH and display SEARCH-OPTION on link between START and END."
   (require 'fb2-reader)
   (let* ((fb2-file-path (expand-file-name (org-link-unescape path)))
          ;; (_ (lambda () (message "--> DEBUG: %s" fb2-file-path)))
@@ -933,7 +934,7 @@ You can install software `libmobi' to get command `mobitool'.")
       'error)))
 
 (defun org-link-beautify--preview-subtitle (path start end &optional lines)
-  "Preview subtitle file PATH and display on link between START and END."
+  "Preview subtitle file on PATH and display LINES on link between START and END."
   ;; display preview only when it exist, otherwise it will break org-mode buffer fontification.
   (org-link-beautify--preview-text path start end (or lines 20)))
 
@@ -1004,7 +1005,7 @@ You can install software `libmobi' to get command `mobitool'.")
   "Find available URL web page screenshot command.")
 
 (defun org-link-beautify--preview-url-archive (url cmd-list)
-  "Construct process to run"
+  "Construct process to run for URL to archive through CMD-LIST."
   (let* ((process-name (format "org-link-beautify--url-screenshot %s" url))
          (process-buffer (format " *org-link-beautify--url-screenshot %s*" url))
          (proc (get-process process-name)))
@@ -1012,7 +1013,7 @@ You can install software `libmobi' to get command `mobitool'.")
       (eval `(start-process ,process-name ,process-buffer ,@cmd-list)))))
 
 (defun org-link-beautify--preview-url (type path start end)
-  "Preview PATH with web page screenshot between START and END."
+  "Preview web page PATH of TYPE with screenshot between START and END."
   (let* ((url (concat type ":" path))
          (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path (buffer-file-name)))
          (thumbnail-filename (format "org-link-beautify URL screenshot %s.png" (time-stamp-string)))
@@ -1411,7 +1412,7 @@ You can install software `libmobi' to get command `mobitool'.")
             (org-link-beautify--display-icon start end description icon))))))))
 
 (defun org-link-beautify-display-async (start end path bracket-p)
-  "Run function `org-link-beautify-display' in async thread to avoid suspend Emacs."
+  "Run `org-link-beautify-display' in async thread to avoid suspend Emacs."
   ;; DEBUG: (message "[org-link-beautify] running preview function in async thread for %s" path)
   (make-thread
    (lambda () (org-link-beautify-display start end path bracket-p))
@@ -1428,6 +1429,7 @@ You can install software `libmobi' to get command `mobitool'.")
     (_ (ignore))))
 
 (defun org-link-beautify--refontify (&optional state)
+  "Re-fontify current entry when STATE is children or subtree with `jit-lock-refontify'."
   ;; replace the whole Org buffer font-lock function `org-restart-font-lock'
   ;; with a lightweight `jit-lock-refontify' current headline scope only
   ;; font-lock function.
@@ -1495,7 +1497,7 @@ The argument FILE must be the absolute path."
            (string-truncate-left file (/ (window-width) 2))))
 
 (defun org-link-beautify-copy-file (&optional args)
-  "Copy the Org link file at point."
+  "Copy the Org link file at point in ARGS."
   (interactive "P")
   (when (derived-mode-p 'org-mode)
     (if (or (region-active-p) mark-active)
@@ -1539,7 +1541,7 @@ The argument FILE must be the absolute path."
       (if (and (featurep 'dwim-shell-command) (featurep 'dwim-shell-commands))
           (progn
             (message "Jumped to position of link file, now you can execute `dwim-shell-command' commands")
-            (execute-extended-command nil (read-extended-command-1 nil "dwim-shell-commands")))
+            (command-execute nil (read-extended-command-1 nil "dwim-shell-commands")))
         (user-error "Jumped to position of link file.
 Package `dwim-shell-command' is missing, please install it")))))
 
