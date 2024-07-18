@@ -1061,7 +1061,7 @@ You can install software `libmobi' to get command `mobitool'.")
       ;; make sure the link prefix is `file'.
       ;; ((not (file-exists-p (expand-file-name path))) ; not exist file!
       ;;  (nerd-icons-codicon "nf-cod-error" :face 'nerd-icons-red-alt))
-      ((file-directory-p path)          ; directory
+      ((file-directory-p (expand-file-name path))          ; directory exist?
        (nerd-icons-octicon "nf-oct-file_directory" :face (org-link-beautify--warning-face-p path)))
       ((file-remote-p path)             ; remote file
        (nerd-icons-codicon "nf-cod-remote_explorer" :face 'nerd-icons-lred))
@@ -1080,7 +1080,10 @@ You can install software `libmobi' to get command `mobitool'.")
     ("custom-id" (nerd-icons-mdicon "nf-md-text_box_search_outline" :face 'nerd-icons-blue))
     ("id" (nerd-icons-mdicon "nf-md-text_search" :face 'nerd-icons-blue))
     ("coderef" (nerd-icons-codicon "nf-cod-references" :face 'nerd-icons-cyan))
-    ("attachment" (nerd-icons-mdicon "nf-md-attachment" :face 'nerd-icons-lorange))
+    ("attachment" (let ((full-path (expand-file-name path (org-attach-dir))))
+                    (if (file-exists-p full-path)
+                        (nerd-icons-mdicon "nf-md-attachment" :face 'nerd-icons-lorange)
+                      (nerd-icons-mdicon "nf-md-attachment" :face '(:foreground "red")))))
     ("elisp" (nerd-icons-icon-for-file "file.el"))
     ("eshell" (nerd-icons-icon-for-mode 'eshell-mode))
     ("shell" (nerd-icons-icon-for-mode 'shell-mode))
