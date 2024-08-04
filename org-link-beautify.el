@@ -1128,18 +1128,25 @@ You can install software `libmobi' to get command `mobitool'.")
     
     ;; `org-element-context' will return "fuzzy" type when link not recognized.
     ("fuzzy"
-     (when (string-match "\\([^:]*\\):\\(.*\\)" path) ; extract the "real" link type for "fuzzy" type in :path.
-       (let ((real-type (match-string 1 path)))
-         (pcase real-type
-           ;; (link (:standard-properties [92824 nil 92863 92940 92942 0 nil nil nil nil nil nil ...] :type "fuzzy" :type-explicit-p nil :path "mu4e:msgid:m2zgotun61.fsf@numbchild" :format bracket :raw-link "mu4e:msgid:m2zgotun61.fsf@numbchild" ...))
-           ("mu4e" (nerd-icons-mdicon "nf-md-email_search_outline" :face 'nerd-icons-blue))
-           (_
-            ;; DEBUG:
-            (message "[org-link-beautify] type: %s, path: %s, extension: %s, link-element: %s" type path extension link-element))))))
+     ;; Org internal [[reference][reference]] -> NOT supported by:
+     ;; `(org-link-set-parameters link-type :activate-func ...)'
+     ;;
+     ;; (link (:standard-properties [584419 nil 584470 584517 584519 0 nil nil nil nil nil nil ...] :type "fuzzy" :type-explicit-p nil :path "defcustom org-contacts-identity-properties-list" :format bracket :raw-link "defcustom org-contacts-identity-properties-list" ...))
 
+     (when-let ((_ (string-match "\\([^:]*\\):\\(.*\\)" path))
+                (real-type (match-string 1 path))) ; extract the "real" link type for "fuzzy" type in :path.
+       (cond
+        ;; FIXME:
+        ;; ((string-equal path link-element)
+        ;;  (nerd-icons-faicon "nf-fa-searchengin" :face 'nerd-icons-blue-alt))
+        (t
+         (message "[org-link-beautify] link type not supported, add PR for this link type.
+ type: %s, path: %s, extension: %s, link-element: %s" type path extension link-element)
+         (nerd-icons-mdicon "nf-md-progress_question" :face 'nerd-icons-lyellow)))))
     (_
      ;; DEBUG
-     (message "[org-link-beautify] type: %s, path: %s, extension: %s, link-element: %s" type path extension link-element)
+     (message "[org-link-beautify] link type not supported, add PR for this link type.
+ type: %s, path: %s, extension: %s, link-element: %s" type path extension link-element)
      ;; handle when returned link type is `nil'.
      (nerd-icons-mdicon "nf-md-progress_question" :face 'nerd-icons-lyellow))))
 
