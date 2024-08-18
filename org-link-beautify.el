@@ -190,7 +190,7 @@ PDF preview."
   (cl-case system-type
     (gnu/linux (executable-find "gnome-epub-thumbnailer"))
     ;; (darwin (executable-find "epub-thumbnailer"))
-    (t (expand-file-name "scripts/epub-thumbnailer.py" (file-name-directory (or load-file-name (buffer-file-name))))))
+    (t (expand-file-name "scripts/thumbnailer-ebook.py" (file-name-directory (or load-file-name (buffer-file-name))))))
   "Whether enable EPUB files cover preview?
 If command \"gnome-epub-thumbnailer\" is available, enable EPUB
 preview by default. You can set this option to nil to disable
