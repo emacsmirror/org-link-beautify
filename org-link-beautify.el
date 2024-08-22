@@ -229,7 +229,7 @@ You can install software `libmobi' to get command `mobitool'."
   (cl-case system-type
     (darwin (executable-find "qlmanage")))
   "Whether enable CDisplay Archived Comic Book Formats cover preview.
-File extensions like (.cbr, .cbz, .cb7, .cba etc)."
+File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
   :type 'boolean
   :safe #'booleanp
   :group 'org-link-beautify)
@@ -1355,7 +1355,7 @@ You can install software `libmobi' to get command `mobitool'.")
            ((and org-link-beautify-comic-preview
                  (equal type "file")
                  (file-exists-p path)
-                 (member extension '("cbr" "cbz" "cb7" "cba")))
+                 (member extension '("cbr" "cbz" "cb7" "cba" "cbt")))
             ;; DEBUG:
             ;; (user-error "[org-link-beautify] cond -> comic file")
             (when (eq (org-link-beautify--preview-comic path start end) 'error)
