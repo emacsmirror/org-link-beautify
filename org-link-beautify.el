@@ -138,7 +138,7 @@ NOTE: overlays may mess up buffer when you cut text etc."
   :safe #'listp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-audio-preview-size 150
+(defcustom org-link-beautify-audio-preview-size 300
   "The audio wave form image size."
   :type 'number
   :safe #'numberp
@@ -438,6 +438,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
 (defun org-link-beautify--display-thumbnail (thumbnail thumbnail-size start end &optional border-width border-color)
   "Display THUMBNAIL between START and END with THUMBNAIL-SIZE and in BORDER-WIDTH BORDER-COLOR when exist."
   (when (and (file-exists-p thumbnail)
+             (listp (get-text-property start 'display))
              ;; If thumbnail image already displayed, don't re-display thumbnail.
              (not (eq (car (get-text-property start 'display)) 'image)))
     (put-text-property
@@ -954,8 +955,8 @@ You can install software `libmobi' to get command `mobitool'.")
    ((executable-find "ffmpeg") "ffmpeg"))
   "Find available audio thumbnailer command.")
 
-(defun org-link-beautify--preview-audio (path start end)
-  "Preview audio PATH with wave form image on link between START and END."
+(defun org-link-beautify--preview-audio (type path start end)
+  "Preview audio PATH and display on link TYPE between START and END."
   (let* ((audio-file (pcase type
                        ("file" (expand-file-name (org-link-unescape path)))
                        ("audio" (expand-file-name (org-link-unescape path)))
@@ -997,6 +998,13 @@ You can install software `libmobi' to get command `mobitool'.")
     (if (file-exists-p thumbnail-file)
         (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end)
       'error)))
+
+;;; TEST: eval bellowing code on [[attachment:]] link.
+;; (let ((type "attachment") ; or "file"
+;;       (path (org-element-property :path (org-element-link-parser)))
+;;       (begin (org-element-begin (org-element-context)))
+;;       (end (org-element-end (org-element-context))))
+;;   (org-link-beautify--preview-audio type path begin end))
 
 (defvar org-link-beautify--url-screenshot-cmd
   (cond
@@ -1289,7 +1297,7 @@ You can install software `libmobi' to get command `mobitool'.")
            ;; [[file:/path/to/audio.mp3]]
            ;; [[audio:/path/to/audio.mp3]]
            ((and org-link-beautify-audio-preview
-                 (member type '("file" "audio"))
+                 (member type '("file" "audio" "attachment"))
                  (cond
                   ((member type '("file" "audio"))
                    (file-exists-p path))
