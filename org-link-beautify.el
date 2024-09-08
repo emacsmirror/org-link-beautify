@@ -681,11 +681,13 @@ You can install software `libmobi' to get command `mobitool'.")
             ;;   )
             ;;  (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
             ;;    (org-link-beautify--notify-generate-thumbnail-failed comic-file thumbnail-file)))
-            (darwin            ; for macOS "qlmanage" command
+            (darwin
              ;; DEBUG
              ;; (message comic-file)
              ;; (message thumbnail-file)
              ;; (message (number-to-string org-link-beautify-comic-preview-size))
+             
+             ;; for macOS "qlmanage" command
              ;; $ qlmanage -t "ラセン恐怖閣-マリコとニジロー1-DL版.cbz" - 2.0 -s 1080 -o ".thumbnails"
              (let ((qlmanage-thumbnail-file (concat thumbnails-dir (file-name-nondirectory comic-file) ".png")))
                (make-process
