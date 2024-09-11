@@ -1100,6 +1100,7 @@ You can install software `libmobi' to get command `mobitool'.")
     ("man" (nerd-icons-mdicon "nf-md-file_document_outline" :face 'nerd-icons-lblue))
     ("info" (nerd-icons-mdicon "nf-md-information_outline" :face 'nerd-icons-lblue))
     ("help" (nerd-icons-mdicon "nf-md-help_circle_outline" :face 'nerd-icons-lblue))
+    ("shortdoc" (nerd-icons-mdicon "nf-md-file_link" :face 'nerd-icons-blue))
     ;; org-ref link types
     ("cite" (nerd-icons-codicon "nf-cod-references" :face 'nerd-icons-cyan))
     ;; Org mode external link types
