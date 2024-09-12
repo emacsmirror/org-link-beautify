@@ -1456,6 +1456,7 @@ You can install software `libmobi' to get command `mobitool'.")
   ;; with a lightweight `jit-lock-refontify' current headline scope only
   ;; font-lock function.
   (when (or (eq state 'children) (eq state 'subtree))
+    ;; Wrap the BODY to executed in scope of current subtree to get BEGIN and END position.
     (org-link-beautify--subtree-scope-wrap
      (jit-lock-refontify begin end))))
 
