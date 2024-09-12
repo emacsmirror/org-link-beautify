@@ -1286,8 +1286,12 @@ You can install software `libmobi' to get command `mobitool'.")
            ;; [[file:/path/to/subtitle.ass]]
            ;; [[file:/path/to/subtitle.srt]]
            ((and org-link-beautify-subtitle-preview
-                 (member type '("file"))
-                 (file-exists-p path)
+                 (member type '("file" "attachment"))
+                 (cond
+                  ((member type '("file" "subtitle"))
+                   (file-exists-p path))
+                  ((string-equal type "attachment")
+                   (file-exists-p (expand-file-name (org-link-unescape path) (org-attach-dir)))))
                  (member extension org-link-beautify-subtitle-preview-list))
             ;; DEBUG:
             ;; (user-error "[org-link-beautify] cond -> subtitle file")
