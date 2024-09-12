@@ -1434,7 +1434,8 @@ You can install software `libmobi' to get command `mobitool'.")
             (org-link-beautify--display-icon start end description icon))))))))
 
 (defun org-link-beautify-display-async (start end path bracket-p)
-  "Run `org-link-beautify-display' in async thread to avoid suspend Emacs."
+  "Display icon for the link type based on PATH from START to END.
+Run `org-link-beautify-display' in async thread to avoid suspend Emacs."
   ;; DEBUG: (message "[org-link-beautify] running preview function in async thread for %s" path)
   (make-thread
    (lambda () (org-link-beautify-display start end path bracket-p))
