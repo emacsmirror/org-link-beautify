@@ -105,7 +105,7 @@ NOTE: overlays may mess up buffer when you cut text etc."
   :group 'org-link-beautify)
 
 (defcustom org-link-beautify-video-preview-list
-  '("rmvb" "ogg" "ogv" "mp4" "mkv" "mov" "m4v" "webm" "flv")
+  '("mp4" "webm" "mkv" "mov" "ogg" "ogv" "rmvb" "rm" "m4v" "flv")
   "A list of video file types be supported with thumbnails."
   :type 'list
   :safe #'listp
