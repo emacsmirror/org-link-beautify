@@ -1108,6 +1108,7 @@ You can install software `libmobi' to get command `mobitool'.")
     ("eaf" (nerd-icons-mdicon "nf-md-apps" :face 'nerd-icons-blue)) ; emacs-application-framework
     ("eww" (nerd-icons-icon-for-mode 'eww-mode))
     ("chrome" (nerd-icons-mdicon "nf-md-google_chrome" :face 'nerd-icons-lorange))
+    ("edge" (nerd-icons-mdicon "nf-md-microsoft_edge" :face 'nerd-icons-green))
     ("mu4e" (nerd-icons-mdicon "nf-md-email_search_outline" :face 'nerd-icons-blue))
     ("news" (nerd-icons-mdicon "nf-md-newspaper_variant_outline" :face 'nerd-icons-dgreen))
     ("git" (nerd-icons-mdicon "nf-md-git" :face 'nerd-icons-lred))
