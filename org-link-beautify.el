@@ -117,7 +117,7 @@ NOTE: overlays may mess up buffer when you cut text etc."
   :safe #'booleanp
   :group 'org-link-beautify)
 
-;;; https://en.wikipedia.org/wiki/Subtitles
+;; https://en.wikipedia.org/wiki/Subtitles
 (defcustom org-link-beautify-subtitle-preview-list
   '("ass" "srt" "sub" "vtt" "ssf")
   "A list of subtitle file types support previewing."
@@ -163,7 +163,7 @@ PDF preview."
   :safe #'symbolp
   :group 'org-link-beautify)
 
-;;; TODO: smarter value decided based on screen size.
+;; TODO: smarter value decided based on screen size.
 (defcustom org-link-beautify-pdf-preview-size 512
   "The PDF preview image size."
   :type 'number
@@ -322,7 +322,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
            ;; solve double quote character issue.
            "\"" (string-replace "\"" "\\\"" (string-join code-lines "\n")) "\"")))
 
-;;; e.g.
+;; e.g.
 ;; (org-link-beautify--python-command-to-string
 ;;  "import numpy as np"
 ;;  "print(np.arange(6))"
@@ -418,7 +418,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
         (overlay-put (symbol-value (symbol-value 'ov-name)) 'before-string str-text-property)
         (overlay-put (symbol-value (symbol-value 'ov-name)) 'evaporate t)))))
 
-;;; TEST:
+;; TEST:
 ;; (org-link-beautify--add-overlay-info "/path/to/thumbnail.png" (+ (point) 1) (+ (point) 2))
 ;; (remove-overlays (point) (+ (point) 1)) ; clear displayed overlays.
 
@@ -771,7 +771,7 @@ You can install software `libmobi' to get command `mobitool'.")
         (org-link-beautify--display-thumbnail thumbnail-file-path thumbnail-size start end)
       'error)))
 
-;;; TEST: [M-:] eval bellowing code on FictionBook2 link.
+;; TEST: [M-:] eval bellowing code on FictionBook2 link.
 ;; (let* ((context (org-element-context))
 ;;        (beg (org-element-property :begin context))
 ;;        (end (org-element-property :end context))
@@ -808,7 +808,7 @@ You can install software `libmobi' to get command `mobitool'.")
 		        file)
 	   nil))))
 
-;;; test
+;; TEST:
 ;; (org-link-beautify--preview-text-file
 ;;  (expand-file-name "~/Code/Emacs/org-link-beautify/README.org")
 ;;  3)
@@ -941,7 +941,7 @@ You can install software `libmobi' to get command `mobitool'.")
   ;; display preview only when it exist, otherwise it will break org-mode buffer fontification.
   (org-link-beautify--preview-text path start end (or lines 20)))
 
-;;; TEST:
+;; TEST:
 ;; (org-link-beautify--preview-subtitle
 ;;  (expand-file-name "/path/to/subtitle.ass")
 ;;  nil nil
@@ -1001,7 +1001,7 @@ You can install software `libmobi' to get command `mobitool'.")
         (org-link-beautify--display-thumbnail thumbnail-file thumbnail-size start end)
       'error)))
 
-;;; TEST: eval bellowing code on [[attachment:]] link.
+;; TEST: eval bellowing code on [[attachment:]] link.
 ;; (let ((type "attachment") ; or "file"
 ;;       (path (org-element-property :path (org-element-link-parser)))
 ;;       (begin (org-element-begin (org-element-context)))
@@ -1449,7 +1449,7 @@ Run `org-link-beautify-display' in async thread to avoid suspend Emacs."
    (lambda () (org-link-beautify-display start end path bracket-p))
    (make-temp-name "org-link-beautify-display-thread-")))
 
-;;; hook on headline expand
+;; hook on headline cycle expanding
 (defun org-link-beautify-headline-cycle (&optional state)
   "Function to be executed on `org-cycle-hook' STATE."
   (pcase state
@@ -1469,7 +1469,7 @@ Run `org-link-beautify-display' in async thread to avoid suspend Emacs."
     (org-link-beautify--subtree-scope-wrap
      (jit-lock-refontify begin end))))
 
-;;; toggle org-link-beautify text-properties
+;; toggle org-link-beautify text-properties
 (defun org-link-beautify--clear-text-properties (&optional begin end)
   "Clear all org-link-beautify text-properties between BEGIN and END.
 If BEGIN and END is ommited, the default value is `point-min' and `point-max'."
