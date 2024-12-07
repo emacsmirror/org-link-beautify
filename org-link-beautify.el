@@ -772,7 +772,12 @@ You can install software `libmobi' to get command `mobitool'.")
            (search-option (match-string 2 path))
            (fictionbook2-file (expand-file-name (org-link-unescape file-path)))
            (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path fictionbook2-file))
-           (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base fictionbook2-file))))
+           (thumbnail-file (cond
+                            ((string-match-p "\\.fb2.zip$" path)
+                             (expand-file-name
+                              (format "%s%s.png" thumbnails-dir (string-replace ".fb2" "" (file-name-base fictionbook2-file)))))
+                            ((string-match-p "\\.fb2$" path)
+                             (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base fictionbook2-file))))))
            (thumbnail-size (or org-link-beautify-fictionbook2-preview-size 600)))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
