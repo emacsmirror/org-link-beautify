@@ -405,8 +405,8 @@ This function will apply file type function based on file extension."
       (org-link-beautify-preview-file-subtitle ov path link))
      ((member extension org-link-beautify-archive-preview-list)
       (org-link-beautify-preview-file-archive ov path link))
-     ((member extension org-link-beautify-text-preview-list)
-      (org-link-beautify-preview-file-text ov path link))
+     ((member extension org-link-beautify-source-code-preview-list)
+      (org-link-beautify-preview-file-source-code ov path link))
      (t (org-link-beautify-iconify ov path link)))))
 
 (defun org-link-beautify-preview-attachment (ov path link)
@@ -800,26 +800,35 @@ You can install software `libmobi' to get command `mobitool'.")
 	    (overlay-put ov 'face    'default)
 	    (overlay-put ov 'keymap  org-link-beautify-keymap)))))
 
-;;; Text File
+;;; Source Code File
 
-(defcustom org-link-beautify-text-preview t
-  "Whether enable text file content preview?"
+(defcustom org-link-beautify-source-code-preview-screenshot t
+  "Whether enable source code file content preview with generating screenshot?"
   :type 'boolean
   :safe #'booleanp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-text-preview-list
+(defcustom org-link-beautify-source-code-preview-command
+  (cond
+   ((executable-find "silicon") "silicon")
+   ((executable-find "germanium") "germanium"))
+  "The command used to preview source code file."
+  :type 'string
+  :safe #'stringp
+  :group 'org-link-beautify)
+
+(defcustom org-link-beautify-source-code-preview-list
   '("org" "txt" "markdown" "md"
     "lisp" "scm" "clj" "cljs"
     "py" "rb" "pl"
     "c" "cpp" "h" "hpp" "cs" "java"
     "r" "jl")
-  "A list of link types supports text preview below the link."
+  "A list of link types supports source code file preview below the link."
   :type 'list
   :safe #'listp
   :group 'org-link-beautify)
 
-(defun org-link-beautify--preview-text-file (file)
+(defun org-link-beautify--preview-source-code-file (file)
   "Return first 10 lines of FILE."
   (with-temp-buffer
     (condition-case nil
@@ -843,39 +852,54 @@ You can install software `libmobi' to get command `mobitool'.")
        (message "Unable to read file %S" file)
 	   nil))))
 
-(defun org-link-beautify--generate-thumbnail-for-file-text (path)
-  "Generate THUMBNAIL-FILE with THUMBNAIL-SIZE for text file of PATH."
+(defun org-link-beautify--generate-preview-for-file-source-code (path)
+  "Generate THUMBNAIL-FILE with THUMBNAIL-SIZE for source code file of PATH."
   (when (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
     (let* ((file-path (match-string 1 path))
            (search-option (match-string 2 path))
-           (text-file (expand-file-name (org-link-unescape file-path)))
-           (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path text-file))
-           (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base text-file))))
-           (thumbnail-size 600))
+           (source-code-file (expand-file-name (org-link-unescape file-path)))
+           (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path source-code-file))
+           (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base source-code-file))))
+           (thumbnail-size 600)
+           (proc-name (format "org-link-beautify--code-preview - %s" source-code-file))
+           (proc-buffer (format " *org-link-beautify code preview - %s*" source-code-file))
+           (proc (get-process proc-name)))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
         ;; DEBUG: (message "[org-link-beautify] DEBUG pdf-file %s, page-number %s, thumbnail-file %s" path pdf-page-number thumbnail-file)
-        )
+        (unless proc
+          (pcase org-link-beautify-source-code-preview-command
+            ("silicon"
+             (start-process
+              proc-name proc-buffer
+              "silicon" source-code-file "-o" thumbnail-file
+              "--no-window-controls" "--shadow-blur-radius" "30" "--shadow-color" "#555"))
+            ("germanium"
+             (start-process
+              proc-name proc-buffer
+              "germanium" source-code-file "-o" thumbnail-file
+              "--no-line-number" "--no-window-access-bar")))))
       (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
         (org-link-beautify--notify-generate-thumbnail-failed fictionbook2-file thumbnail-file))
       ;; return the thumbnail file as result.
       thumbnail-file)))
 
-(defun org-link-beautify-preview-file-text (ov path link)
-  "Preview text file of PATH over OV overlay position for LINK element."
-  (when org-link-beautify-text-preview
-    (if (not (display-graphic-p))
-        (prog1 nil
-          (message "Your Emacs does not support displaying images!"))
-      (when-let* ((text (org-link-beautify--preview-text-file path))
-                  ;; (thumbnail-file (org-link-beautify--generate-thumbnail-for-file-text path))
-                  ;; ((file-exists-p thumbnail-file))
-                  ;; (image (create-image thumbnail-file))
-                  )
-        ;; DEBUG: (message "[org-link-beautify] DEBUG image overlay: %s for path: %s at link: %s" ov path link)
-        (overlay-put ov 'after-string text)
-	    (overlay-put ov 'face    'org-block)
-	    (overlay-put ov 'keymap  org-link-beautify-keymap)))))
+(defun org-link-beautify-preview-file-source-code (ov path link)
+  "Preview source code file of PATH over OV overlay position for LINK element."
+  (if org-link-beautify-source-code-preview-screenshot
+      (if (not (display-graphic-p))
+          (prog1 nil
+            (message "Your Emacs does not support displaying images!"))
+        (when-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-source-code path))
+                    ((file-exists-p thumbnail-file))
+                    (image (create-image thumbnail-file)))
+          ;; DEBUG: (message "[org-link-beautify] DEBUG image overlay: %s for path: %s at link: %s" ov path link)
+          (overlay-put ov 'display image)
+	      (overlay-put ov 'face    'default)
+	      (overlay-put ov 'keymap  org-link-beautify-keymap)))
+    (when-let* ((source-code (org-link-beautify--preview-source-code-file path)))
+      (overlay-put ov 'after-string source-code)
+	  (overlay-put ov 'face    'org-block))))
 
 ;;; file: [comic]
 
