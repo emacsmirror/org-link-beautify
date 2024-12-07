@@ -353,7 +353,6 @@ The argument FILE must be the absolute path."
  type: %s, path: %s, extension: %s, link-element: %s" type path extension link-element)
            (nerd-icons-mdicon "nf-md-progress_question" :face 'nerd-icons-lyellow)))))
       (_
-       ;; DEBUG
        (message "[org-link-beautify] link type not supported, add PR for this link type.
  type: %s, path: %s, extension: %s, link-element: %s" type path extension link-element)
        ;; handle when returned link type is `nil'.
@@ -519,7 +518,6 @@ This function will apply file type function based on file extension."
            (thumbnail-size (or org-link-beautify-pdf-preview-size 512)))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
-        ;; DEBUG: (message "[org-link-beautify] DEBUG pdf-file %s, page-number %s, thumbnail-file %s" path pdf-page-number thumbnail-file)
         (pcase org-link-beautify-pdf-preview-command
           ("pdftocairo"
            (start-process
@@ -556,7 +554,6 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
     (when-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-pdf path))
                 ((file-exists-p thumbnail-file))
                 (image (create-image thumbnail-file nil nil :width org-link-beautify-pdf-preview-size)))
-      ;; DEBUG: (message "[org-link-beautify] DEBUG image overlay: %s for path: %s at link: %s" ov path link)
       (overlay-put ov 'display image)
 	  (overlay-put ov 'face    'default)
 	  (overlay-put ov 'keymap  org-link-beautify-keymap))))
@@ -597,7 +594,6 @@ EPUB preview."
            (thumbnail-size (or org-link-beautify-ebook-preview-size 600)))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
-        ;; DEBUG: (message "[org-link-beautify] DEBUG pdf-file %s, page-number %s, thumbnail-file %s" path pdf-page-number thumbnail-file)
         (cl-case system-type
           (gnu/linux                 ; for Linux "gnome-epub-thumbnailer"
            (start-process
@@ -611,7 +607,6 @@ EPUB preview."
             ;;     (number-to-string thumbnail-size))
             ))
           (darwin            ; for macOS "epub-thumbnailer" command
-           ;; DEBUG: (message "[org-link-beautify] DEBUG image overlay: %s for path: %s at link: %s" ov path link)
            (make-process
             :name "org-link-beautify--epub-preview"
             :command (list org-link-beautify-epub-preview-command
@@ -641,7 +636,6 @@ EPUB preview."
     (when-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-pdf path))
                 ((file-exists-p thumbnail-file))
                 (image (create-image thumbnail-file nil nil :width (or org-link-beautify-ebook-preview-size 300))))
-      ;; DEBUG: (message "[org-link-beautify] DEBUG image overlay: %s for path: %s at link: %s" ov path link)
       (overlay-put ov 'display image)
 	  (overlay-put ov 'face    'default)
 	  (overlay-put ov 'keymap  org-link-beautify-keymap))))
@@ -691,7 +685,6 @@ You can install software `libmobi' to get command `mobitool'.")
            (thumbnail-size (or org-link-beautify-ebook-preview-size 600)))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
-        ;; DEBUG: (message "[org-link-beautify] DEBUG pdf-file %s, page-number %s, thumbnail-file %s" path pdf-page-number thumbnail-file)
         (pcase org-link-beautify--kindle-cover-command
           ("mobitool" ; NOTE: mobitool command-line tool dump covert image filename can't be specified.
            (let ((mobitool-cover-file (concat thumbnails-dir (file-name-base kindle-file) "_cover.jpg")))
@@ -718,7 +711,6 @@ You can install software `libmobi' to get command `mobitool'.")
     (when-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-kindle path))
                 ((file-exists-p thumbnail-file))
                 (image (create-image thumbnail-file nil nil :width (or org-link-beautify-kindle-preview-size 300))))
-      ;; DEBUG: (message "[org-link-beautify] DEBUG image overlay: %s for path: %s at link: %s" ov path link)
       (overlay-put ov 'display image)
 	  (overlay-put ov 'face    'default)
 	  (overlay-put ov 'keymap  org-link-beautify-keymap))))
@@ -781,7 +773,6 @@ You can install software `libmobi' to get command `mobitool'.")
            (thumbnail-size (or org-link-beautify-fictionbook2-preview-size 600)))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
-        ;; DEBUG: (message "[org-link-beautify] DEBUG pdf-file %s, page-number %s, thumbnail-file %s" path pdf-page-number thumbnail-file)
         (let ((cover-image (org-link-beautify-fictionbook2--extract-cover fictionbook2-file)))
           (if (eq cover-image 'no-cover)
               (message "[org-link-beautify] FictionBook2 preview failed to extract cover image.")
@@ -800,7 +791,6 @@ You can install software `libmobi' to get command `mobitool'.")
       (when-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-fictionbook2 path))
                   ((file-exists-p thumbnail-file))
                   (image (create-image thumbnail-file nil nil :width (or org-link-beautify-fictionbook2-preview-size 300))))
-        ;; DEBUG: (message "[org-link-beautify] DEBUG image overlay: %s for path: %s at link: %s" ov path link)
         (overlay-put ov 'display image)
 	    (overlay-put ov 'face    'default)
 	    (overlay-put ov 'keymap  org-link-beautify-keymap)))))
@@ -871,7 +861,6 @@ You can install software `libmobi' to get command `mobitool'.")
            (proc (get-process proc-name)))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
-        ;; DEBUG: (message "[org-link-beautify] DEBUG pdf-file %s, page-number %s, thumbnail-file %s" path pdf-page-number thumbnail-file)
         (unless proc
           (pcase org-link-beautify-source-code-preview-command
             ("silicon"
@@ -898,7 +887,6 @@ You can install software `libmobi' to get command `mobitool'.")
         (when-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-source-code path))
                     ((file-exists-p thumbnail-file))
                     (image (create-image thumbnail-file)))
-          ;; DEBUG: (message "[org-link-beautify] DEBUG image overlay: %s for path: %s at link: %s" ov path link)
           (overlay-put ov 'display image)
 	      (overlay-put ov 'face    'default)
 	      (overlay-put ov 'keymap  org-link-beautify-keymap)))
@@ -990,7 +978,6 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
     (when-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-comic path))
                 ((file-exists-p thumbnail-file))
                 (image (create-image thumbnail-file nil nil :width (or org-link-beautify-comic-preview-size 300))))
-      ;; DEBUG: (message "[org-link-beautify] DEBUG image overlay: %s for path: %s at link: %s" ov path link)
       (overlay-put ov 'display image)
 	  (overlay-put ov 'face    'default)
 	  (overlay-put ov 'keymap  org-link-beautify-keymap))))
@@ -1081,7 +1068,6 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
     (when-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-video path))
                 ((file-exists-p thumbnail-file))
                 (image (create-image thumbnail-file nil nil :width 400)))
-      ;; DEBUG: (message "[org-link-beautify] DEBUG image overlay: %s for path: %s at link: %s" ov path link)
       (overlay-put ov 'display image)
 	  (overlay-put ov 'face    'default)
 	  (overlay-put ov 'keymap  org-link-beautify-keymap))))
@@ -1167,7 +1153,6 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
     (when-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-audio path))
                 ((file-exists-p thumbnail-file))
                 (image (create-image thumbnail-file nil nil :width (or org-link-beautify-audio-preview-size 300))))
-      ;; DEBUG: (message "[org-link-beautify] DEBUG image overlay: %s for path: %s at link: %s" ov path link)
       (overlay-put ov 'display image)
 	  (overlay-put ov 'face    'default)
 	  (overlay-put ov 'keymap  org-link-beautify-keymap))))
@@ -1225,7 +1210,6 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
         (when-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-subtitle path))
                     ((file-exists-p thumbnail-file))
                     (image (create-image thumbnail-file nil nil :width (or org-link-beautify-subtitle-preview-size 300))))
-          ;; DEBUG: (message "[org-link-beautify] DEBUG image overlay: %s for path: %s at link: %s" ov path link)
           (overlay-put ov 'display image)
 	      (overlay-put ov 'face    'default)
 	      (overlay-put ov 'keymap  org-link-beautify-keymap))
@@ -1278,7 +1262,6 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
       (prog1 nil
         (message "Your Emacs does not support displaying images!"))
     (when-let* ((text (org-link-beautify--generate-preview-for-file-archive path)))
-      ;; DEBUG: (message "[org-link-beautify] DEBUG image overlay: %s for path: %s at link: %s" ov path link)
       (overlay-put ov 'after-string text)
 	  (overlay-put ov 'face         'default)
 	  (overlay-put ov 'keymap       org-link-beautify-keymap))))
@@ -1293,7 +1276,6 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
     (when-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-pdf path))
                 ((file-exists-p thumbnail-file))
                 (image (create-image thumbnail-file)))
-      ;; DEBUG: (message "[org-link-beautify] DEBUG image overlay: %s for path: %s at link: %s" ov path link)
       (overlay-put ov 'display image)
 	  (overlay-put ov 'face    'default)
 	  (overlay-put ov 'keymap  org-link-beautify-keymap))))
@@ -1308,7 +1290,6 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
     (when-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-epub path))
                 ((file-exists-p thumbnail-file))
                 (image (create-image thumbnail-file)))
-      ;; DEBUG: (message "[org-link-beautify] DEBUG image overlay: %s for path: %s at link: %s" ov path link)
       (overlay-put ov 'display image)
 	  (overlay-put ov 'face    'default)
 	  (overlay-put ov 'keymap  org-link-beautify-keymap))))
@@ -1323,7 +1304,6 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
     (when-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-epub path))
                 ((file-exists-p thumbnail-file))
                 (image (create-image thumbnail-file)))
-      ;; DEBUG: (message "[org-link-beautify] DEBUG image overlay: %s for path: %s at link: %s" ov path link)
       (overlay-put ov 'display image)
 	  (overlay-put ov 'face    'default)
 	  (overlay-put ov 'keymap  org-link-beautify-keymap))))
@@ -1338,7 +1318,6 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
     (when-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-video path))
                 ((file-exists-p thumbnail-file))
                 (image (create-image thumbnail-file nil nil :width (or org-link-beautify-video-preview-size 600))))
-      ;; DEBUG: (message "[org-link-beautify] DEBUG image overlay: %s for path: %s at link: %s" ov path link)
       (overlay-put ov 'display image)
 	  (overlay-put ov 'face    'default)
 	  (overlay-put ov 'keymap  org-link-beautify-keymap))))
@@ -1353,7 +1332,6 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
     (when-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-audio path))
                 ((file-exists-p thumbnail-file))
                 (image (create-image thumbnail-file nil nil :width (or org-link-beautify-audio-preview-size 300))))
-      ;; DEBUG: (message "[org-link-beautify] DEBUG image overlay: %s for path: %s at link: %s" ov path link)
       (overlay-put ov 'display image)
 	  (overlay-put ov 'face    'default)
 	  (overlay-put ov 'keymap  org-link-beautify-keymap))))
@@ -1490,7 +1468,6 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
         (when-let* ((thumbnail-file (org-link-beautify--generate-preview-for-url ov path link))
                     ((file-exists-p thumbnail-file))
                     (image (create-image thumbnail-file nil nil :width (or org-link-beautify-url-preview-size 600))))
-          ;; DEBUG: (message "[org-link-beautify] DEBUG image overlay: %s for path: %s at link: %s" ov path link)
           (overlay-put ov 'display image)
 	      (overlay-put ov 'face    'default)
 	      (overlay-put ov 'keymap  org-link-beautify-keymap)))
