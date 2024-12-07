@@ -571,8 +571,8 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
 If command \"gnome-epub-thumbnailer\" is available, enable EPUB
 preview by default. You can set this option to nil to disable
 EPUB preview."
-  :type 'boolean
-  :safe #'booleanp
+  :type 'string
+  :safe #'stringp
   :group 'org-link-beautify)
 
 (defcustom org-link-beautify-ebook-preview-size 300
@@ -656,8 +656,8 @@ Enable Kindle ebook preview by default. You can set this option
 to nil to disable EPUB preview.
 
 You can install software `libmobi' to get command `mobitool'."
-  :type 'boolean
-  :safe #'booleanp
+  :type 'string
+  :safe #'stringp
   :group 'org-link-beautify)
 
 (defvar org-link-beautify--kindle-cover-command
@@ -905,8 +905,8 @@ You can install software `libmobi' to get command `mobitool'.")
     (darwin (executable-find "qlmanage")))
   "Whether enable CDisplay Archived Comic Book Formats cover preview.
 File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
-  :type 'boolean
-  :safe #'booleanp
+  :type 'string
+  :safe #'stringp
   :group 'org-link-beautify)
 
 (defcustom org-link-beautify-comic-preview-list
@@ -1000,8 +1000,8 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
    ;; $ ffmpeg -i video.mp4 -ss 00:01:00.000 -vframes 1 -vcodec png -an -f rawvideo -s 119x64 out.png
    ((executable-find "ffmpeg") "ffmpeg"))
   "The available command to preview video."
-  :type 'boolean
-  :safe #'booleanp
+  :type 'string
+  :safe #'stringp
   :group 'org-link-beautify)
 
 (defcustom org-link-beautify-video-preview-list
@@ -1085,8 +1085,8 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
 (defcustom org-link-beautify-audio-preview (or (executable-find "audiowaveform")
                                                (executable-find "qlmanage"))
   "Whether enable audio files wave form preview?"
-  :type 'boolean
-  :safe #'booleanp
+  :type 'string
+  :safe #'stringp
   :group 'org-link-beautify)
 
 (defvar org-link-beautify-audio-preview-command
@@ -1445,8 +1445,8 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
    ((executable-find "webkit2png") "webkit2png")
    ((executable-find "monolith") "monolith"))
   "Find available URL web page screenshot archive command."
-  :type 'boolean
-  :safe #'booleanp
+  :type 'string
+  :safe #'stringp
   :group 'org-link-beautify)
 
 (defcustom org-link-beautify-url-preview-size 800
