@@ -1522,8 +1522,8 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
       ("git" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git))
       ("http" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-url))
       ("https" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-url))
-      ;; (_ (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      )))
+      ("mu4e" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      (_ (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))))
 
 ;;;###autoload
 (defun org-link-beautify-disable ()
