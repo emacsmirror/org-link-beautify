@@ -375,6 +375,69 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
                                 icon
                                 (propertize "]" 'face '(:inherit nil :underline nil :foreground "orange"))))))
 
+;;; General thumbnail generator.
+
+(defvar org-link-beautify-thumbnailer-script
+  (expand-file-name "scripts/thumbnailer.py" (file-name-directory (or load-file-name (buffer-file-name))))
+  "The script path of thumbnailer.")
+
+(defun org-link-beautify-thumbnailer (path)
+  "Generate thumbnail image for file of PATH over OV overlay position for LINK element."
+  (when (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
+    (let* ((file-path (match-string 1 path))
+           (input-file (expand-file-name (org-link-unescape file-path)))
+           (search-option (match-string 2 path))
+           (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path input-file))
+           (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base input-file))))
+           (thumbnail-size 300)
+           (proc-name (format "org-link-beautify-thumbnailer - %s" (file-name-base input-file)))
+           (proc-buffer (format " *org-link-beautify-thumbnailer - %s*" (file-name-base input-file)))
+           (proc (get-process proc-name)))
+      (make-process
+       :name proc-name
+       :command (list org-link-beautify-thumbnailer-script
+                      input-file
+                      thumbnail-file
+                      (number-to-string thumbnail-size))
+       :buffer proc-buffer
+       :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
+       :sentinel (lambda (proc event)
+                   (when org-link-beautify-enable-debug-p
+                     (message (format "> proc: %s\n> event: %s" proc event)))
+                   ;; (when (string= event "finished\n")
+                   ;;   (kill-buffer (process-buffer proc))
+                   ;;   (kill-process proc))
+                   ))
+      ;; return the thumbnail file as result.
+      thumbnail-file)))
+
+(defun org-link-beautify-preview-thumbnail (thumbnail-file)
+  "Display THUMBNAIL-FILE with overlay."
+  (if (not (display-graphic-p))
+      (prog1 nil
+        (message "Your Emacs does not support displaying images!"))
+    (require 'image)
+    (when-let* ((file (expand-file-name path))
+                ;; ((string-match-p (image-file-name-regexp) file))
+                ((file-exists-p file)))
+      (let* ((width (or (org-display-inline-image--width link) 300))
+             (align (org-image--align link))
+             (image (org--create-inline-image thumbnail-file width)))
+        (when image                     ; Add image to overlay
+	      ;; See bug#59902. We cannot rely on Emacs to update image if the file has changed.
+          (image-flush image) ; refresh image in cache if file changed.
+	      (overlay-put ov 'display image)
+	      (overlay-put ov 'face    'default)
+	      (overlay-put ov 'keymap  org-link-beautify-keymap)
+          (when align
+            (overlay-put ov
+                         'before-string (propertize " "
+                                                    'face 'default
+                                                    'display (pcase align
+                                                               ("center" `(space :align-to (- center (0.5 . ,image))))
+                                                               ("right"  `(space :align-to (- right ,image)))))))
+          t)))))
+
 ;;; Preview file: link type
 
 (defun org-link-beautify-preview-file (ov path link)
@@ -406,7 +469,10 @@ This function will apply file type function based on file extension."
       (org-link-beautify-preview-file-archive ov path link))
      ((member extension org-link-beautify-source-code-preview-list)
       (org-link-beautify-preview-file-source-code ov path link))
-     (t (org-link-beautify-iconify ov path link)))))
+     (t (let ((thumbnail-file (org-link-beautify-thumbnailer path)))
+          (if (file-exists-p thumbnail-file)
+              (org-link-beautify-preview-thumbnail thumbnail-file)
+            (org-link-beautify-iconify ov path link)))))))
 
 (defun org-link-beautify-preview-attachment (ov path link)
   "Preview attachment file of PATH over OV overlay position for LINK element.
