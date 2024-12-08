@@ -277,11 +277,15 @@ The argument FILE must be the absolute path."
 
 (defun org-link-beautify--return-icon (ov path link)
   "Return icon for PATH on OV overlay at LINK element."
-  (let ((type (org-element-property :type link)))
+  (let ((type (org-element-property :type link))
+        (extension (file-name-extension path)))
     (pcase type
       ("file" (if-let (extension (file-name-extension path))
                   (nerd-icons-icon-for-extension extension)
                 (nerd-icons-icon-for-dir path)))
+      ("attachment" (if-let (extension (file-name-extension path))
+                        (nerd-icons-icon-for-extension extension)
+                      (nerd-icons-icon-for-dir path)))
       ("http" (nerd-icons-icon-for-url (concat type ":" path)))
       ("https" (nerd-icons-icon-for-url (concat type ":" path)))
       ;; Org mode internal link types
