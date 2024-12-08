@@ -304,7 +304,7 @@ The argument FILE must be the absolute path."
       ("cite" (nerd-icons-codicon "nf-cod-references" :face 'nerd-icons-cyan))
       ;; Org mode external link types
       ("eaf" (nerd-icons-mdicon "nf-md-apps" :face 'nerd-icons-blue)) ; emacs-application-framework
-      ("eww" (nerd-icons-icon-for-mode 'eww-mode))
+      ("eww" (nerd-icons-icon-for-mode 'eww-mode)) ; EWW
       ("chrome" (nerd-icons-mdicon "nf-md-google_chrome" :face 'nerd-icons-lorange))
       ("edge" (nerd-icons-mdicon "nf-md-microsoft_edge" :face 'nerd-icons-green))
       ("mu4e" (nerd-icons-mdicon "nf-md-email_search_outline" :face 'nerd-icons-blue))
@@ -314,6 +314,7 @@ The argument FILE must be the absolute path."
       ("orgit-rev" (nerd-icons-devicon "nf-dev-git_commit" :face 'nerd-icons-silver))
       ("orgit-log" (nerd-icons-octicon "nf-oct-diff" :face 'nerd-icons-silver))
       ("pdf" (nerd-icons-icon-for-file "file.pdf"))
+      ("epub" (nerd-icons-mdicon "nf-md-book_open_page_variant_outline" :face 'nerd-icons-blue-alt))
       ("nov" (nerd-icons-icon-for-file "file.epub")) ; for Emacs package "nov.el" link type `nov:'
       ("grep" (nerd-icons-mdicon "nf-md-selection_search" :face 'nerd-icons-green))
       ("occur" (nerd-icons-mdicon "nf-md-selection_multiple" :face 'nerd-icons-green))
@@ -334,11 +335,10 @@ The argument FILE must be the absolute path."
       ;; org-media-note link types
       ("videocite" (nerd-icons-faicon "nf-fa-file_video_o" :face 'nerd-icons-blue-alt))
       ("audiocite" (nerd-icons-faicon "nf-fa-file_audio_o" :face 'nerd-icons-blue-alt))
-      ("epub" (nerd-icons-mdicon "nf-md-book_open_page_variant_outline" :face 'nerd-icons-blue-alt))
       ("javascript" (nerd-icons-mdicon "nf-md-language_javascript" :face 'nerd-icons-yellow))
       ("js" (nerd-icons-mdicon "nf-md-language_javascript" :face 'nerd-icons-yellow))
-      ("vscode" (nerd-icons-mdicon "nf-md-microsoft_visual_studio_code" :face 'nerd-icons-blue-alt))
-      ("macappstores" (nerd-icons-mdicon "nf-md-apple" :face 'nerd-icons-silver))
+      ("vscode" (nerd-icons-mdicon "nf-md-microsoft_visual_studio_code" :face 'nerd-icons-blue-alt)) ; Visual Studio Code
+      ("macappstores" (nerd-icons-mdicon "nf-md-apple" :face 'nerd-icons-silver)) ; Mac App Store
       
       ("fuzzy"
        ;; Org internal [[reference][reference]] -> NOT supported by:
