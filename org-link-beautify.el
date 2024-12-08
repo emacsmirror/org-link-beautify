@@ -101,8 +101,14 @@ The argument FILE must be the absolute path."
     (darwin
      (do-applescript
       (format "tell app \"Finder\" to set the clipboard to ( POSIX file \"%s\" )" file)))
-    ;; TODO:
-    (gnu/linux )
+    (gnu/linux
+     ;; - xclip-copyfile :: command copies files into the X clipboard, recursing into directories.
+     ;; - xclip-cutfile :: command Copy the files, but also deletes them afterwards.
+     ;; - xclip-pastefile :: command Paste the files out of the clipboard.
+     ;; - xclip :: command Copy text or files to the clipboard.
+     (if (executable-find "xclip-copyfile")
+         (shell-command (format "xclip-copyfile %s" file))
+       (user-error "[org-link-beautify] Error: the command-line tool 'xclip-copyfile' is not installed!")))
     ;; TODO:
     (windows-nt ))
   (message "Copied file [%s] to system clipboard." (string-truncate-left file (/ (window-width) 2))))
