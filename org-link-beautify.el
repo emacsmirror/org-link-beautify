@@ -1096,7 +1096,7 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
    ((and (eq system-type 'gnu/linux) (executable-find "audiowaveform")) "audiowaveform"))
   "Find available audio preview command.")
 
-(defcustom org-link-beautify-audio-preview-list '("mp3" "wav" "flac" "ogg" "m4a" "dat")
+(defcustom org-link-beautify-audio-preview-list '("mp3" "wav" "flac" "ogg" "m4a" "opus" "dat")
   "A list of audio file types be supported generating audio wave form image."
   :type 'list
   :safe #'listp
