@@ -52,13 +52,13 @@
   :prefix "org-link-beautify-"
   :group 'org)
 
-(defcustom org-link-beautify-thumbnails-dir 'source-path
+(defcustom org-link-beautify-thumbnails-dir 'current-working-directory
   "The directory of generated thumbnails.
 
-By default the thumbnails are generated in source file path’s
-.thumbnails directory. This is better for avoiding re-generate
-preview thumbnails. Or you can set this option to ‘'user-home’
-which represent to ~/.cache/thumbnails/."
+By default option value with symbol 'current-working-directory the
+thumbnails are generated in source file path’s .thumbnails directory.
+This is better for avoiding re-generate preview thumbnails. Or you can
+set this option to 'user-home which represent to ~/.cache/thumbnails/."
   :type 'symbol
   :safe #'symbolp
   :group 'org-link-beautify)
@@ -145,7 +145,7 @@ The argument FILE must be the absolute path."
 (defun org-link-beautify--get-thumbnails-dir-path (file)
   "Return the FILE thumbnail directory's path."
   (cl-case org-link-beautify-thumbnails-dir
-    (source-path
+    (current-working-directory
      (concat (file-name-directory file) ".thumbnails/"))
     (user-home
      (expand-file-name "~/.cache/thumbnails/"))))
