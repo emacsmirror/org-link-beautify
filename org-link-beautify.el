@@ -345,16 +345,13 @@ The argument FILE must be the absolute path."
        (when-let* ((_ (string-match "\\([^:]*\\):\\(.*\\)" path))
                    (real-type (match-string 1 path))) ; extract the "real" link type for "fuzzy" type in :path.
          (cond
-          ;; FIXME:
-          ;; ((string-equal path link-element)
-          ;;  (nerd-icons-faicon "nf-fa-searchengin" :face 'nerd-icons-blue-alt))
           (t
            (message "[org-link-beautify] link type not supported, add PR for this link type.
- type: %s, path: %s, extension: %s, link-element: %s" type path extension link-element)
+type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
            (nerd-icons-mdicon "nf-md-progress_question" :face 'nerd-icons-lyellow)))))
       (_
        (message "[org-link-beautify] link type not supported, add PR for this link type.
- type: %s, path: %s, extension: %s, link-element: %s" type path extension link-element)
+type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
        ;; handle when returned link type is `nil'.
        (nerd-icons-mdicon "nf-md-progress_question" :face 'nerd-icons-lyellow)))))
 
