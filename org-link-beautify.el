@@ -564,10 +564,15 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
 ;;; file: .epub
 
 (defcustom org-link-beautify-epub-preview-command
-  (cl-case system-type
-    (gnu/linux (executable-find "gnome-epub-thumbnailer"))
-    ;; (darwin (executable-find "epub-thumbnailer"))
-    (t (expand-file-name "scripts/thumbnailer-ebook.py" (file-name-directory (or load-file-name (buffer-file-name))))))
+  (let ((script (expand-file-name "scripts/thumbnailer-ebook.py" (file-name-directory (or load-file-name (buffer-file-name))))))
+    (cl-case system-type
+      (gnu/linux (if (executable-find "gnome-epub-thumbnailer")
+                     "gnome-epub-thumbnailer"
+                   script))
+      (darwin (if (executable-find "epub-thumbnailer")
+                  "epub-thumbnailer"
+                script))
+      (t script)))
   "Whether enable EPUB files cover preview?
 If command \"gnome-epub-thumbnailer\" is available, enable EPUB
 preview by default. You can set this option to nil to disable
@@ -597,19 +602,8 @@ EPUB preview."
            (thumbnail-size (or org-link-beautify-ebook-preview-size 600)))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
-        (cl-case system-type
-          (gnu/linux                 ; for Linux "gnome-epub-thumbnailer"
-           (start-process
-            "org-link-beautify--epub-preview"
-            " *org-link-beautify epub-preview*"
-            org-link-beautify-epub-preview-command
-            epub-file thumbnail-file
-            ;; (if org-link-beautify-ebook-preview-size
-            ;;     "--size")
-            ;; (if org-link-beautify-ebook-preview-size
-            ;;     (number-to-string thumbnail-size))
-            ))
-          (darwin            ; for macOS "epub-thumbnailer" command
+        (pcase org-link-beautify-epub-preview-command
+          ("epub-thumbnailer"           ; for macOS "epub-thumbnailer" command
            (make-process
             :name "org-link-beautify--epub-preview"
             :command (list org-link-beautify-epub-preview-command
@@ -625,7 +619,16 @@ EPUB preview."
                           ;;   (kill-buffer (process-buffer proc))
                           ;;   (kill-process proc))
                           ))))
-          (t (user-error "This system platform currently not supported by org-link-beautify.\n Please contribute code to support"))))
+          ("gnome-epub-thumbnailer"                 ; for Linux "gnome-epub-thumbnailer"
+           (start-process
+            "org-link-beautify--epub-preview"
+            " *org-link-beautify epub-preview*"
+            org-link-beautify-epub-preview-command
+            epub-file thumbnail-file
+            (when org-link-beautify-ebook-preview-size "--size")
+            (when org-link-beautify-ebook-preview-size (number-to-string thumbnail-size))
+            ))
+          (_ (user-error "This system platform currently not supported by org-link-beautify.\n Please contribute code to support"))))
       (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
         (org-link-beautify--notify-generate-thumbnail-failed epub-file thumbnail-file))
       ;; return the thumbnail file as result.
