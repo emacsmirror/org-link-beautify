@@ -75,6 +75,11 @@ Supports video file link preview with thumbnail.
 
 * Install
 
+** Break Change
+
+Start from commit "=7fd6640=", the old implementation is renamed into "=org-link-beautify-old.el=" to backward compatibility.
+The new implementation is based on Org mode new ~org-link-parameter~ =:preview= function.
+
 ** Requirements
 
 - nerd-icons :: 
