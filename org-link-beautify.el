@@ -636,7 +636,7 @@ EPUB preview."
   (if (not (display-graphic-p))
       (prog1 nil
         (message "Your Emacs does not support displaying images!"))
-    (if-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-pdf path))
+    (if-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-epub path))
               ((file-exists-p thumbnail-file))
               (image (create-image thumbnail-file nil nil :width (or org-link-beautify-ebook-preview-size 300))))
         (progn
