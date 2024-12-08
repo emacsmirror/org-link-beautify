@@ -63,13 +63,6 @@ which represent to ~/.cache/thumbnails/."
   :safe #'symbolp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-display-overlay-info nil
-  "Whether display link info with Emacs overlay over link thumbnail.
-NOTE: overlays may mess up buffer when you cut text etc."
-  :type 'boolean
-  :safe #'booleanp
-  :group 'org-link-beautify)
-
 (defcustom org-link-beautify-enable-debug-p nil
   "Whether enable org-link-beautify print debug info."
   :type 'boolean
