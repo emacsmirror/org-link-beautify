@@ -581,7 +581,7 @@ EPUB preview."
   :safe #'stringp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-ebook-preview-size 300
+(defcustom org-link-beautify-ebook-preview-size 600
   "The EPUB cover preview image size."
   :type 'number
   :safe #'numberp
@@ -626,8 +626,7 @@ EPUB preview."
             org-link-beautify-epub-preview-command
             epub-file thumbnail-file
             (when org-link-beautify-ebook-preview-size "--size")
-            (when org-link-beautify-ebook-preview-size (number-to-string thumbnail-size))
-            ))
+            (when org-link-beautify-ebook-preview-size (number-to-string thumbnail-size))))
           (_ (user-error "This system platform currently not supported by org-link-beautify.\n Please contribute code to support"))))
       (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
         (org-link-beautify--notify-generate-thumbnail-failed epub-file thumbnail-file))
@@ -641,7 +640,7 @@ EPUB preview."
         (message "Your Emacs does not support displaying images!"))
     (if-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-epub path))
               ((file-exists-p thumbnail-file))
-              (image (create-image thumbnail-file nil nil :width (or org-link-beautify-ebook-preview-size 300))))
+              (image (create-image thumbnail-file nil nil :width 300)))
         (progn
           (overlay-put ov 'display image)
 	      (overlay-put ov 'face    'default)
