@@ -528,7 +528,7 @@ This function will apply file type function based on file extension."
   :safe #'stringp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-pdf-preview-size 600
+(defcustom org-link-beautify-pdf-preview-size 300
   "The PDF preview image size."
   :type 'number
   :safe #'numberp
@@ -582,7 +582,7 @@ This function will apply file type function based on file extension."
                               (format "%s%s-P%s.%s"
                                       thumbnails-dir (file-name-base pdf-file) pdf-page-number
                                       (symbol-name org-link-beautify-pdf-preview-image-format)))))
-           (thumbnail-size (or org-link-beautify-pdf-preview-size 512)))
+           (thumbnail-size 600))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
         (pcase org-link-beautify-pdf-preview-command
