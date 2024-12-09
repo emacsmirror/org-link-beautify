@@ -1552,17 +1552,18 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
     (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
     (unless (or (file-exists-p thumbnail-file)
                 (file-exists-p html-archive-file))
-      (unless proc
-        (pcase org-link-beautify-url-preview-command
-          ("webkit2png"
-           (start-process
-            process-name process-buffer
-            "webkit2png" url "-o" thumbnail-file))
-          ("monolith"
-           (let* ((html-archive-file (concat (file-name-sans-extension thumbnail-file) ".html")))
+      (when org-link-beautify-url-preview-command
+        (unless proc
+          (pcase org-link-beautify-url-preview-command
+            ("webkit2png"
              (start-process
               process-name process-buffer
-              "monolith" "--no-audio" "--no-video" url "--output" html-archive-file))))))
+              "webkit2png" url "-o" thumbnail-file))
+            ("monolith"
+             (let* ((html-archive-file (concat (file-name-sans-extension thumbnail-file) ".html")))
+               (start-process
+                process-name process-buffer
+                "monolith" "--no-audio" "--no-video" url "--output" html-archive-file)))))))
     (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
       (org-link-beautify--notify-generate-thumbnail-failed url thumbnail-file))))
 
