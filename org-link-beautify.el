@@ -759,7 +759,8 @@ You can install software `libmobi' to get command `mobitool'.")
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
         (pcase org-link-beautify--kindle-cover-command
-          ("mobitool" ; NOTE: mobitool command-line tool dump covert image filename can't be specified.
+          ("mobitool"
+           ;; mobitool dumped cover image thumbnail filename can't be specified in command-line argument.
            (let ((mobitool-cover-file (concat thumbnails-dir (file-name-base kindle-file) "_cover.jpg")))
              (unless (file-exists-p mobitool-cover-file)
                (message "[org-link-beautify] preview kindle ebook file %s" kindle-file)
