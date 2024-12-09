@@ -1238,7 +1238,7 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
 
 ;;; file: [subtitle]
 
-(defcustom org-link-beautify-subtitle-preview-command nil
+(defcustom org-link-beautify-subtitle-preview-command org-link-beautify-thumbnailer-script
   "The command to preview subtitle file."
   :type 'string
   :safe #'stringp
@@ -1271,8 +1271,7 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
             (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
             (unless (file-exists-p thumbnail-file)
               (pcase org-link-beautify-subtitle-preview-command
-                ;; TODO:
-                ))
+                (org-link-beautify-thumbnailer-script (org-link-beautify-thumbnailer file-path))))
             ;; return the thumbnail file as result.
             thumbnail-file)
         (let* ((subtitle-file-context (split-string (shell-command-to-string (format "head -n 20 '%s'" subtitle-file)) "\n"))
