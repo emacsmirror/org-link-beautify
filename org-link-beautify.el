@@ -231,12 +231,13 @@ The argument FILE must be the absolute path."
 (defun org-link-beautify--javascript-script-run (javascript-script-file)
   "Run JAVASCRIPT-SCRIPT-FILE through shell command."
   (shell-command-to-string
-   (format "%s %s" org-link-beautify-python-interpreter javascript-script-file)))
+   (format "%s %s" org-link-beautify-javascript-interpreter javascript-script-file)))
 
 (defun org-link-beautify--javascript-command-to-string (&rest code-lines)
   "Run JavaScript CODE-LINES through shell command."
   (shell-command-to-string
-   (concat "node --eval "
+   (concat org-link-beautify-javascript-interpreter
+           " --eval "
            ;; solve double quote character issue.
            "\"" (string-replace "\"" "\\\"" (string-join code-lines "\n")) "\"")))
 
