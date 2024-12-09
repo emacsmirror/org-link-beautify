@@ -825,13 +825,12 @@ You can install software `libmobi' to get command `mobitool'.")
       image
     'no-cover))
 
-(defun org-link-beautify-fictionbook2--save-cover (image file-path)
-  "Save FictionBook2 cover IMAGE to FILE-PATH."
-  ;; TODO: how to save image data into image file?
+(defun org-link-beautify-fictionbook2--save-cover (image thumbnail-file)
+  "Save FictionBook2 cover IMAGE to THUMBNAIL-FILE."
   ;; `image-save': This writes the original image data to a file.
   (with-temp-buffer
     (insert (plist-get (cdr image) :data))
-    (write-region (point-min) (point-max) file-path)))
+    (write-region (point-min) (point-max) thumbnail-file)))
 
 (defun org-link-beautify--generate-preview-for-file-fictionbook2 (path)
   "Generate THUMBNAIL-FILE with THUMBNAIL-SIZE for .fb2 & .fb2.zip file of PATH."
