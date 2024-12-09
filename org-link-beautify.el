@@ -1014,30 +1014,31 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
            ;;  ;; (if org-link-beautify-comic-preview-size
            ;;  ;;     (number-to-string thumbnail-size))
            ;;  ))
-           (darwin
-            ;; for macOS "qlmanage" command
-            ;; $ qlmanage -t "ラセン恐怖閣-マリコとニジロー1-DL版.cbz" - 2.0 -s 1080 -o ".thumbnails"
-            (let ((qlmanage-thumbnail-file (concat thumbnails-dir (file-name-nondirectory comic-file) ".png")))
-              (make-process
-               :name "org-link-beautify--comic-preview"
-               :command (list org-link-beautify-comic-preview-command
-                              "-t"
-                              comic-file
-                              "-o" thumbnails-dir
-                              "-s" (number-to-string thumbnail-size))
-               :buffer " *org-link-beautify comic-preview*"
-               :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
-               :sentinel (lambda (proc event)
-                           (if org-link-beautify-enable-debug-p
-                               (message (format "> proc: %s\n> event: %s" proc event))
-                             ;; (when (string= event "finished\n")
-                             ;;   (kill-buffer (process-buffer proc))
-                             ;;   (kill-process proc))
-                             )))
-              ;; then rename [file.extension.png] to [file.png]
-              (when (file-exists-p qlmanage-thumbnail-file)
-                (rename-file qlmanage-thumbnail-file thumbnail-file))))
-           (t (user-error "This system platform currently not supported by org-link-beautify.\n Please contribute code to support"))))
+           )
+          (darwin
+           ;; for macOS "qlmanage" command
+           ;; $ qlmanage -t "ラセン恐怖閣-マリコとニジロー1-DL版.cbz" - 2.0 -s 1080 -o ".thumbnails"
+           (let ((qlmanage-thumbnail-file (concat thumbnails-dir (file-name-nondirectory comic-file) ".png")))
+             (make-process
+              :name "org-link-beautify--comic-preview"
+              :command (list org-link-beautify-comic-preview-command
+                             "-t"
+                             comic-file
+                             "-o" thumbnails-dir
+                             "-s" (number-to-string thumbnail-size))
+              :buffer " *org-link-beautify comic-preview*"
+              :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
+              :sentinel (lambda (proc event)
+                          (if org-link-beautify-enable-debug-p
+                              (message (format "> proc: %s\n> event: %s" proc event))
+                            ;; (when (string= event "finished\n")
+                            ;;   (kill-buffer (process-buffer proc))
+                            ;;   (kill-process proc))
+                            )))
+             ;; then rename [file.extension.png] to [file.png]
+             (when (file-exists-p qlmanage-thumbnail-file)
+               (rename-file qlmanage-thumbnail-file thumbnail-file))))
+          (t (user-error "This system platform currently not supported by org-link-beautify.\n Please contribute code to support")))
         (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
           (org-link-beautify--notify-generate-thumbnail-failed comic-file thumbnail-file))
         ;; return the thumbnail file as result.
