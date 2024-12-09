@@ -971,7 +971,10 @@ You can install software `libmobi' to get command `mobitool'.")
 
 (defcustom org-link-beautify-comic-preview-command
   (cl-case system-type
-    (darwin (executable-find "qlmanage")))
+    (darwin (if (executable-find "qlmanage")
+                "qlmanage"
+              org-link-beautify-thumbnailer-script))
+    (gnu/linux org-link-beautify-thumbnailer-script))
   "Whether enable CDisplay Archived Comic Book Formats cover preview.
 File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
   :type 'string
@@ -998,51 +1001,60 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
            (comic-file (expand-file-name (org-link-unescape file-path)))
            (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path comic-file))
            (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base comic-file))))
-           (thumbnail-size (or org-link-beautify-comic-preview-size 1080)))
+           (thumbnail-size (or org-link-beautify-comic-preview-size 1080))
+           (proc-name (format "org-link-beautify comic preview - %s" (file-name-base file-path)))
+           (proc-buffer (format " *org-link-beautify comic preview - %s*" (file-name-base file-path)))
+           (proc (get-process proc-name)))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
-        (cl-case system-type
-          ;; TODO:
-          (gnu/linux
-           ;; (start-process
-           ;;  "org-link-beautify--comic-preview"
-           ;;  " *org-link-beautify comic-preview*"
-           ;;  org-link-beautify-comic-preview-command
-           ;;  comic-file thumbnail-file
-           ;;  ;; (if org-link-beautify-comic-preview-size
-           ;;  ;;     "--size")
-           ;;  ;; (if org-link-beautify-comic-preview-size
-           ;;  ;;     (number-to-string thumbnail-size))
-           ;;  ))
-           )
-          (darwin
-           ;; for macOS "qlmanage" command
-           ;; $ qlmanage -t "ラセン恐怖閣-マリコとニジロー1-DL版.cbz" - 2.0 -s 1080 -o ".thumbnails"
-           (let ((qlmanage-thumbnail-file (concat thumbnails-dir (file-name-nondirectory comic-file) ".png")))
-             (make-process
-              :name "org-link-beautify--comic-preview"
-              :command (list org-link-beautify-comic-preview-command
-                             "-t"
-                             comic-file
-                             "-o" thumbnails-dir
-                             "-s" (number-to-string thumbnail-size))
-              :buffer " *org-link-beautify comic-preview*"
-              :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
-              :sentinel (lambda (proc event)
-                          (if org-link-beautify-enable-debug-p
-                              (message (format "> proc: %s\n> event: %s" proc event))
-                            ;; (when (string= event "finished\n")
-                            ;;   (kill-buffer (process-buffer proc))
-                            ;;   (kill-process proc))
-                            )))
-             ;; then rename [file.extension.png] to [file.png]
-             (when (file-exists-p qlmanage-thumbnail-file)
-               (rename-file qlmanage-thumbnail-file thumbnail-file))))
-          (t (user-error "This system platform currently not supported by org-link-beautify.\n Please contribute code to support")))
-        (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
-          (org-link-beautify--notify-generate-thumbnail-failed comic-file thumbnail-file))
-        ;; return the thumbnail file as result.
-        thumbnail-file))))
+        (unless proc
+          (cl-case system-type
+            (gnu/linux
+             (pcase org-link-beautify-comic-preview-command
+               ("cbconvert"              ; https://github.com/gen2brain/cbconvert
+                (start-process
+                 proc-name
+                 proc-buffer
+                 org-link-beautify-comic-preview-command
+                 "cover" comic-file "--output" thumbnails-dir
+                 (if org-link-beautify-comic-preview-size
+                     "--width")
+                 (if org-link-beautify-comic-preview-size
+                     (number-to-string thumbnail-size))))
+               (org-link-beautify-thumbnailer-script
+                (org-link-beautify-thumbnailer file-path))))
+            (darwin
+             ;; for macOS "qlmanage" command
+             ;; $ qlmanage -t "ラセン恐怖閣-マリコとニジロー1-DL版.cbz" - 2.0 -s 1080 -o ".thumbnails"
+             (pcase org-link-beautify-comic-preview-command
+               ("qlmanage"
+                (let ((qlmanage-thumbnail-file (concat thumbnails-dir (file-name-nondirectory comic-file) ".png")))
+                  (make-process
+                   :name proc-name
+                   :command (list org-link-beautify-comic-preview-command
+                                  "-t"
+                                  comic-file
+                                  "-o" thumbnails-dir
+                                  "-s" (number-to-string thumbnail-size))
+                   :buffer proc-buffer
+                   :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
+                   :sentinel (lambda (proc event)
+                               (if org-link-beautify-enable-debug-p
+                                   (message (format "> proc: %s\n> event: %s" proc event))
+                                 ;; (when (string= event "finished\n")
+                                 ;;   (kill-buffer (process-buffer proc))
+                                 ;;   (kill-process proc))
+                                 )))
+                  ;; then rename [file.extension.png] to [file.png]
+                  (when (file-exists-p qlmanage-thumbnail-file)
+                    (rename-file qlmanage-thumbnail-file thumbnail-file))))
+               (org-link-beautify-thumbnailer-script
+                (org-link-beautify-thumbnailer file-path))))
+            (t (user-error "This system platform currently not supported by org-link-beautify.\n Please contribute code to support")))))
+      (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+        (org-link-beautify--notify-generate-thumbnail-failed comic-file thumbnail-file))
+      ;; return the thumbnail file as result.
+      thumbnail-file)))
 
 (defun org-link-beautify-preview-file-comic (ov path link)
   "Preview comic .cbz or .cbr file of PATH over OV overlay position for LINK element."
@@ -1272,7 +1284,8 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
             (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
             (unless (file-exists-p thumbnail-file)
               (pcase org-link-beautify-subtitle-preview-command
-                (org-link-beautify-thumbnailer-script (org-link-beautify-thumbnailer file-path))))
+                (org-link-beautify-thumbnailer-script
+                 (org-link-beautify-thumbnailer file-path))))
             ;; return the thumbnail file as result.
             thumbnail-file)
         (let* ((subtitle-file-context (split-string (shell-command-to-string (format "head -n 20 '%s'" subtitle-file)) "\n"))
