@@ -1556,14 +1556,26 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
         (unless proc
           (pcase org-link-beautify-url-preview-command
             ("webkit2png"
-             (start-process
-              process-name process-buffer
-              "webkit2png" url "-o" thumbnail-file))
+             (make-process
+              :name proc-name
+              :command (list "webkit2png" url "-o" thumbnail-file)
+              :buffer proc-buffer
+              :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
+              :sentinel (lambda (proc event)
+                          (when (string= event "finished\n")
+                            (kill-buffer (process-buffer proc))
+                            (kill-process proc)))))
             ("monolith"
              (let* ((html-archive-file (concat (file-name-sans-extension thumbnail-file) ".html")))
-               (start-process
-                process-name process-buffer
-                "monolith" "--no-audio" "--no-video" url "--output" html-archive-file)))))))
+               (make-process
+                :name proc-name
+                :command (list "monolith" "--no-audio" "--no-video" url "--output" html-archive-file)
+                :buffer proc-buffer
+                :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
+                :sentinel (lambda (proc event)
+                            (when (string= event "finished\n")
+                              (kill-buffer (process-buffer proc))
+                              (kill-process proc))))))))))
     (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
       (org-link-beautify--notify-generate-thumbnail-failed url thumbnail-file))))
 
