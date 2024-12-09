@@ -1613,7 +1613,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
   :global nil
   :init-value nil
   :lighter " ߷"
-  :keymap org-link-beautify-mode-map ; NOTE: avoid to enable `org-link-beautify-keymap' globally everywhere.
+  :keymap org-link-beautify-mode-map ; avoid to enable `org-link-beautify-keymap' globally everywhere.
   (if org-link-beautify-mode
       (org-link-beautify-enable)
     (org-link-beautify-disable)))
