@@ -150,11 +150,13 @@ The argument FILE must be the absolute path."
 
 (defun org-link-beautify--get-thumbnails-dir-path (file)
   "Return the FILE thumbnail directory's path."
-  (cl-case org-link-beautify-thumbnails-dir
-    (current-working-directory
-     (concat (file-name-directory file) ".thumbnails/"))
-    (user-home
-     (expand-file-name "~/.cache/thumbnails/"))))
+  (if file
+      (cl-case org-link-beautify-thumbnails-dir
+        (current-working-directory
+         (concat (file-name-directory file) ".thumbnails/"))
+        (user-home
+         (expand-file-name "~/.cache/thumbnails/")))
+    (user-error "[org-link-beautify] Error: the paramter `file' of function `org-link-beautify--get-thumbnails-dir-path' is nil")))
 
 (defun org-link-beautify--ensure-thumbnails-dir (thumbnails-dir)
   "Ensure THUMBNAILS-DIR exist, if not ,create it."
