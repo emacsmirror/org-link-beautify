@@ -940,7 +940,9 @@ You can install software `libmobi' to get command `mobitool'.")
              (start-process
               proc-name proc-buffer
               "silicon" source-code-file "-o" thumbnail-file
-              "--no-window-controls" "--shadow-blur-radius" "30" "--shadow-color" "#555"))
+              "--theme" "Dracula"
+              "--no-window-controls" "--shadow-blur-radius" "30" "--shadow-color" "#555"
+              "--window-title" (file-name-nondirectory file-path)))
             ("germanium"
              (start-process
               proc-name proc-buffer
