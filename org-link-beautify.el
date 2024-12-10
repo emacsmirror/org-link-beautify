@@ -1375,7 +1375,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
         (message "Your Emacs does not support displaying images!"))
     (if-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-pdf path))
               ((file-exists-p thumbnail-file))
-              (image (create-image thumbnail-file)))
+              (image (create-image thumbnail-file nil nil :width 300)))
         (progn
           (overlay-put ov 'display image)
 	      (overlay-put ov 'face    'default)
@@ -1391,7 +1391,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
         (message "Your Emacs does not support displaying images!"))
     (if-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-epub path))
               ((file-exists-p thumbnail-file))
-              (image (create-image thumbnail-file)))
+              (image (create-image thumbnail-file nil nil :width 300)))
         (progn
           (overlay-put ov 'display image)
 	      (overlay-put ov 'face    'default)
@@ -1407,7 +1407,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
         (message "Your Emacs does not support displaying images!"))
     (if-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-epub path))
               ((file-exists-p thumbnail-file))
-              (image (create-image thumbnail-file)))
+              (image (create-image thumbnail-file nil nil :width 300)))
         (progn
           (overlay-put ov 'display image)
 	      (overlay-put ov 'face    'default)
@@ -1423,7 +1423,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
         (message "Your Emacs does not support displaying images!"))
     (if-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-video path))
               ((file-exists-p thumbnail-file))
-              (image (create-image thumbnail-file nil nil :width (or org-link-beautify-video-preview-size 600))))
+              (image (create-image thumbnail-file nil nil :width 400)))
         (progn
           (overlay-put ov 'display image)
 	      (overlay-put ov 'face    'default)
