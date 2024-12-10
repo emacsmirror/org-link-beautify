@@ -960,7 +960,7 @@ You can install software `libmobi' to get command `mobitool'.")
         (message "Your Emacs does not support displaying images!"))
     (if-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-source-code path))
               ((file-exists-p thumbnail-file))
-              (image (create-image thumbnail-file)))
+              (image (create-image thumbnail-file nil nil :width 800)))
         (progn
           (overlay-put ov 'display image)
 	      (overlay-put ov 'face    'default)
