@@ -1597,6 +1597,24 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
 	      (overlay-put ov 'keymap  org-link-beautify-keymap))
       (org-link-beautify-iconify ov path link))))
 
+;;; Insert Org link without description based on smart detecting file extension.
+
+(defun org-link-beautify-remove-description (orig-func link &optional description)
+  "Remove DESCRIPTION from LINK around ORIG-FUNC.
+
+This is for link image previewing to get around function `org-link-preview'
+\(original named `org-toggle-inline-images'\) parameter `include-linked'."
+  (let ((extension (file-name-extension link)))
+    (when (or (member extension '("pdf" "epub" "mobi" "azw3" "fb2" "fb2.zip")) ; ebook files
+              (member extension image-file-name-extensions) ; image files
+              (member extension '("avi" "rmvb" "ogg" "ogv" "mp4" "mkv" "mov" "mpeg" "webm" "flv" "ts" "mpg")) ; video files
+              (member extension '("mp3" "wav" "flac" "ogg" "m4a" "opus" "dat")) ; audio files
+              (member extension '("cbr" "cbz" "cb7" "cba" "cbt")) ; comic ebooks
+              (member extension '("zip" "rar" "7z" "gz" "tar" "tar.gz" "tar.bz2" "xz" "zst")) ; archive files
+              (member extension '("ass" "srt" "sub" "vtt" "ssf"))) ; subtitle files
+      (setq description nil)))
+  (funcall orig-func link description))
+
 
 ;;; minor mode `org-link-beautify-mode'
 
@@ -1622,7 +1640,9 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
       ("http" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-url))
       ("https" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-url))
       ("mu4e" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      (_ (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))))
+      (_ (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))))
+  ;; remove link description
+  (advice-add 'org-link-make-string :around #'org-link-beautify-remove-description))
 
 ;;;###autoload
 (defun org-link-beautify-disable ()
@@ -1631,7 +1651,8 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
     (pcase link-type
       ("file" (org-link-set-parameters "file" :preview #'org-link-preview-file))
       ("attachment" (org-link-set-parameters "attachment" :preview #'org-attach-preview-file))
-      (_ (org-link-set-parameters link-type :preview nil)))))
+      (_ (org-link-set-parameters link-type :preview nil))))
+  (advice-remove 'org-link-make-string #'org-link-beautify-remove-description))
 
 (defvar org-link-beautify-mode-map
   (let ((map (make-sparse-keymap)))
