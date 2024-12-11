@@ -1628,9 +1628,10 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
 (defun org-link-beautify-disable ()
   "Disable `org-link-beautify'."
   (dolist (link-type (mapcar #'car org-link-parameters))
-    (org-link-set-parameters link-type :preview nil)
-    (org-link-set-parameters "file" :preview #'org-link-preview-file)
-    (org-link-set-parameters "attachment" :preview #'org-attach-preview-file)))
+    (pcase link-type
+      ("file" (org-link-set-parameters "file" :preview #'org-link-preview-file))
+      ("attachment" (org-link-set-parameters "attachment" :preview #'org-attach-preview-file))
+      (_ (org-link-set-parameters link-type :preview nil)))))
 
 (defvar org-link-beautify-mode-map
   (let ((map (make-sparse-keymap)))
