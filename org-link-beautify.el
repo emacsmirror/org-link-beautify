@@ -723,22 +723,14 @@ EPUB preview."
     (darwin (executable-find "mobitool")))
   "Whether enable Kindle ebook files cover preview?
 
-Enable Kindle ebook preview by default. You can set this option
-to nil to disable EPUB preview.
+Enable Kindle ebook preview by default.
+
+You can set this option to nil to disable EPUB preview.
 
 You can install software `libmobi' to get command `mobitool'."
   :type 'string
   :safe #'stringp
   :group 'org-link-beautify)
-
-(defvar org-link-beautify--kindle-cover-command
-  (cond
-   ;; for macOS, use `mobitool' from libmobi.
-   ((and (eq system-type 'darwin) (executable-find "mobitool")) "mobitool")
-   ;; for Linux, use `mobitool' from libmobi.
-   ((and (eq system-type 'gnu/linux) (executable-find "mobitool")) "mobitool"))
-  "Find available kindle ebook cover dump command.
-You can install software `libmobi' to get command `mobitool'.")
 
 (defcustom org-link-beautify-kindle-preview-size 300
   "The Kindle cover preview image size."
@@ -760,7 +752,7 @@ You can install software `libmobi' to get command `mobitool'.")
            (thumbnail-size (or org-link-beautify-ebook-preview-size 600)))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
-        (pcase org-link-beautify--kindle-cover-command
+        (pcase (file-name-nondirectory org-link-beautify-kindle-preview-command)
           ("mobitool"
            ;; mobitool dumped cover image thumbnail filename can't be specified in command-line argument.
            (let ((mobitool-cover-file (concat thumbnails-dir (file-name-base kindle-file) "_cover.jpg")))
@@ -784,7 +776,8 @@ You can install software `libmobi' to get command `mobitool'.")
   (if (not (display-graphic-p))
       (prog1 nil
         (message "Your Emacs does not support displaying images!"))
-    (if-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-kindle path))
+    (if-let* ((org-link-beautify-kindle-preview-command)
+              (thumbnail-file (org-link-beautify--generate-preview-for-file-kindle path))
               ((file-exists-p thumbnail-file))
               (image (create-image thumbnail-file nil nil :width (or org-link-beautify-kindle-preview-size 300))))
         (progn
