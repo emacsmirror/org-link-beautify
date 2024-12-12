@@ -382,7 +382,7 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
 
 (defvar org-link-beautify-thumbnailer-script
   (expand-file-name "scripts/thumbnailer.py" (file-name-directory (or load-file-name (buffer-file-name))))
-  "The script path of thumbnailer.")
+  "The path of general thumbnailer script.")
 
 (defun org-link-beautify-thumbnailer (path)
   "Generate thumbnail image for file of PATH over OV overlay position for LINK element."
@@ -587,7 +587,7 @@ This function will apply file type function based on file extension."
            (thumbnail-size 600))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
-        (pcase org-link-beautify-pdf-preview-command
+        (pcase (file-name-nondirectory org-link-beautify-pdf-preview-command)
           ("pdftocairo"
            (start-process
             "org-link-beautify--pdf-preview"
@@ -620,7 +620,8 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
   (if (not (display-graphic-p))
       (prog1 nil
         (message "Your Emacs does not support displaying images!"))
-    (if-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-pdf path))
+    (if-let* ((org-link-beautify-pdf-preview-command)
+              (thumbnail-file (org-link-beautify--generate-preview-for-file-pdf path))
               ((file-exists-p thumbnail-file))
               (image (create-image thumbnail-file nil nil :width org-link-beautify-pdf-preview-size)))
         (progn
@@ -670,7 +671,7 @@ EPUB preview."
            (thumbnail-size (or org-link-beautify-ebook-preview-size 600)))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
-        (pcase org-link-beautify-epub-preview-command
+        (pcase (file-name-nondirectory org-link-beautify-epub-preview-command)
           ("epub-thumbnailer"           ; for macOS "epub-thumbnailer" command
            (make-process
             :name "org-link-beautify--epub-preview"
@@ -706,7 +707,8 @@ EPUB preview."
   (if (not (display-graphic-p))
       (prog1 nil
         (message "Your Emacs does not support displaying images!"))
-    (if-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-epub path))
+    (if-let* ((org-link-beautify-epub-preview-command)
+              (thumbnail-file (org-link-beautify--generate-preview-for-file-epub path))
               ((file-exists-p thumbnail-file))
               (image (create-image thumbnail-file nil nil :width 300)))
         (progn
@@ -928,7 +930,7 @@ You can install software `libmobi' to get command `mobitool'."
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
         (unless proc
-          (pcase org-link-beautify-source-code-preview-command
+          (pcase (file-name-nondirectory org-link-beautify-source-code-preview-command)
             ("silicon"
              (start-process
               proc-name proc-buffer
@@ -951,7 +953,8 @@ You can install software `libmobi' to get command `mobitool'."
   (if (not (display-graphic-p))
       (prog1 nil
         (message "Your Emacs does not support displaying images!"))
-    (if-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-source-code path))
+    (if-let* ((org-link-beautify-source-code-preview-command)
+              (thumbnail-file (org-link-beautify--generate-preview-for-file-source-code path))
               ((file-exists-p thumbnail-file))
               (image (create-image thumbnail-file nil nil :width 800)))
         (progn
@@ -968,9 +971,8 @@ You can install software `libmobi' to get command `mobitool'."
 
 (defcustom org-link-beautify-comic-preview-command
   (cl-case system-type
-    (darwin (if (executable-find "qlmanage")
-                "qlmanage"
-              org-link-beautify-thumbnailer-script))
+    (darwin (or (executable-find "qlmanage")
+                org-link-beautify-thumbnailer-script))
     (gnu/linux org-link-beautify-thumbnailer-script))
   "Whether enable CDisplay Archived Comic Book Formats cover preview.
 File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
@@ -1007,7 +1009,7 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
         (unless proc
           (cl-case system-type
             (gnu/linux
-             (pcase org-link-beautify-comic-preview-command
+             (pcase (file-name-nondirectory org-link-beautify-comic-preview-command)
                ("cbconvert"              ; https://github.com/gen2brain/cbconvert
                 (start-process
                  proc-name
@@ -1018,12 +1020,12 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
                      "--width")
                  (if org-link-beautify-comic-preview-size
                      (number-to-string thumbnail-size))))
-               (org-link-beautify-thumbnailer-script
+               ((file-name-nondirectory org-link-beautify-thumbnailer-script)
                 (org-link-beautify-thumbnailer file-path))))
             (darwin
              ;; for macOS "qlmanage" command
              ;; $ qlmanage -t "ラセン恐怖閣-マリコとニジロー1-DL版.cbz" - 2.0 -s 1080 -o ".thumbnails"
-             (pcase org-link-beautify-comic-preview-command
+             (pcase (file-name-nondirectory org-link-beautify-comic-preview-command)
                ("qlmanage"
                 (let ((qlmanage-thumbnail-file (concat thumbnails-dir (file-name-nondirectory comic-file) ".png")))
                   (make-process
@@ -1045,7 +1047,7 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
                   ;; then rename [file.extension.png] to [file.png]
                   (when (file-exists-p qlmanage-thumbnail-file)
                     (rename-file qlmanage-thumbnail-file thumbnail-file))))
-               (org-link-beautify-thumbnailer-script
+               ((file-name-nondirectory org-link-beautify-thumbnailer-script)
                 (org-link-beautify-thumbnailer file-path))))
             (t (user-error "This system platform currently not supported by org-link-beautify.\n Please contribute code to support")))))
       (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
@@ -1058,7 +1060,8 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
   (if (not (display-graphic-p))
       (prog1 nil
         (message "Your Emacs does not support displaying images!"))
-    (if-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-comic path))
+    (if-let* ((org-link-beautify-comic-preview-command)
+              (thumbnail-file (org-link-beautify--generate-preview-for-file-comic path))
               ((file-exists-p thumbnail-file))
               (image (create-image thumbnail-file nil nil :width (or org-link-beautify-comic-preview-size 300))))
         (progn
@@ -1069,15 +1072,21 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
 
 ;;; file: [video]
 
+(defvar org-link-beautify-video-thumbnailer-script
+  (expand-file-name "scripts/thumbnailer-video.py" (file-name-directory (or load-file-name (buffer-file-name))))
+  "The path of video thumbnailer script.")
+
 (defcustom org-link-beautify-video-preview-command
-  (cond
-   ;; for macOS, use `qlmanage'
-   ((and (eq system-type 'darwin) (executable-find "qlmanage")) "qlmanage")
-   ;; for Linux, use `ffmpegthumbnailer'
-   ((and (eq system-type 'gnu/linux) (executable-find "ffmpegthumbnailer")) "ffmpegthumbnailer")
-   ;; for general, use `ffmpeg'
-   ;; $ ffmpeg -i video.mp4 -ss 00:01:00.000 -vframes 1 -vcodec png -an -f rawvideo -s 119x64 out.png
-   ((executable-find "ffmpeg") "ffmpeg"))
+  (cl-case system-type
+    ;; for macOS, use `qlmanage' on priority
+    (darwin (or (executable-find "qlmanage") (executable-find "ffmpeg")))
+    ;; for Linux, use `ffmpegthumbnailer' on priority
+    (gnu/linux (or (executable-find "ffmpegthumbnailer") (executable-find "ffmpeg")))
+    ;; for general, use `ffmpeg'
+    ;; $ ffmpeg -i video.mp4 -ss 00:01:00.000 -vframes 1 -vcodec png -an -f rawvideo -s 119x64 out.png
+    (t (or (executable-find "ffmpeg")
+           org-link-beautify-video-thumbnailer-script
+           org-link-beautify-thumbnailer-script)))
   "The available command to preview video."
   :type 'string
   :safe #'stringp
@@ -1113,7 +1122,7 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
       (unless (file-exists-p thumbnail-file)
         ;; detect process already running?
         (unless proc
-          (pcase org-link-beautify-video-preview-command
+          (pcase (file-name-nondirectory org-link-beautify-video-preview-command)
             ("ffmpeg"
              ;; $ ffmpeg -i video.mp4 -ss 00:01:00.000 -vframes 1 -vcodec png -an -f rawvideo -s 119x64 out.png
              (start-process
@@ -1139,7 +1148,23 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
             ("ffmpegthumbnailer"
              (start-process
               proc-name proc-buffer
-              "ffmpegthumbnailer" "-f" "-i" video-file "-s" (number-to-string thumbnail-size) "-o" thumbnail-file)))))
+              "ffmpegthumbnailer" "-f" "-i" video-file "-s" (number-to-string thumbnail-size) "-o" thumbnail-file))
+            ((file-name-nondirectory org-link-beautify-video-thumbnailer-script)
+             (make-process
+              :name proc-name
+              :command (list org-link-beautify-video-thumbnailer-script
+                             input-file
+                             thumbnail-file
+                             (number-to-string thumbnail-size))
+              :buffer proc-buffer
+              :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
+              :sentinel (lambda (proc event)
+                          (when org-link-beautify-enable-debug-p
+                            (message (format "> proc: %s\n> event: %s" proc event)))
+                          ;; (when (string= event "finished\n")
+                          ;;   (kill-buffer (process-buffer proc))
+                          ;;   (kill-process proc))
+                          ))))))
       (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
         (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file))
       ;; return the thumbnail file as result.
@@ -1150,7 +1175,8 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
   (if (not (display-graphic-p))
       (prog1 nil
         (message "Your Emacs does not support displaying images!"))
-    (if-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-video path))
+    (if-let* ((org-link-beautify-video-preview-command)
+              (thumbnail-file (org-link-beautify--generate-preview-for-file-video path))
               ((file-exists-p thumbnail-file))
               (image (create-image thumbnail-file nil nil :width 400)))
         (progn
@@ -1161,22 +1187,14 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
 
 ;;; file: [audio]
 
-(defcustom org-link-beautify-audio-preview (or (executable-find "audiowaveform")
-                                               (executable-find "qlmanage"))
-  "Whether enable audio files wave form preview?"
+(defcustom org-link-beautify-audio-preview-command
+  (cl-case system-type
+    (darwin (or (executable-find "ffmpeg") (executable-find "qlmanage")))
+    (gnu/linux (or (executable-find "ffmpeg") (executable-find "audiowaveform"))))
+  "Find available audio preview command."
   :type 'string
   :safe #'stringp
   :group 'org-link-beautify)
-
-(defvar org-link-beautify-audio-preview-command
-  (cond
-   ;; for general, use `ffmpeg'
-   ((executable-find "ffmpeg") "ffmpeg")
-   ;; for macOS, use `qlmanage'
-   ((and (eq system-type 'darwin) (executable-find "qlmanage")) "qlmanage")
-   ;; for Linux, use `audiowaveform'
-   ((and (eq system-type 'gnu/linux) (executable-find "audiowaveform")) "audiowaveform"))
-  "Find available audio preview command.")
 
 (defcustom org-link-beautify-audio-preview-list '("mp3" "wav" "flac" "ogg" "m4a" "opus" "dat")
   "A list of audio file types be supported generating audio wave form image."
@@ -1206,7 +1224,7 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
         (unless proc
-          (pcase org-link-beautify-audio-preview-command
+          (pcase (file-name-nondirectory org-link-beautify-audio-preview-command)
             ("ffmpeg"
              (start-process
               proc-name proc-buffer
@@ -1237,7 +1255,8 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
   (if (not (display-graphic-p))
       (prog1 nil
         (message "Your Emacs does not support displaying images!"))
-    (if-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-audio path))
+    (if-let* ((org-link-beautify-audio-preview-command)
+              (thumbnail-file (org-link-beautify--generate-preview-for-file-audio path))
               ((file-exists-p thumbnail-file))
               (image (create-image thumbnail-file nil nil :width (or org-link-beautify-audio-preview-size 300))))
         (progn
@@ -1280,8 +1299,8 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
                  (thumbnail-size (or org-link-beautify-subtitle-preview-size 200)))
             (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
             (unless (file-exists-p thumbnail-file)
-              (pcase org-link-beautify-subtitle-preview-command
-                (org-link-beautify-thumbnailer-script
+              (pcase (file-name-nondirectory org-link-beautify-subtitle-preview-command)
+                ((file-name-nondirectory org-link-beautify-thumbnailer-script)
                  (org-link-beautify-thumbnailer file-path))))
             ;; return the thumbnail file as result.
             thumbnail-file)
@@ -1295,18 +1314,19 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
   (if (not (display-graphic-p))
       (prog1 nil
         (message "Your Emacs does not support displaying images!"))
-    (if org-link-beautify-subtitle-preview-command
-        (if-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-subtitle path))
-                  ((file-exists-p thumbnail-file))
-                  (image (create-image thumbnail-file nil nil :width (or org-link-beautify-subtitle-preview-size 300))))
-            (progn
-              (overlay-put ov 'display image)
-	          (overlay-put ov 'face    'default)
-	          (overlay-put ov 'keymap  org-link-beautify-keymap))
-          (org-link-beautify-iconify ov path link))
-      (when-let* ((text (org-link-beautify--generate-preview-for-file-subtitle path)))
-        (overlay-put ov 'after-string text)
-	    (overlay-put ov 'face         'default)))))
+    (if-let* ((org-link-beautify-subtitle-preview-command)
+              (thumbnail-file (org-link-beautify--generate-preview-for-file-subtitle path))
+              ((file-exists-p thumbnail-file))
+              (image (create-image thumbnail-file nil nil :width (or org-link-beautify-subtitle-preview-size 300))))
+        (progn
+          (overlay-put ov 'display image)
+	      (overlay-put ov 'face    'default)
+	      (overlay-put ov 'keymap  org-link-beautify-keymap))
+      (if-let* ((text (org-link-beautify--generate-preview-for-file-subtitle path)))
+          (progn
+            (overlay-put ov 'after-string text)
+	        (overlay-put ov 'face         'default))
+        (org-link-beautify-iconify ov path link)))))
 
 ;;; file: [archive file]
 
@@ -1551,7 +1571,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
                 (file-exists-p html-archive-file))
       (when org-link-beautify-url-preview-command
         (unless proc
-          (pcase org-link-beautify-url-preview-command
+          (pcase (file-name-nondirectory org-link-beautify-url-preview-command)
             ("webkit2png"
              (make-process
               :name proc-name
@@ -1581,7 +1601,8 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
   (if (not (display-graphic-p))
       (prog1 nil
         (message "Your Emacs does not support displaying images!"))
-    (if-let* ((thumbnail-file (org-link-beautify--generate-preview-for-url ov path link))
+    (if-let* ((org-link-beautify-url-preview-command)
+              (thumbnail-file (org-link-beautify--generate-preview-for-url ov path link))
               ((file-exists-p thumbnail-file))
               (image (create-image thumbnail-file nil nil :width (or org-link-beautify-url-preview-size 600))))
         (progn
