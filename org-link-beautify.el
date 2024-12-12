@@ -584,14 +584,16 @@ This function will apply file type function based on file extension."
                               (format "%s%s-P%s.%s"
                                       thumbnails-dir (file-name-base pdf-file) pdf-page-number
                                       (symbol-name org-link-beautify-pdf-preview-image-format)))))
-           (thumbnail-size 600))
+           (thumbnail-size 600)
+           (proc-name (format "org-link-beautify pdf preview - %s" pdf-file))
+           (proc-buffer (format " *org-link-beautify pdf preview - %s*" pdf-file))
+           (proc (get-process proc-name)))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
         (pcase (file-name-nondirectory org-link-beautify-pdf-preview-command)
           ("pdftocairo"
            (start-process
-            "org-link-beautify--pdf-preview"
-            " *org-link-beautify pdf-preview*"
+            proc-name proc-buffer
             "pdftocairo"
             (pcase org-link-beautify-pdf-preview-image-format
               ('png "-png")
@@ -599,17 +601,15 @@ This function will apply file type function based on file extension."
               ('svg "-svg"))
             "-singlefile"
             "-f" (number-to-string pdf-page-number)
-            path (file-name-sans-extension thumbnail-file)))
+            pdf-file (file-name-sans-extension thumbnail-file)))
           ("pdf2svg"
            (unless (eq org-link-beautify-pdf-preview-image-format 'svg)
              (warn "The pdf2svg only supports convert PDF to SVG format.
 Please adjust `org-link-beautify-pdf-preview-command' to `pdftocairo' or
 Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
            (start-process
-            "org-link-beautify--pdf-preview"
-            " *org-link-beautify pdf-preview*"
-            "pdf2svg"
-            path thumbnail-file (number-to-string pdf-page-number)))))
+            proc-name proc-buffer
+            "pdf2svg" pdf-file thumbnail-file (number-to-string pdf-page-number)))))
       (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
         (org-link-beautify--notify-generate-thumbnail-failed path thumbnail-file))
       ;; return the thumbnail file as result.
@@ -668,18 +668,21 @@ EPUB preview."
                             (if (or (null epub-page-number) (= epub-page-number 1)) ; if have page number ::N specified.
                                 (format "%s%s.png" thumbnails-dir (file-name-base epub-file))
                               (format "%s%s-P%s.png" thumbnails-dir (file-name-base epub-file) epub-page-number))))
-           (thumbnail-size (or org-link-beautify-ebook-preview-size 600)))
+           (thumbnail-size (or org-link-beautify-ebook-preview-size 600))
+           (proc-name (format "org-link-beautify epub preview - %s" epub-file))
+           (proc-buffer (format " *org-link-beautify epub preview - %s*" epub-file))
+           (proc (get-process proc-name)))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
         (pcase (file-name-nondirectory org-link-beautify-epub-preview-command)
           ("epub-thumbnailer"           ; for macOS "epub-thumbnailer" command
            (make-process
-            :name "org-link-beautify--epub-preview"
+            :name proc-name
             :command (list org-link-beautify-epub-preview-command
                            epub-file
                            thumbnail-file
                            (number-to-string thumbnail-size))
-            :buffer " *org-link-beautify epub-preview*"
+            :buffer proc-buffer
             :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
             :sentinel (lambda (proc event)
                         (if org-link-beautify-enable-debug-p
@@ -690,8 +693,7 @@ EPUB preview."
                           ))))
           ("gnome-epub-thumbnailer"                 ; for Linux "gnome-epub-thumbnailer"
            (start-process
-            "org-link-beautify--epub-preview"
-            " *org-link-beautify epub-preview*"
+            proc-name proc-buffer
             org-link-beautify-epub-preview-command
             epub-file thumbnail-file
             (when org-link-beautify-ebook-preview-size "--size")
@@ -751,7 +753,10 @@ You can install software `libmobi' to get command `mobitool'."
                             (if (or (null kindle-page-number) (= kindle-page-number 1)) ; if have page number ::N specified.
                                 (format "%s%s.jpg" thumbnails-dir (file-name-base kindle-file))
                               (format "%s%s-P%s.jpg" thumbnails-dir (file-name-base kindle-file) kindle-page-number))))
-           (thumbnail-size (or org-link-beautify-ebook-preview-size 600)))
+           (thumbnail-size (or org-link-beautify-ebook-preview-size 600))
+           (proc-name (format "org-link-beautify kindle preview - %s" kindle-file))
+           (proc-buffer (format " *org-link-beautify kindle preview - %s*" kindle-file))
+           (proc (get-process proc-name)))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
         (pcase (file-name-nondirectory org-link-beautify-kindle-preview-command)
@@ -761,8 +766,7 @@ You can install software `libmobi' to get command `mobitool'."
              (unless (file-exists-p mobitool-cover-file)
                (message "[org-link-beautify] preview kindle ebook file %s" kindle-file)
                (start-process
-                "org-link-beautify--kindle-preview"
-                " *org-link-beautify kindle-preview*"
+                proc-name proc-buffer
                 "mobitool" "-c" "-o" thumbnails-dir kindle-file))
              ;; then rename [file.extension.jpg] to [file.jpg]
              (when (file-exists-p mobitool-cover-file)
@@ -842,7 +846,10 @@ You can install software `libmobi' to get command `mobitool'."
                               (format "%s%s.png" thumbnails-dir (string-replace ".fb2" "" (file-name-base fictionbook2-file)))))
                             ((string-match-p "\\.fb2$" path)
                              (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base fictionbook2-file))))))
-           (thumbnail-size (or org-link-beautify-fictionbook2-preview-size 600)))
+           (thumbnail-size (or org-link-beautify-fictionbook2-preview-size 600))
+           (proc-name (format "org-link-beautify fictionbook preview - %s" fictionbook2-file))
+           (proc-buffer (format " *org-link-beautify fictionbook preview - %s*" fictionbook2-file))
+           (proc (get-process proc-name)))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
         (let ((cover-image (org-link-beautify-fictionbook2--extract-cover fictionbook2-file)))
@@ -971,8 +978,7 @@ You can install software `libmobi' to get command `mobitool'."
 
 (defcustom org-link-beautify-comic-preview-command
   (cl-case system-type
-    (darwin (or (executable-find "qlmanage")
-                org-link-beautify-thumbnailer-script))
+    (darwin (or (executable-find "qlmanage") org-link-beautify-thumbnailer-script))
     (gnu/linux org-link-beautify-thumbnailer-script))
   "Whether enable CDisplay Archived Comic Book Formats cover preview.
 File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
@@ -1020,8 +1026,7 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
                      "--width")
                  (if org-link-beautify-comic-preview-size
                      (number-to-string thumbnail-size))))
-               ((file-name-nondirectory org-link-beautify-thumbnailer-script)
-                (org-link-beautify-thumbnailer file-path))))
+               ("thumbnailer.py" (org-link-beautify-thumbnailer file-path))))
             (darwin
              ;; for macOS "qlmanage" command
              ;; $ qlmanage -t "ラセン恐怖閣-マリコとニジロー1-DL版.cbz" - 2.0 -s 1080 -o ".thumbnails"
@@ -1047,8 +1052,7 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
                   ;; then rename [file.extension.png] to [file.png]
                   (when (file-exists-p qlmanage-thumbnail-file)
                     (rename-file qlmanage-thumbnail-file thumbnail-file))))
-               ((file-name-nondirectory org-link-beautify-thumbnailer-script)
-                (org-link-beautify-thumbnailer file-path))))
+               ("thumbnailer.py" (org-link-beautify-thumbnailer file-path))))
             (t (user-error "This system platform currently not supported by org-link-beautify.\n Please contribute code to support")))))
       (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
         (org-link-beautify--notify-generate-thumbnail-failed comic-file thumbnail-file))
@@ -1149,7 +1153,7 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
              (start-process
               proc-name proc-buffer
               "ffmpegthumbnailer" "-f" "-i" video-file "-s" (number-to-string thumbnail-size) "-o" thumbnail-file))
-            ((file-name-nondirectory org-link-beautify-video-thumbnailer-script)
+            ("thumbnailer-video.py"
              (make-process
               :name proc-name
               :command (list org-link-beautify-video-thumbnailer-script
@@ -1293,15 +1297,18 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
     (let* ((file-path (match-string 1 path))
            (search-option (match-string 2 path))
            (subtitle-file (expand-file-name (org-link-unescape file-path))))
-      (if org-link-beautify-subtitle-preview-command
-          (let* ((thumbnails-dir (org-link-beautify--get-thumbnails-dir-path subtitle-file))
-                 (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base subtitle-file))))
-                 (thumbnail-size (or org-link-beautify-subtitle-preview-size 200)))
-            (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
+      (if-let* ((org-link-beautify-subtitle-preview-command)
+                (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path subtitle-file))
+                (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base subtitle-file))))
+                (thumbnail-size (or org-link-beautify-subtitle-preview-size 200))
+                (proc-name (format "org-link-beautify subtitle preview - %s" subtitle-file))
+                (proc-buffer (format " *org-link-beautify subtile preview - %s*" subtitle-file))
+                (proc (get-process proc-name)))
+          (progn
             (unless (file-exists-p thumbnail-file)
+              (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
               (pcase (file-name-nondirectory org-link-beautify-subtitle-preview-command)
-                ((file-name-nondirectory org-link-beautify-thumbnailer-script)
-                 (org-link-beautify-thumbnailer file-path))))
+                ("thumbnailer.py" (org-link-beautify-thumbnailer file-path))))
             ;; return the thumbnail file as result.
             thumbnail-file)
         (let* ((subtitle-file-context (split-string (shell-command-to-string (format "head -n 20 '%s'" subtitle-file)) "\n"))
