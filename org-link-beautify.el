@@ -35,7 +35,7 @@
 (require 'org-element-ast)
 (require 'cl-lib)
 (require 'color)
-
+(require 'image)
 (require 'nerd-icons)
 (require 'qrencode)
 
@@ -417,13 +417,10 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
 
 (defun org-link-beautify-preview-thumbnail (thumbnail-file)
   "Display THUMBNAIL-FILE with overlay."
-  (if (not (display-graphic-p))
-      (prog1 nil
-        (message "Your Emacs does not support displaying images!"))
-    (require 'image)
-    (when-let* ((file (expand-file-name path))
-                ;; ((string-match-p (image-file-name-regexp) file))
-                ((file-exists-p file)))
+  (if-let* (( (display-graphic-p))
+            (file (expand-file-name path))
+            ;; ((string-match-p (image-file-name-regexp) file))
+            ((file-exists-p file)))
       (let* ((width (or (org-display-inline-image--width link) 300))
              (align (org-image--align link))
              (image (org--create-inline-image thumbnail-file width)))
@@ -440,7 +437,9 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
                                                     'display (pcase align
                                                                ("center" `(space :align-to (- center (0.5 . ,image))))
                                                                ("right"  `(space :align-to (- right ,image)))))))
-          t)))))
+          t))
+    (prog1 nil
+      (message "Your Emacs does not support displaying images!"))))
 
 ;;; Preview file: link type
 
@@ -495,13 +494,10 @@ This function will apply file type function based on file extension."
 
 (defun org-link-beautify-preview-file-image (ov path link)
   "Preview image file of PATH over OV overlay position for LINK element."
-  (if (not (display-graphic-p))
-      (prog1 nil
-        (message "Your Emacs does not support displaying images!"))
-    (require 'image)
-    (when-let* ((file (expand-file-name path))
-                ;; ((string-match-p (image-file-name-regexp) file))
-                ((file-exists-p file)))
+  (if-let* (( (display-graphic-p))
+            (file (expand-file-name path))
+            ;; ((string-match-p (image-file-name-regexp) file))
+            ((file-exists-p file)))
       (let* ((width (org-display-inline-image--width link))
              (align (org-image--align link))
              (image (org--create-inline-image file width)))
@@ -518,7 +514,9 @@ This function will apply file type function based on file extension."
                                                     'display (pcase align
                                                                ("center" `(space :align-to (- center (0.5 . ,image))))
                                                                ("right"  `(space :align-to (- right ,image)))))))
-          t)))))
+          t))
+    (prog1 nil
+      (message "Your Emacs does not support displaying images!"))))
 
 ;;; file: .pdf
 
@@ -618,18 +616,16 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
 
 (defun org-link-beautify-preview-file-pdf (ov path link)
   "Preview pdf file of PATH over OV overlay position for LINK element."
-  (if (not (display-graphic-p))
-      (prog1 nil
-        (message "Your Emacs does not support displaying images!"))
-    (if-let* ((org-link-beautify-pdf-preview-command)
-              (thumbnail-file (org-link-beautify--generate-preview-for-file-pdf path))
-              ((file-exists-p thumbnail-file))
-              (image (create-image thumbnail-file nil nil :width org-link-beautify-pdf-preview-size)))
-        (progn
-          (overlay-put ov 'display image)
-	      (overlay-put ov 'face    'default)
-	      (overlay-put ov 'keymap  org-link-beautify-keymap))
-      (org-link-beautify-iconify ov path link))))
+  (if-let* (( (display-graphic-p))
+            (org-link-beautify-pdf-preview-command)
+            (thumbnail-file (org-link-beautify--generate-preview-for-file-pdf path))
+            ((file-exists-p thumbnail-file))
+            (image (create-image thumbnail-file nil nil :width org-link-beautify-pdf-preview-size)))
+      (prog1 ov
+        (overlay-put ov 'display image)
+	    (overlay-put ov 'face    'default)
+	    (overlay-put ov 'keymap  org-link-beautify-keymap))
+    (org-link-beautify-iconify ov path link)))
 
 ;;; file: .epub
 
@@ -707,18 +703,16 @@ EPUB preview."
 
 (defun org-link-beautify-preview-file-epub (ov path link)
   "Preview epub file of PATH over OV overlay position for LINK element."
-  (if (not (display-graphic-p))
-      (prog1 nil
-        (message "Your Emacs does not support displaying images!"))
-    (if-let* ((org-link-beautify-epub-preview-command)
-              (thumbnail-file (org-link-beautify--generate-preview-for-file-epub path))
-              ((file-exists-p thumbnail-file))
-              (image (create-image thumbnail-file nil nil :width 300)))
-        (progn
-          (overlay-put ov 'display image)
-	      (overlay-put ov 'face    'default)
-	      (overlay-put ov 'keymap  org-link-beautify-keymap))
-      (org-link-beautify-iconify ov path link))))
+  (if-let* (( (display-graphic-p))
+            (org-link-beautify-epub-preview-command)
+            (thumbnail-file (org-link-beautify--generate-preview-for-file-epub path))
+            ((file-exists-p thumbnail-file))
+            (image (create-image thumbnail-file nil nil :width 300)))
+      (prog1 ov
+        (overlay-put ov 'display image)
+	    (overlay-put ov 'face    'default)
+	    (overlay-put ov 'keymap  org-link-beautify-keymap))
+    (org-link-beautify-iconify ov path link)))
 
 ;;; file: .mobi, .azw3
 
@@ -780,18 +774,16 @@ You can install software `libmobi' to get command `mobitool'."
 
 (defun org-link-beautify-preview-file-kindle (ov path link)
   "Preview kindle .mobi or .azw3 file of PATH over OV overlay position for LINK element."
-  (if (not (display-graphic-p))
-      (prog1 nil
-        (message "Your Emacs does not support displaying images!"))
-    (if-let* ((org-link-beautify-kindle-preview-command)
-              (thumbnail-file (org-link-beautify--generate-preview-for-file-kindle path))
-              ((file-exists-p thumbnail-file))
-              (image (create-image thumbnail-file nil nil :width (or org-link-beautify-kindle-preview-size 300))))
-        (progn
-          (overlay-put ov 'display image)
-	      (overlay-put ov 'face    'default)
-	      (overlay-put ov 'keymap  org-link-beautify-keymap))
-      (org-link-beautify-iconify ov path link))))
+  (if-let* (( (display-graphic-p))
+            (org-link-beautify-kindle-preview-command)
+            (thumbnail-file (org-link-beautify--generate-preview-for-file-kindle path))
+            ((file-exists-p thumbnail-file))
+            (image (create-image thumbnail-file nil nil :width (or org-link-beautify-kindle-preview-size 300))))
+      (prog1 ov
+        (overlay-put ov 'display image)
+	    (overlay-put ov 'face    'default)
+	    (overlay-put ov 'keymap  org-link-beautify-keymap))
+    (org-link-beautify-iconify ov path link)))
 
 ;;; FictionBook2 (.fb2, .fb2.zip) file cover preview
 
@@ -864,18 +856,16 @@ You can install software `libmobi' to get command `mobitool'."
 
 (defun org-link-beautify-preview-file-fictionbook2 (ov path link)
   "Preview FictionBook2 .fb2, .fb2.zip file of PATH over OV overlay position for LINK element."
-  (when org-link-beautify-fictionbook2-preview
-    (if (not (display-graphic-p))
-        (prog1 nil
-          (message "Your Emacs does not support displaying images!"))
-      (if-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-fictionbook2 path))
-                ((file-exists-p thumbnail-file))
-                (image (create-image thumbnail-file nil nil :width (or org-link-beautify-fictionbook2-preview-size 300))))
-          (progn
-            (overlay-put ov 'display image)
-	        (overlay-put ov 'face    'default)
-	        (overlay-put ov 'keymap  org-link-beautify-keymap))
-        (org-link-beautify-iconify ov path link)))))
+  (if-let* ((org-link-beautify-fictionbook2-preview)
+            ( (display-graphic-p))
+            (thumbnail-file (org-link-beautify--generate-preview-for-file-fictionbook2 path))
+            ((file-exists-p thumbnail-file))
+            (image (create-image thumbnail-file nil nil :width (or org-link-beautify-fictionbook2-preview-size 300))))
+      (prog1 ov
+        (overlay-put ov 'display image)
+	    (overlay-put ov 'face    'default)
+	    (overlay-put ov 'keymap  org-link-beautify-keymap))
+    (org-link-beautify-iconify ov path link)))
 
 ;;; Source Code File
 
@@ -958,22 +948,20 @@ You can install software `libmobi' to get command `mobitool'."
 
 (defun org-link-beautify-preview-file-source-code (ov path link)
   "Preview source code file of PATH over OV overlay position for LINK element."
-  (if (not (display-graphic-p))
-      (prog1 nil
-        (message "Your Emacs does not support displaying images!"))
-    (if-let* ((org-link-beautify-source-code-preview-command)
-              (thumbnail-file (org-link-beautify--generate-preview-for-file-source-code path))
-              ((file-exists-p thumbnail-file))
-              (image (create-image thumbnail-file nil nil :width 800)))
-        (progn
-          (overlay-put ov 'display image)
-	      (overlay-put ov 'face    'default)
-	      (overlay-put ov 'keymap  org-link-beautify-keymap))
-      (if-let* ((source-code (org-link-beautify--preview-source-code-file path)))
-          (progn
-            (overlay-put ov 'after-string source-code)
-	        (overlay-put ov 'face    'org-block))
-        (org-link-beautify-iconify ov path link)))))
+  (if-let* (( (display-graphic-p))
+            (org-link-beautify-source-code-preview-command)
+            (thumbnail-file (org-link-beautify--generate-preview-for-file-source-code path))
+            ((file-exists-p thumbnail-file))
+            (image (create-image thumbnail-file nil nil :width 800)))
+      (prog1 ov
+        (overlay-put ov 'display image)
+	    (overlay-put ov 'face    'default)
+	    (overlay-put ov 'keymap  org-link-beautify-keymap))
+    (if-let* ((source-code (org-link-beautify--preview-source-code-file path)))
+        (prog1 ov
+          (overlay-put ov 'after-string source-code)
+	      (overlay-put ov 'face    'org-block))
+      (org-link-beautify-iconify ov path link))))
 
 ;;; file: [comic]
 
@@ -1062,18 +1050,16 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
 
 (defun org-link-beautify-preview-file-comic (ov path link)
   "Preview comic .cbz or .cbr file of PATH over OV overlay position for LINK element."
-  (if (not (display-graphic-p))
-      (prog1 nil
-        (message "Your Emacs does not support displaying images!"))
-    (if-let* ((org-link-beautify-comic-preview-command)
-              (thumbnail-file (org-link-beautify--generate-preview-for-file-comic path))
-              ((file-exists-p thumbnail-file))
-              (image (create-image thumbnail-file nil nil :width (or org-link-beautify-comic-preview-size 300))))
-        (progn
-          (overlay-put ov 'display image)
-	      (overlay-put ov 'face    'default)
-	      (overlay-put ov 'keymap  org-link-beautify-keymap))
-      (org-link-beautify-iconify ov path link))))
+  (if-let* (( (display-graphic-p))
+            (org-link-beautify-comic-preview-command)
+            (thumbnail-file (org-link-beautify--generate-preview-for-file-comic path))
+            ((file-exists-p thumbnail-file))
+            (image (create-image thumbnail-file nil nil :width (or org-link-beautify-comic-preview-size 300))))
+      (prog1 ov
+        (overlay-put ov 'display image)
+	    (overlay-put ov 'face    'default)
+	    (overlay-put ov 'keymap  org-link-beautify-keymap))
+    (org-link-beautify-iconify ov path link)))
 
 ;;; file: [video]
 
@@ -1177,18 +1163,16 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
 
 (defun org-link-beautify-preview-file-video (ov path link)
   "Preview video file of PATH over OV overlay position for LINK element."
-  (if (not (display-graphic-p))
-      (prog1 nil
-        (message "Your Emacs does not support displaying images!"))
-    (if-let* ((org-link-beautify-video-preview-command)
-              (thumbnail-file (org-link-beautify--generate-preview-for-file-video path))
-              ((file-exists-p thumbnail-file))
-              (image (create-image thumbnail-file nil nil :width 400)))
-        (progn
-          (overlay-put ov 'display image)
-	      (overlay-put ov 'face    'default)
-	      (overlay-put ov 'keymap  org-link-beautify-keymap))
-      (org-link-beautify-iconify ov path link))))
+  (if-let* (( (display-graphic-p))
+            (org-link-beautify-video-preview-command)
+            (thumbnail-file (org-link-beautify--generate-preview-for-file-video path))
+            ((file-exists-p thumbnail-file))
+            (image (create-image thumbnail-file nil nil :width 400)))
+      (prog1 ov
+        (overlay-put ov 'display image)
+	    (overlay-put ov 'face    'default)
+	    (overlay-put ov 'keymap  org-link-beautify-keymap))
+    (org-link-beautify-iconify ov path link)))
 
 ;;; file: [audio]
 
@@ -1257,18 +1241,16 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
 
 (defun org-link-beautify-preview-file-audio (ov path link)
   "Preview audio file of PATH over OV overlay position for LINK element."
-  (if (not (display-graphic-p))
-      (prog1 nil
-        (message "Your Emacs does not support displaying images!"))
-    (if-let* ((org-link-beautify-audio-preview-command)
-              (thumbnail-file (org-link-beautify--generate-preview-for-file-audio path))
-              ((file-exists-p thumbnail-file))
-              (image (create-image thumbnail-file nil nil :width (or org-link-beautify-audio-preview-size 300))))
-        (progn
-          (overlay-put ov 'display image)
-	      (overlay-put ov 'face    'default)
-	      (overlay-put ov 'keymap  org-link-beautify-keymap))
-      (org-link-beautify-iconify ov path link))))
+  (if-let* (( (display-graphic-p))
+            (org-link-beautify-audio-preview-command)
+            (thumbnail-file (org-link-beautify--generate-preview-for-file-audio path))
+            ((file-exists-p thumbnail-file))
+            (image (create-image thumbnail-file nil nil :width (or org-link-beautify-audio-preview-size 300))))
+      (prog1 ov
+        (overlay-put ov 'display image)
+	    (overlay-put ov 'face    'default)
+	    (overlay-put ov 'keymap  org-link-beautify-keymap))
+    (org-link-beautify-iconify ov path link)))
 
 ;;; file: [subtitle]
 
@@ -1305,13 +1287,11 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
                 (proc-name (format "org-link-beautify subtitle preview - %s" subtitle-file))
                 (proc-buffer (format " *org-link-beautify subtile preview - %s*" subtitle-file))
                 (proc (get-process proc-name)))
-          (progn
+          (prog1 thumbnail-file ; return the thumbnail file as result.
             (unless (file-exists-p thumbnail-file)
               (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
               (pcase (file-name-nondirectory org-link-beautify-subtitle-preview-command)
-                ("thumbnailer.py" (org-link-beautify-thumbnailer file-path))))
-            ;; return the thumbnail file as result.
-            thumbnail-file)
+                ("thumbnailer.py" (org-link-beautify-thumbnailer file-path)))))
         (let* ((subtitle-file-context (split-string (shell-command-to-string (format "head -n 20 '%s'" subtitle-file)) "\n"))
                (text (concat "\n" (org-link-beautify--display-content-block subtitle-file-context))))
           ;; return the subtitle file context as result.
@@ -1319,22 +1299,20 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
 
 (defun org-link-beautify-preview-file-subtitle (ov path link)
   "Preview subtitle file of PATH over OV overlay position for LINK element."
-  (if (not (display-graphic-p))
-      (prog1 nil
-        (message "Your Emacs does not support displaying images!"))
-    (if-let* ((org-link-beautify-subtitle-preview-command)
-              (thumbnail-file (org-link-beautify--generate-preview-for-file-subtitle path))
-              ((file-exists-p thumbnail-file))
-              (image (create-image thumbnail-file nil nil :width (or org-link-beautify-subtitle-preview-size 300))))
-        (progn
-          (overlay-put ov 'display image)
-	      (overlay-put ov 'face    'default)
-	      (overlay-put ov 'keymap  org-link-beautify-keymap))
-      (if-let* ((text (org-link-beautify--generate-preview-for-file-subtitle path)))
-          (progn
-            (overlay-put ov 'after-string text)
-	        (overlay-put ov 'face         'default))
-        (org-link-beautify-iconify ov path link)))))
+  (if-let* (( (display-graphic-p))
+            (org-link-beautify-subtitle-preview-command)
+            (thumbnail-file (org-link-beautify--generate-preview-for-file-subtitle path))
+            ((file-exists-p thumbnail-file))
+            (image (create-image thumbnail-file nil nil :width (or org-link-beautify-subtitle-preview-size 300))))
+      (prog1 ov
+        (overlay-put ov 'display image)
+	    (overlay-put ov 'face    'default)
+	    (overlay-put ov 'keymap  org-link-beautify-keymap))
+    (if-let* ((text (org-link-beautify--generate-preview-for-file-subtitle path)))
+        (prog1 ov
+          (overlay-put ov 'after-string text)
+	      (overlay-put ov 'face         'default))
+      (org-link-beautify-iconify ov path link))))
 
 ;;; file: [archive file]
 
@@ -1377,95 +1355,82 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
 
 (defun org-link-beautify-preview-file-archive (ov path link)
   "Preview archive file link of PATH over OV overlay position for LINK element."
-  (if (not (display-graphic-p))
-      (prog1 nil
-        (message "Your Emacs does not support displaying images!"))
-    (if-let* ((text (org-link-beautify--generate-preview-for-file-archive path)))
-        (progn
-          (overlay-put ov 'after-string text)
-	      (overlay-put ov 'face         'default)
-	      (overlay-put ov 'keymap       org-link-beautify-keymap))
-      (org-link-beautify-iconify ov path link))))
+  (if-let* ((text (org-link-beautify--generate-preview-for-file-archive path)))
+      (prog1 ov
+        (overlay-put ov 'after-string text)
+	    (overlay-put ov 'face         'default)
+	    (overlay-put ov 'keymap       org-link-beautify-keymap))
+    (org-link-beautify-iconify ov path link)))
 
 ;;; pdf: & docview: link type
 
 (defun org-link-beautify-preview-pdf (ov path link)
   "Preview pdf: link of PATH over OV overlay position for LINK element."
-  (if (not (display-graphic-p))
-      (prog1 nil
-        (message "Your Emacs does not support displaying images!"))
-    (if-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-pdf path))
-              ((file-exists-p thumbnail-file))
-              (image (create-image thumbnail-file nil nil :width 300)))
-        (progn
-          (overlay-put ov 'display image)
-	      (overlay-put ov 'face    'default)
-	      (overlay-put ov 'keymap  org-link-beautify-keymap))
-      (org-link-beautify-iconify ov path link))))
+  (if-let* (( (display-graphic-p))
+            (thumbnail-file (org-link-beautify--generate-preview-for-file-pdf path))
+            ((file-exists-p thumbnail-file))
+            (image (create-image thumbnail-file nil nil :width 300)))
+      (prog1 ov
+        (overlay-put ov 'display image)
+	    (overlay-put ov 'face    'default)
+	    (overlay-put ov 'keymap  org-link-beautify-keymap))
+    (org-link-beautify-iconify ov path link)))
 
 ;;; epub: link type
 
 (defun org-link-beautify-preview-epub (ov path link)
   "Preview epub: link of PATH over OV overlay position for LINK element."
-  (if (not (display-graphic-p))
-      (prog1 nil
-        (message "Your Emacs does not support displaying images!"))
-    (if-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-epub path))
-              ((file-exists-p thumbnail-file))
-              (image (create-image thumbnail-file nil nil :width 300)))
-        (progn
-          (overlay-put ov 'display image)
-	      (overlay-put ov 'face    'default)
-	      (overlay-put ov 'keymap  org-link-beautify-keymap))
-      (org-link-beautify-iconify ov path link))))
+  (if-let* (( (display-graphic-p))
+            (thumbnail-file (org-link-beautify--generate-preview-for-file-epub path))
+            ((file-exists-p thumbnail-file))
+            (image (create-image thumbnail-file nil nil :width 300)))
+      (prog1 ov
+        (overlay-put ov 'display image)
+	    (overlay-put ov 'face    'default)
+	    (overlay-put ov 'keymap  org-link-beautify-keymap))
+    (org-link-beautify-iconify ov path link)))
 
 ;;; nov: link type
 
 (defun org-link-beautify-preview-nov (ov path link)
   "Preview nov: link of PATH over OV overlay position for LINK element."
-  (if (not (display-graphic-p))
-      (prog1 nil
-        (message "Your Emacs does not support displaying images!"))
-    (if-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-epub path))
-              ((file-exists-p thumbnail-file))
-              (image (create-image thumbnail-file nil nil :width 300)))
-        (progn
-          (overlay-put ov 'display image)
-	      (overlay-put ov 'face    'default)
-	      (overlay-put ov 'keymap  org-link-beautify-keymap))
-      (org-link-beautify-iconify ov path link))))
+  (if-let* (( (display-graphic-p))
+            (thumbnail-file (org-link-beautify--generate-preview-for-file-epub path))
+            ((file-exists-p thumbnail-file))
+            (image (create-image thumbnail-file nil nil :width 300)))
+      (prog1 ov
+        (overlay-put ov 'display image)
+	    (overlay-put ov 'face    'default)
+	    (overlay-put ov 'keymap  org-link-beautify-keymap))
+    (org-link-beautify-iconify ov path link)))
 
 ;;; video: link type
 
 (defun org-link-beautify-preview-video (ov path link)
   "Preview video: link of PATH over OV overlay position for LINK element."
-  (if (not (display-graphic-p))
-      (prog1 nil
-        (message "Your Emacs does not support displaying images!"))
-    (if-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-video path))
-              ((file-exists-p thumbnail-file))
-              (image (create-image thumbnail-file nil nil :width 400)))
-        (progn
-          (overlay-put ov 'display image)
-	      (overlay-put ov 'face    'default)
-	      (overlay-put ov 'keymap  org-link-beautify-keymap))
-      (org-link-beautify-iconify ov path link))))
+  (if-let* (( (display-graphic-p))
+            (thumbnail-file (org-link-beautify--generate-preview-for-file-video path))
+            ((file-exists-p thumbnail-file))
+            (image (create-image thumbnail-file nil nil :width 400)))
+      (prog1 ov
+        (overlay-put ov 'display image)
+	    (overlay-put ov 'face    'default)
+	    (overlay-put ov 'keymap  org-link-beautify-keymap))
+    (org-link-beautify-iconify ov path link)))
 
 ;;; audio: link type
 
 (defun org-link-beautify-preview-audio (ov path link)
   "Preview audio: link of PATH over OV overlay position for LINK element."
-  (if (not (display-graphic-p))
-      (prog1 nil
-        (message "Your Emacs does not support displaying images!"))
-    (if-let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-audio path))
-              ((file-exists-p thumbnail-file))
-              (image (create-image thumbnail-file nil nil :width (or org-link-beautify-audio-preview-size 300))))
-        (progn
-          (overlay-put ov 'display image)
-	      (overlay-put ov 'face    'default)
-	      (overlay-put ov 'keymap  org-link-beautify-keymap))
-      (org-link-beautify-iconify ov path link))))
+  (if-let* (( (display-graphic-p))
+            (thumbnail-file (org-link-beautify--generate-preview-for-file-audio path))
+            ((file-exists-p thumbnail-file))
+            (image (create-image thumbnail-file nil nil :width (or org-link-beautify-audio-preview-size 300))))
+      (prog1 ov
+        (overlay-put ov 'display image)
+	    (overlay-put ov 'face    'default)
+	    (overlay-put ov 'keymap  org-link-beautify-keymap))
+    (org-link-beautify-iconify ov path link)))
 
 ;;; org-contact: link type
 
@@ -1479,23 +1444,21 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
 
 (defun org-link-beautify-preview-org-contact (ov path link)
   "Preview org-contct: link of PATH over OV overlay position for LINK element."
-  (if (not (display-graphic-p))
-      (prog1 nil
-        (message "Your Emacs does not support displaying images!"))
-    (if-let* ((name path)
-              (image (org-link-beautify--generate-preview-for-org-contacts name)))
-        (progn
-          (overlay-put ov 'display image)
-          (overlay-put ov 'after-string (concat
-                                         (propertize "{" 'face '(:foreground "purple2"))
-                                         (propertize name 'face 'org-verbatim)
-                                         (propertize "}" 'face '(:foreground "purple2")))))
-      (if-let* ((text (org-element-property :title (org-contacts-search-contact name))))
-          (overlay-put ov 'after-string (concat
-                                         (propertize "{" 'face '(:foreground "purple2"))
-                                         (propertize text 'face 'org-verbatim)
-                                         (propertize "}" 'face '(:foreground "purple2"))))
-        (org-link-beautify-iconify ov path link)))))
+  (if-let* ((name path)
+            ( (display-graphic-p))
+            (image (org-link-beautify--generate-preview-for-org-contacts name)))
+      (prog1 ov
+        (overlay-put ov 'display image)
+        (overlay-put ov 'after-string (concat
+                                       (propertize "{" 'face '(:foreground "purple2"))
+                                       (propertize name 'face 'org-verbatim)
+                                       (propertize "}" 'face '(:foreground "purple2")))))
+    (if-let* ((text (org-element-property :title (org-contacts-search-contact name))))
+        (overlay-put ov 'after-string (concat
+                                       (propertize "{" 'face '(:foreground "purple2"))
+                                       (propertize text 'face 'org-verbatim)
+                                       (propertize "}" 'face '(:foreground "purple2"))))
+      (org-link-beautify-iconify ov path link))))
 
 ;;; org-bookmark: link type
 
@@ -1515,15 +1478,12 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
 
 (defun org-link-beautify-preview-org-bookmark (ov path link)
   "Preview org-bookmark: link of PATH over OV overlay position for LINK element."
-  (if (not (display-graphic-p))
-      (prog1 nil
-        (message "Your Emacs does not support displaying images!"))
-    (if-let* (((require 'org-bookmarks nil t))
-              (text (org-link-beautify--generate-preview-for-org-bookmarks path)))
-        (progn
-          (overlay-put ov 'after-string text)
-          (overlay-put ov 'face         'org-link))
-      (org-link-beautify-iconify ov path link))))
+  (if-let* (((require 'org-bookmarks nil t))
+            (text (org-link-beautify--generate-preview-for-org-bookmarks path)))
+      (prog1 ov
+        (overlay-put ov 'after-string text)
+        (overlay-put ov 'face         'org-link))
+    (org-link-beautify-iconify ov path link)))
 
 ;;; excalidraw: link type
 
@@ -1606,18 +1566,16 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
 
 (defun org-link-beautify-preview-url (ov path link)
   "Preview http[s]: URL link of PATH over OV overlay position for LINK element."
-  (if (not (display-graphic-p))
-      (prog1 nil
-        (message "Your Emacs does not support displaying images!"))
-    (if-let* ((org-link-beautify-url-preview-command)
-              (thumbnail-file (org-link-beautify--generate-preview-for-url ov path link))
-              ((file-exists-p thumbnail-file))
-              (image (create-image thumbnail-file nil nil :width (or org-link-beautify-url-preview-size 600))))
-        (progn
-          (overlay-put ov 'display image)
-	      (overlay-put ov 'face    'default)
-	      (overlay-put ov 'keymap  org-link-beautify-keymap))
-      (org-link-beautify-iconify ov path link))))
+  (if-let* (( (display-graphic-p))
+            (org-link-beautify-url-preview-command)
+            (thumbnail-file (org-link-beautify--generate-preview-for-url ov path link))
+            ((file-exists-p thumbnail-file))
+            (image (create-image thumbnail-file nil nil :width (or org-link-beautify-url-preview-size 600))))
+      (prog1 ov
+        (overlay-put ov 'display image)
+	    (overlay-put ov 'face    'default)
+	    (overlay-put ov 'keymap  org-link-beautify-keymap))
+    (org-link-beautify-iconify ov path link)))
 
 ;;; Insert Org link without description based on smart detecting file extension.
 
