@@ -26,7 +26,7 @@
 ;;
 ;; (use-package org-link-beautify
 ;;   :ensure t
-;;   :hook (org-mode . org-link-beautify-mode))
+;;   :init (org-link-beautify-mode t))
 
 ;;; Code:
 
@@ -1685,7 +1685,7 @@ This is for link image previewing to get around function `org-link-preview'
 (define-minor-mode org-link-beautify-mode
   "A minor mode to beautify Org Mode links with icons, and inline preview etc."
   :group 'org-link-beautify
-  :global nil
+  :global t
   :init-value nil
   :lighter " ߷"
   :keymap org-link-beautify-mode-map ; avoid to enable `org-link-beautify-keymap' globally everywhere.
