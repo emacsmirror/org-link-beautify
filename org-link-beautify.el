@@ -1589,7 +1589,7 @@ This is for link image previewing to get around function `org-link-preview'
               (member extension image-file-name-extensions) ; image files
               (member extension '("avi" "rmvb" "ogg" "ogv" "mp4" "mkv" "mov" "mpeg" "webm" "flv" "ts" "mpg")) ; video files
               (member extension '("mp3" "wav" "flac" "ogg" "m4a" "opus" "dat")) ; audio files
-              (member extension '("cbr" "cbz" "cb7" "cba" "cbt")) ; comic ebooks
+              (member extension '("cbr" "cbz" "cb7" "cba" "cbt")) ; comic files
               (member extension '("zip" "rar" "7z" "gz" "tar" "tar.gz" "tar.bz2" "xz" "zst")) ; archive files
               (member extension '("ass" "srt" "sub" "vtt" "ssf"))) ; subtitle files
       (setq description nil)))
