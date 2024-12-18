@@ -1583,21 +1583,23 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
 
 ;;; Insert Org link without description based on smart detecting file extension.
 
-(defun org-link-beautify-remove-description (orig-func link &optional description)
-  "Remove DESCRIPTION from LINK around ORIG-FUNC.
+(defun org-link-beautify-remove-description (orig-func link-raw &optional link-description)
+  "Advice function to remove LINK-DESCRIPTION from LINK-RAW around ORIG-FUNC.
 
 This is for link image previewing to get around function `org-link-preview'
 \(original named `org-toggle-inline-images'\) parameter `include-linked'."
-  (let ((extension (file-name-extension link)))
-    (when (or (member extension '("pdf" "epub" "mobi" "azw3" "fb2" "fb2.zip")) ; ebook files
+  (let ((link-type (when (string-match org-link-types-re link-raw) (match-string 1 link-raw)))
+        (extension (file-name-extension link-raw)))
+    (when (or (member extension '("pdf" "epub" "mobi" "azw3" "lit" "fb2" "fb2.zip")) ; ebook files
               (member extension image-file-name-extensions) ; image files
               (member extension '("avi" "rmvb" "ogg" "ogv" "mp4" "mkv" "mov" "mpeg" "webm" "flv" "ts" "mpg")) ; video files
               (member extension '("mp3" "wav" "flac" "ogg" "m4a" "opus" "dat")) ; audio files
               (member extension '("cbr" "cbz" "cb7" "cba" "cbt")) ; comic files
               (member extension '("zip" "rar" "7z" "gz" "tar" "tar.gz" "tar.bz2" "xz" "zst")) ; archive files
-              (member extension '("ass" "srt" "sub" "vtt" "ssf"))) ; subtitle files
-      (setq description nil)))
-  (funcall orig-func link description))
+              (member extension '("ass" "srt" "sub" "vtt" "ssf")) ; subtitle files
+              (member link-type '("pdf" "epub" "nov")))
+      (setq link-description nil)))
+  (funcall orig-func link-raw link-description))
 
 
 ;;; minor mode `org-link-beautify-mode'
