@@ -1191,7 +1191,7 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
   :safe #'listp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-audio-preview-size 300
+(defcustom org-link-beautify-audio-preview-size 600
   "The audio wave form image size."
   :type 'number
   :safe #'numberp
@@ -1206,7 +1206,7 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
            (audio-filename (file-name-nondirectory audio-file))
            (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path audio-file))
            (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base audio-file))))
-           (thumbnail-size (or org-link-beautify-audio-preview-size 200))
+           (thumbnail-size (or org-link-beautify-audio-preview-size 300))
            (proc-name (format "org-link-beautify audio preview - %s" audio-filename))
            (proc-buffer (format " *org-link-beautify audio preview - %s*" audio-filename))
            (proc (get-process proc-name)))
@@ -1369,7 +1369,9 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
   (if-let* (( (display-graphic-p))
             (thumbnail-file (org-link-beautify--generate-preview-for-file-pdf path))
             ((file-exists-p thumbnail-file))
-            (image (create-image thumbnail-file nil nil :width 300)))
+            ;; reference `org--create-inline-image'
+            (width (org-display-inline-image--width link))
+            (image (org--create-inline-image thumbnail-file width)))
       (prog1 ov
         (overlay-put ov 'display image)
 	    (overlay-put ov 'face    'default)
@@ -1383,7 +1385,8 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
   (if-let* (( (display-graphic-p))
             (thumbnail-file (org-link-beautify--generate-preview-for-file-epub path))
             ((file-exists-p thumbnail-file))
-            (image (create-image thumbnail-file nil nil :width 300)))
+            (width (org-display-inline-image--width link))
+            (image (org--create-inline-image thumbnail-file width)))
       (prog1 ov
         (overlay-put ov 'display image)
 	    (overlay-put ov 'face    'default)
@@ -1397,7 +1400,8 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
   (if-let* (( (display-graphic-p))
             (thumbnail-file (org-link-beautify--generate-preview-for-file-epub path))
             ((file-exists-p thumbnail-file))
-            (image (create-image thumbnail-file nil nil :width 300)))
+            (width (org-display-inline-image--width link))
+            (image (org--create-inline-image thumbnail-file width)))
       (prog1 ov
         (overlay-put ov 'display image)
 	    (overlay-put ov 'face    'default)
