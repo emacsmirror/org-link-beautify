@@ -160,9 +160,12 @@ The argument FILE must be the absolute path."
 
 (defun org-link-beautify--ensure-thumbnails-dir (thumbnails-dir)
   "Ensure THUMBNAILS-DIR exist, if not ,create it."
-  (when (file-exists-p (file-name-directory thumbnails-dir))
-    (unless (file-directory-p thumbnails-dir)
-      (make-directory thumbnails-dir))))
+  (if (file-exists-p (file-name-parent-directory thumbnails-dir))
+      (unless (file-directory-p thumbnails-dir)
+        (make-directory thumbnails-dir))
+    (if (yes-or-no-p "[org-link-beautify] thumbnails directory parent directory does not exist, create it?")
+        (make-directory thumbnails-dir t)
+      (warn "[org-link-beautify] thumbnails directory parent directory does not exist"))))
 
 (defun org-link-beautify--notify-generate-thumbnail-failed (source-file thumbnail-file)
   "Notify that generating THUMBNAIL-FILE for SOURCE-FILE failed."
