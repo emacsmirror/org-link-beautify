@@ -440,9 +440,7 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
                                                     'display (pcase align
                                                                ("center" `(space :align-to (- center (0.5 . ,image))))
                                                                ("right"  `(space :align-to (- right ,image)))))))
-          t))
-    (prog1 nil
-      (message "Your Emacs does not support displaying images!"))))
+          t))))
 
 ;;; Preview file: link type
 
@@ -517,9 +515,7 @@ This function will apply file type function based on file extension."
                                                     'display (pcase align
                                                                ("center" `(space :align-to (- center (0.5 . ,image))))
                                                                ("right"  `(space :align-to (- right ,image)))))))
-          t))
-    (prog1 nil
-      (message "Your Emacs does not support displaying images!"))))
+          t))))
 
 ;;; file: .pdf
 
