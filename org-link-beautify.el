@@ -657,7 +657,8 @@ EPUB preview."
   (when (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
     (let* ((file-path (match-string 1 path))
            (search-option (match-string 2 path))
-           (epub-page-number (or (match-string 2 path) 1))
+           ;; TODO: currently epub file page number thumbnail is not supported by `org-link-beautify-epub-preview-command'.
+           (epub-page-number (if search-option (string-to-number search-option) 1))
            (epub-file (expand-file-name (org-link-unescape file-path)))
            (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path epub-file))
            (thumbnail-file (expand-file-name
@@ -706,7 +707,8 @@ EPUB preview."
             (org-link-beautify-epub-preview-command)
             (thumbnail-file (org-link-beautify--generate-preview-for-file-epub path))
             ((file-exists-p thumbnail-file))
-            (image (create-image thumbnail-file nil nil :width 300)))
+            (width (org-display-inline-image--width link))
+            (image (org--create-inline-image thumbnail-file width)))
       (prog1 ov
         (overlay-put ov 'display image)
 	    (overlay-put ov 'face    'default)
@@ -1379,61 +1381,23 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
 
 ;;; epub: link type
 
-(defun org-link-beautify-preview-epub (ov path link)
-  "Preview epub: link of PATH over OV overlay position for LINK element."
-  (if-let* (( (display-graphic-p))
-            (thumbnail-file (org-link-beautify--generate-preview-for-file-epub path))
-            ((file-exists-p thumbnail-file))
-            (width (org-display-inline-image--width link))
-            (image (org--create-inline-image thumbnail-file width)))
-      (prog1 ov
-        (overlay-put ov 'display image)
-	    (overlay-put ov 'face    'default)
-	    (overlay-put ov 'keymap  org-link-beautify-keymap))
-    (org-link-beautify-iconify ov path link)))
+(defalias 'org-link-beautify-preview-epub 'org-link-beautify-preview-file-epub
+  "Preview epub: link of PATH over OV overlay position for LINK element.")
 
 ;;; nov: link type
 
-(defun org-link-beautify-preview-nov (ov path link)
-  "Preview nov: link of PATH over OV overlay position for LINK element."
-  (if-let* (( (display-graphic-p))
-            (thumbnail-file (org-link-beautify--generate-preview-for-file-epub path))
-            ((file-exists-p thumbnail-file))
-            (width (org-display-inline-image--width link))
-            (image (org--create-inline-image thumbnail-file width)))
-      (prog1 ov
-        (overlay-put ov 'display image)
-	    (overlay-put ov 'face    'default)
-	    (overlay-put ov 'keymap  org-link-beautify-keymap))
-    (org-link-beautify-iconify ov path link)))
+(defalias 'org-link-beautify-preview-nov 'org-link-beautify-preview-epub
+  "Preview nov: link of PATH over OV overlay position for LINK element.")
 
 ;;; video: link type
 
-(defun org-link-beautify-preview-video (ov path link)
-  "Preview video: link of PATH over OV overlay position for LINK element."
-  (if-let* (( (display-graphic-p))
-            (thumbnail-file (org-link-beautify--generate-preview-for-file-video path))
-            ((file-exists-p thumbnail-file))
-            (image (create-image thumbnail-file nil nil :width 400)))
-      (prog1 ov
-        (overlay-put ov 'display image)
-	    (overlay-put ov 'face    'default)
-	    (overlay-put ov 'keymap  org-link-beautify-keymap))
-    (org-link-beautify-iconify ov path link)))
+(defalias 'org-link-beautify-preview-video 'org-link-beautify-preview-file-video
+  "Preview video: link of PATH over OV overlay position for LINK element.")
 
 ;;; audio: link type
 
-(defun org-link-beautify-preview-audio (ov path link)
-  "Preview audio: link of PATH over OV overlay position for LINK element."
-  (if-let* (( (display-graphic-p))
-            (thumbnail-file (org-link-beautify--generate-preview-for-file-audio path))
-            ((file-exists-p thumbnail-file))
-            (image (create-image thumbnail-file nil nil :width (or org-link-beautify-audio-preview-size 300))))
-      (prog1 ov
-        (overlay-put ov 'display image)
-	    (overlay-put ov 'face    'default)
-	    (overlay-put ov 'keymap  org-link-beautify-keymap))
-    (org-link-beautify-iconify ov path link)))
+(defalias 'org-link-beautify-preview-audio 'org-link-beautify-preview-file-audio
+  "Preview audio: link of PATH over OV overlay position for LINK element.")
 
 ;;; org-contact: link type
 
@@ -1614,7 +1578,7 @@ This is for link image previewing to get around function `org-link-preview'
       ("docview" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-pdf))
       ("pdfview" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-pdf))
       ("epub" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-epub))
-      ("nov" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-epub))
+      ("nov" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-nov))
       ("video" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-video))
       ("audio" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-audio))
       ("org-contact" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-org-contact))
