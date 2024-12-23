@@ -499,8 +499,8 @@ This function will apply file type function based on file extension."
             (file (expand-file-name path))
             ;; ((string-match-p (image-file-name-regexp) file))
             ((file-exists-p file)))
-      (let* ((width (org-display-inline-image--width link))
-             (align (org-image--align link))
+      (let* ((align (org-image--align link))
+             (width (org-display-inline-image--width link))
              (image (org--create-inline-image file width)))
         (when image                     ; Add image to overlay
 	      ;; See bug#59902. We cannot rely on Emacs to update image if the file has changed.
@@ -619,7 +619,9 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
             (org-link-beautify-pdf-preview-command)
             (thumbnail-file (org-link-beautify--generate-preview-for-file-pdf path))
             ((file-exists-p thumbnail-file))
-            (image (create-image thumbnail-file nil nil :width org-link-beautify-pdf-preview-size)))
+            ;; NOTE: limite thumbnail image inline display width to hardcoded 300.
+            (width (or 300 (org-display-inline-image--width link) org-link-beautify-pdf-preview-size))
+            (image (org--create-inline-image thumbnail-file width)))
       (prog1 ov
         (overlay-put ov 'display image)
 	    (overlay-put ov 'face    'default)
@@ -707,7 +709,8 @@ EPUB preview."
             (org-link-beautify-epub-preview-command)
             (thumbnail-file (org-link-beautify--generate-preview-for-file-epub path))
             ((file-exists-p thumbnail-file))
-            (width (org-display-inline-image--width link))
+            ;; NOTE: limite thumbnail image inline display width to hardcoded 300.
+            (width (or 300 (org-display-inline-image--width link) org-link-beautify-ebook-preview-size))
             (image (org--create-inline-image thumbnail-file width)))
       (prog1 ov
         (overlay-put ov 'display image)
@@ -779,7 +782,9 @@ You can install software `libmobi' to get command `mobitool'."
             (org-link-beautify-kindle-preview-command)
             (thumbnail-file (org-link-beautify--generate-preview-for-file-kindle path))
             ((file-exists-p thumbnail-file))
-            (image (create-image thumbnail-file nil nil :width (or org-link-beautify-kindle-preview-size 300))))
+            ;; NOTE: limite epub file thumbnail image inline display width to hardcoded 300.
+            (width (or 300 (org-display-inline-image--width link)))
+            (image (org--create-inline-image thumbnail-file width)))
       (prog1 ov
         (overlay-put ov 'display image)
 	    (overlay-put ov 'face    'default)
@@ -861,7 +866,9 @@ You can install software `libmobi' to get command `mobitool'."
             ( (display-graphic-p))
             (thumbnail-file (org-link-beautify--generate-preview-for-file-fictionbook2 path))
             ((file-exists-p thumbnail-file))
-            (image (create-image thumbnail-file nil nil :width (or org-link-beautify-fictionbook2-preview-size 300))))
+            ;; NOTE: limite thumbnail image inline display width to hardcoded 300.
+            (width (or 300 (org-display-inline-image--width link)))
+            (image (org--create-inline-image thumbnail-file width)))
       (prog1 ov
         (overlay-put ov 'display image)
 	    (overlay-put ov 'face    'default)
