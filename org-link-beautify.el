@@ -897,6 +897,12 @@ You can install software `libmobi' to get command `mobitool'."
   :safe #'listp
   :group 'org-link-beautify)
 
+(defcustom org-link-beautify-source-code-preview-max-lines 30
+  "The maximum lines number of file for previewing."
+  :type 'number
+  :safe #'numberp
+  :group 'org-link-beautify)
+
 (defun org-link-beautify--preview-source-code-file (file)
   "Return first 10 lines of FILE."
   (with-temp-buffer
@@ -934,7 +940,10 @@ You can install software `libmobi' to get command `mobitool'."
            (proc-buffer (format " *org-link-beautify code preview - %s*" source-code-file))
            (proc (get-process proc-name)))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
-      (unless (file-exists-p thumbnail-file)
+      (unless (and (file-exists-p thumbnail-file)
+                   ;; limit to maximum 30 lines of file.
+                   (> (string-to-number (shell-command-to-string (format "cat %s | wc -l" source-code-file)))
+                      org-link-beautify-source-code-preview-max-lines))
         (unless proc
           (pcase (file-name-nondirectory org-link-beautify-source-code-preview-command)
             ("silicon"
