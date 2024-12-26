@@ -294,6 +294,7 @@ The argument FILE must be the absolute path."
                       (nerd-icons-icon-for-dir path)))
       ("http" (nerd-icons-icon-for-url (concat type ":" path)))
       ("https" (nerd-icons-icon-for-url (concat type ":" path)))
+      ("ftp" (nerd-icons-icon-for-url (concat type ":" path)))
       ;; Org mode internal link types
       ("custom-id" (nerd-icons-mdicon "nf-md-text_box_search_outline" :face 'nerd-icons-blue))
       ("id" (nerd-icons-mdicon "nf-md-text_search" :face 'nerd-icons-blue))
@@ -319,7 +320,7 @@ The argument FILE must be the absolute path."
       ("orgit" (nerd-icons-faicon "nf-fa-git" :face 'nerd-icons-red))
       ("orgit-rev" (nerd-icons-devicon "nf-dev-git_commit" :face 'nerd-icons-silver))
       ("orgit-log" (nerd-icons-octicon "nf-oct-diff" :face 'nerd-icons-silver))
-      ("pdf" (nerd-icons-icon-for-file "file.pdf"))
+      ("pdf" (nerd-icons-faicon "nf-fa-file_pdf" :face 'nerd-icons-red))
       ("epub" (nerd-icons-mdicon "nf-md-book_open_page_variant_outline" :face 'nerd-icons-blue-alt))
       ("nov" (nerd-icons-icon-for-file "file.epub")) ; for Emacs package "nov.el" link type `nov:'
       ("grep" (nerd-icons-mdicon "nf-md-selection_search" :face 'nerd-icons-green))
@@ -336,9 +337,9 @@ The argument FILE must be the absolute path."
       ("org-contact" (nerd-icons-mdicon "nf-md-contacts_outline" :face 'nerd-icons-purple-alt))
       ("org-bookmark" (nerd-icons-mdicon "nf-md-bookmark_check_outline" :face 'nerd-icons-blue-alt))
       ("org-ql-search" (nerd-icons-mdicon "nf-md-text_box_search_outline" :face 'nerd-icons-blue-alt))
+      ;; org-media-note link types
       ("video" (nerd-icons-faicon "nf-fa-file_video_o" :face 'nerd-icons-blue))
       ("audio" (nerd-icons-faicon "nf-fa-file_audio_o" :face 'nerd-icons-blue))
-      ;; org-media-note link types
       ("videocite" (nerd-icons-faicon "nf-fa-file_video_o" :face 'nerd-icons-blue-alt))
       ("audiocite" (nerd-icons-faicon "nf-fa-file_audio_o" :face 'nerd-icons-blue-alt))
       ("javascript" (nerd-icons-mdicon "nf-md-language_javascript" :face 'nerd-icons-yellow))
@@ -1590,21 +1591,78 @@ This is for link image previewing to get around function `org-link-preview'
     (pcase link-type
       ("file" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-file)) ; `org-link-preview-file',
       ("attachment" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-attachment)) ; `org-attach-preview-file'
+      ("docview" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-pdf)) ; extension `doc-view'
+      ("pdfview" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-pdf)) ; extension `pdf-tools'
       ("pdf" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-pdf))
-      ("docview" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-pdf))
-      ("pdfview" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-pdf))
       ("epub" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-epub))
-      ("nov" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-nov))
+      ("nov" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-nov)) ; extension `nov'
       ("video" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-video))
       ("audio" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-audio))
-      ("org-contact" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-org-contact))
-      ("org-bookmark" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-org-bookmark))
-      ("excalidraw" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-excalidraw))
       ("geo" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-geography))
-      ("git" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git))
       ("http" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-url))
       ("https" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-url))
+      ("ftp" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-url))
+
+      ;; Org mode internal link types
+      ("custom-id" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("id" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("coderef" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("elisp" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("eshell" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("shell" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("man" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("woman" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("info" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("help" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("shortdoc" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      
+      ;; Org mode external link types
+      ("grep" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("occur" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("mailto" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("news" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("rss" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("elfeed" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; extension `elfeed'
+      ("wikipedia" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("irc" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("wechat" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("magnet" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("git" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git))
+      ("eww" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; EWW
+      ("chrome" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("edge" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
       ("mu4e" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("web-browser" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git))
+      
+      ;; org-ref link types
+      ("cite" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("ref" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("doi" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("bibtex" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("bibliography" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      
+      ;; org-mode extensions link types
+      ("org-ql-search" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; extension `org-ql'
+      ("org-contact" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-org-contact)) ; extension `org-contacts'
+      ("org-bookmark" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-org-bookmark)) ; extension `org-bookmarks'
+      ("orgit-rev" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git)) ; extension `orgit'
+      ("orgit-log" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git)) ; extension `orgit'
+      ("orgit" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git))     ; extension `orgit'
+      ("excalidraw" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-excalidraw)) ; extension `org-excalidraw'
+      
+      ;; org-media-note link types
+      ("video" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-video)) ; `org-media-note'
+      ("audio" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-audio)) ; `org-media-note'
+      ("videocite" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-video)) ; `org-media-note'
+      ("audiocite" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-audio)) ; `org-media-note'
+      
+      ;; other link types
+      ("eaf" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; extension `emacs-application-framework'
+      ("javascript" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; Org mode inline source code link
+      ("js" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; Org mode inline source code link
+      ("vscode" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; Visual Studio Code
+      ("macappstores" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; Mac App Store
+      ("fuzzy" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; org-mode internal raw link type
       (_ (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))))
   ;; remove link description
   (advice-add 'org-link-make-string :around #'org-link-beautify-remove-description))
