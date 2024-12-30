@@ -1570,14 +1570,25 @@ This is for link image previewing to get around function `org-link-preview'
 \(original named `org-toggle-inline-images'\) parameter `include-linked'."
   (let ((link-type (when (string-match org-link-types-re link-raw) (match-string 1 link-raw)))
         (extension (file-name-extension link-raw)))
-    (when (or (member extension '("pdf" "epub" "mobi" "azw3" "lit" "fb2" "fb2.zip")) ; ebook files
-              (member extension image-file-name-extensions) ; image files
+    (when (or (member extension image-file-name-extensions) ; image files
+              (member extension '("pdf" "epub" "mobi" "azw3" "lit" "fb2" "fb2.zip")) ; ebook files
               (member extension '("avi" "rmvb" "ogg" "ogv" "mp4" "mkv" "mov" "mpeg" "webm" "flv" "ts" "mpg")) ; video files
               (member extension '("mp3" "wav" "flac" "ogg" "m4a" "opus" "dat")) ; audio files
               (member extension '("cbr" "cbz" "cb7" "cba" "cbt")) ; comic files
               (member extension '("zip" "rar" "7z" "gz" "tar" "tar.gz" "tar.bz2" "xz" "zst")) ; archive files
               (member extension '("ass" "srt" "sub" "vtt" "ssf")) ; subtitle files
-              (member link-type '("pdf" "epub" "nov")))
+              (member link-type '("info" "help" "shortdoc" "man" "woman" "id" "custom-id" "coderef"))
+              (member link-type '("elisp" "shell" "js" "javascript" "grep" "occur" "git"))
+              (member link-type '("mailto" "rss" "news" "wikipedia" "irc" "magnet" "wechat" "mu4e" "web-browser" "eww" "chrome" "edge"))
+              (member link-type '("org-ql-search" "org-contact" "org-bookmark" "orgit" "orgit-rev" "orgit-log"))
+              ;; Emacs package special link types
+              ;; NOTE: "epub" "nov" page-number thumbnail generating not supported.
+              (member link-type '("pdf" "pdfview" "docview")) ; "epub" "nov"
+              (member link-type '("video" "videocite" "audio" "audiocite" "excalidraw"))
+              ;; speail meaning link types
+              (member link-type '("geo"))
+              ;; special application link types
+              (member link-type '("vscode" "macappstores")))
       (setq link-description nil)))
   (funcall orig-func link-raw link-description))
 
@@ -1596,8 +1607,6 @@ This is for link image previewing to get around function `org-link-preview'
       ("pdf" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-pdf))
       ("epub" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-epub))
       ("nov" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-nov)) ; extension `nov'
-      ("video" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-video))
-      ("audio" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-audio))
       ("geo" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-geography))
       ("http" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-url))
       ("https" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-url))
