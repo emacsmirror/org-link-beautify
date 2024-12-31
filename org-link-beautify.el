@@ -345,7 +345,7 @@ The argument FILE must be the absolute path."
       ("javascript" (nerd-icons-mdicon "nf-md-language_javascript" :face 'nerd-icons-yellow))
       ("js" (nerd-icons-mdicon "nf-md-language_javascript" :face 'nerd-icons-yellow))
       ("vscode" (nerd-icons-mdicon "nf-md-microsoft_visual_studio_code" :face 'nerd-icons-blue-alt)) ; Visual Studio Code
-      ("macappstores" (nerd-icons-mdicon "nf-md-apple" :face 'nerd-icons-silver)) ; Mac App Store
+      ("macappstore" (nerd-icons-mdicon "nf-md-apple" :face 'nerd-icons-blue)) ; Mac App Store
       
       ("fuzzy"
        ;; Org internal [[reference][reference]] -> NOT supported by:
@@ -1588,7 +1588,7 @@ This is for link image previewing to get around function `org-link-preview'
               ;; speail meaning link types
               (member link-type '("geo"))
               ;; special application link types
-              (member link-type '("vscode" "macappstores")))
+              (member link-type '("vscode" "macappstore")))
       (setq link-description nil)))
   (funcall orig-func link-raw link-description))
 
@@ -1670,7 +1670,7 @@ This is for link image previewing to get around function `org-link-preview'
       ("javascript" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; Org mode inline source code link
       ("js" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; Org mode inline source code link
       ("vscode" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; Visual Studio Code
-      ("macappstores" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; Mac App Store
+      ("macappstore" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; Mac App Store
       ("fuzzy" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; org-mode internal raw link type
       (_ (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))))
   ;; remove link description
