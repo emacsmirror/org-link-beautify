@@ -1133,11 +1133,20 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
         (unless proc
           (pcase (file-name-nondirectory org-link-beautify-video-preview-command)
             ("ffmpeg"
-             ;; $ ffmpeg -i video.mp4 -ss 00:01:00.000 -vframes 1 -vcodec png -an -f rawvideo -s 119x64 out.png
-             (start-process
-              proc-name proc-buffer
-              "ffmpeg" "-i" video-file "-ss" "00:01:00.000" "-vframes" "1"
-              "-vcodec" "png" "-an" "-f" "rawvideo" "-s" (number-to-string thumbnail-size) thumbnail-file))
+             ;; $ ffmpeg -i video.mp4 -ss 00:00:00.001 -vframes 1 -vcodec png -an -f rawvideo -s 119x64 out.png
+             (let ((thumbnail-width thumbnail-size)
+                   (thumbnail-height 300))
+               (start-process
+                proc-name proc-buffer
+                "ffmpeg"
+                "-i" video-file
+                "-ss" "00:00:00.001"
+                "-vframes" "1"
+                "-vcodec" "png"
+                "-an"
+                "-f" "rawvideo"
+                "-s" (format "%sx%s" thumbnail-width thumbnail-height)
+                thumbnail-file)))
             ("qlmanage"
              (let ((qlmanage-thumbnail-file (concat thumbnails-dir (file-name-nondirectory video-file) ".png")))
                (unless (file-exists-p qlmanage-thumbnail-file)
