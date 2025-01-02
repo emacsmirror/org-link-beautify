@@ -419,12 +419,12 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
       ;; return the thumbnail file as result.
       thumbnail-file)))
 
-(defun org-link-beautify-preview-thumbnail (thumbnail-file)
-  "Display THUMBNAIL-FILE with overlay."
+(defun org-link-beautify-preview-thumbnail (ov path link)
+  "Display thumbnail on overlay OV from PATH at element LINK."
   (if-let* (( (display-graphic-p))
-            (file (expand-file-name path))
-            ;; ((string-match-p (image-file-name-regexp) file))
-            ((file-exists-p file)))
+            (thumbnail-file (expand-file-name path))
+            ;; ((string-match-p (image-file-name-regexp) thumbnail-file))
+            ((file-exists-p thumbnail-file)))
       (let* ((width (or (org-display-inline-image--width link) 300))
              (align (org-image--align link))
              (image (org--create-inline-image thumbnail-file width)))
@@ -476,7 +476,7 @@ This function will apply file type function based on file extension."
       (org-link-beautify-preview-file-source-code ov path link))
      (t (let ((thumbnail-file (org-link-beautify-thumbnailer path)))
           (if (file-exists-p thumbnail-file)
-              (org-link-beautify-preview-thumbnail thumbnail-file)
+              (org-link-beautify-preview-thumbnail ov path link)
             (org-link-beautify-iconify ov path link)))))))
 
 (defun org-link-beautify-preview-attachment (ov path link)
