@@ -888,11 +888,12 @@ You can install software `libmobi' to get command `mobitool'."
   :group 'org-link-beautify)
 
 (defcustom org-link-beautify-source-code-preview-list
-  '("org" "txt" "markdown" "md"
+  '(; "org" "txt" "markdown" "md"
     "lisp" "scm" "clj" "cljs"
     "py" "rb" "pl"
     "c" "cpp" "h" "hpp" "cs" "java"
-    "r" "jl")
+    "js" "css"
+    "R" "jl")
   "A list of link types supports source code file preview below the link."
   :type 'list
   :safe #'listp
