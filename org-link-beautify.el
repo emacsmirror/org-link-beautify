@@ -1103,7 +1103,7 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
   :group 'org-link-beautify)
 
 (defcustom org-link-beautify-video-preview-list
-  '("mp4" "webm" "mkv" "mov" "mpeg" "ogg" "ogv" "rmvb" "rm" "m4v" "flv")
+  '("mp4" "webm" "mkv" "mov" "mpeg" "ogg" "ogv" "rmvb" "rm" "avi" "m4v" "flv")
   "A list of video file types be supported with thumbnails."
   :type 'list
   :safe #'listp
