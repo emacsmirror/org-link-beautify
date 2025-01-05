@@ -1502,9 +1502,24 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
 ;;; http[s]: url link type
 
 (defcustom org-link-beautify-url-preview-command
-  (cond
-   ((executable-find "webkit2png") "webkit2png")
-   ((executable-find "monolith") "monolith"))
+  (cl-case system-type
+    (darwin
+     (cond
+      ;; Google Chrome headless screenshot
+      ((file-exists-p "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
+       "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
+      ;; webkit2png
+      ((executable-find "webkit2png") "webkit2png")
+      ;; monolith
+      ((executable-find "monolith") "monolith")))
+    (gnu/linux
+     (cond
+      ;; Google Chrome headless screenshot
+      ((executable-find "chrome") (executable-find "google-chrome"))
+      ;; webkit2png
+      ((executable-find "webkit2png") "webkit2png")
+      ;; monolith
+      ((executable-find "monolith") "monolith"))))
   "Find available URL web page screenshot archive command."
   :type 'string
   :safe #'stringp
@@ -1533,7 +1548,15 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
                 (file-exists-p html-archive-file))
       (when org-link-beautify-url-preview-command
         (unless proc
-          (pcase (file-name-nondirectory org-link-beautify-url-preview-command)
+          (pcase org-link-beautify-url-preview-command
+            ((or "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" "google-chrome")
+             ;; $ google-chrome --headless --screenshot=screenshot.png "https://www.chromestatus.com/"
+             (start-process
+              proc-name proc-buffer
+              org-link-beautify-url-preview-command
+              "--headless"
+              (format "--screenshot=%s" thumbnail-file)
+              url))
             ("webkit2png"
              (make-process
               :name proc-name
