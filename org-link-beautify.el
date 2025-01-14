@@ -1612,7 +1612,7 @@ This is for link image previewing to get around function `org-link-preview'
               (member extension '("ass" "srt" "sub" "vtt" "ssf")) ; subtitle files
               (member link-type '("info" "help" "shortdoc" "man" "woman" "id" "custom-id" "coderef"))
               (member link-type '("elisp" "shell" "js" "javascript" "grep" "occur" "git"))
-              (member link-type '("mailto" "rss" "news" "wikipedia" "irc" "magnet" "wechat" "mu4e" "web-browser" "eww" "chrome" "edge"))
+              (member link-type '("mailto" "rss" "news" "wikipedia" "irc" "magnet" "wechat" "web-browser" "eww" "chrome" "edge"))
               (member link-type '("org-ql-search" "org-contact" "org-bookmark" "orgit" "orgit-rev" "orgit-log"))
               ;; Emacs package special link types
               ;; NOTE: "epub" "nov" page-number thumbnail generating not supported.
