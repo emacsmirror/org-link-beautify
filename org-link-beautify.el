@@ -35,6 +35,7 @@
 (require 'org-element-ast)
 (require 'cl-lib)
 (require 'color)
+(require 'faces)
 (require 'image)
 (require 'nerd-icons)
 (require 'qrencode)
@@ -374,9 +375,17 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
               (icon (org-link-beautify--return-icon ov path link)))
     (overlay-put ov
                  'display (concat
-                           (propertize "[" 'face `(:inherit nil :underline nil :foreground ,(color-lighten-name (face-foreground 'shadow) 2)))
+                           (propertize "[" 'face `( :inherit nil
+                                                    :underline nil
+                                                    :foreground ,(if (face-foreground 'shadow)
+                                                                     (color-lighten-name (face-foreground 'shadow) 2)
+                                                                   "gray40")))
                            (propertize description 'face (org-link-beautify--return-warning-face ov path link))
-                           (propertize "]" 'face `(:inherit nil :underline nil :foreground ,(color-lighten-name (face-foreground 'shadow) 2)))))
+                           (propertize "]" 'face `( :inherit nil
+                                                    :underline nil
+                                                    :foreground ,(if (face-foreground 'shadow)
+                                                                     (color-lighten-name (face-foreground 'shadow) 2)
+                                                                   "gray40")))))
     (overlay-put ov
                  'after-string (concat
                                 (propertize "[" 'face '(:inherit nil :underline nil :foreground "orange"))
