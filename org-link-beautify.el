@@ -483,10 +483,7 @@ This function will apply file type function based on file extension."
       (org-link-beautify-preview-file-archive ov path link))
      ((member extension org-link-beautify-source-code-preview-list)
       (org-link-beautify-preview-file-source-code ov path link))
-     (t (let ((thumbnail-file (org-link-beautify-thumbnailer path)))
-          (if (file-exists-p thumbnail-file)
-              (org-link-beautify-preview-thumbnail ov path link)
-            (org-link-beautify-iconify ov path link)))))))
+     (t (org-link-beautify-iconify ov path link)))))
 
 (defun org-link-beautify-preview-attachment (ov path link)
   "Preview attachment file of PATH over OV overlay position for LINK element.
