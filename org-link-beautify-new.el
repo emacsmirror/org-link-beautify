@@ -1,4 +1,4 @@
-;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
+;;; org-link-beautify-new.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "29.1") (org "9.7.14") (nerd-icons "0.0.1") (qrencode "1.3"))
@@ -1744,6 +1744,6 @@ This is for link image previewing to get around function `org-link-preview'
 
 
 
-(provide 'org-link-beautify)
+(provide 'org-link-beautify-new)
 
-;;; org-link-beautify.el ends here
+;;; org-link-beautify-new.el ends here

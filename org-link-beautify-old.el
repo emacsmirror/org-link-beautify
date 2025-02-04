@@ -1,4 +1,4 @@
-;;; org-link-beautify.el --- Beautify Org Links -*- lexical-binding: t; -*-
+;;; org-link-beautify-old.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Requires: ((emacs "29.1") (nerd-icons "0.0.1") (fb2-reader "0.1.1") (qrencode "1.2"))
@@ -1613,6 +1613,6 @@ Package `dwim-shell-command' is missing, please install it")))))
 
 
 
-(provide 'org-link-beautify)
+(provide 'org-link-beautify-old)
 
-;;; org-link-beautify.el ends here
+;;; org-link-beautify-old.el ends here
