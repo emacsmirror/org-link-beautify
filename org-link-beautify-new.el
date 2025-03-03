@@ -128,7 +128,7 @@ The argument FILE must be the absolute path."
                  (string-equal (org-element-property :type element) "file"))
             (let ((file-path (expand-file-name (org-element-property :path element))))
               (org-link-beautify--copy-file-to-clipboard file-path))
-          (message "[org-link-beautify] No action executed on link."))))))
+          (message "[org-link-beautify] No action executed on link"))))))
 
 (define-key org-link-beautify-keymap (kbd "M-w") #'org-link-beautify-action-copy-file)
 
@@ -168,9 +168,9 @@ The argument FILE must be the absolute path."
         (make-directory thumbnails-dir t)
       (warn "[org-link-beautify] thumbnails directory parent directory does not exist"))))
 
-(defun org-link-beautify--notify-generate-thumbnail-failed (source-file thumbnail-file)
+(defun org-link-beautify--notify-generate-thumbnail-failed (source-file &optional _thumbnail-file)
   "Notify that generating THUMBNAIL-FILE for SOURCE-FILE failed."
-  (message "[org-link-beautify] For file %s.\nCreate thumbnail %s failed." source-file thumbnail-file))
+  (message "[org-link-beautify] Failed to generate thumbnail for file %s" source-file))
 
 (defun org-link-beautify--display-content-block (lines-list)
   "Display LINES-LIST string as a block with beautified frame border."
@@ -860,7 +860,7 @@ You can install software `libmobi' to get command `mobitool'."
       (unless (file-exists-p thumbnail-file)
         (let ((cover-image (org-link-beautify-fictionbook2--extract-cover fictionbook2-file)))
           (if (eq cover-image 'no-cover)
-              (message "[org-link-beautify] FictionBook2 preview failed to extract cover image.")
+              (message "[org-link-beautify] FictionBook2 preview failed to extract cover image")
             (org-link-beautify-fictionbook2--save-cover cover-image thumbnail-file))))
       (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
         (org-link-beautify--notify-generate-thumbnail-failed fictionbook2-file thumbnail-file))
@@ -1163,9 +1163,7 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
                        (proc-filter (lambda (proc output)
                                       ;; * No thumbnail created for [FILE PATH]
                                       (when (string-match "\\* No thumbnail created for.*" output)
-                                        (message
-                                         "[org-link-beautify] video preview FAILED on macOS QuickLook generating thumbnail for %s"
-                                         video-filename)))))
+                                        (message "[org-link-beautify] video preview FAILED on macOS QuickLook generating thumbnail for video %s" video-filename)))))
                    (set-process-filter proc proc-filter)))
                ;; then rename [file.extension.png] to [file.png]
                (when (file-exists-p qlmanage-thumbnail-file)
