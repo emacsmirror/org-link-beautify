@@ -770,7 +770,6 @@ You can install software `libmobi' to get command `mobitool'."
            ;; mobitool dumped cover image thumbnail filename can't be specified in command-line argument.
            (let ((mobitool-cover-file (concat thumbnails-dir (file-name-base kindle-file) "_cover.jpg")))
              (unless (file-exists-p mobitool-cover-file)
-               (message "[org-link-beautify] preview kindle ebook file %s" kindle-file)
                (start-process
                 proc-name proc-buffer
                 "mobitool" "-c" "-o" thumbnails-dir kindle-file))
