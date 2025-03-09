@@ -114,7 +114,7 @@ def extract_cover(cover_path):
     if cover_path:
         cover = epub.open(cover_path)
         im = Image.open(BytesIO(cover.read()))
-        im.thumbnail((size, size), Image.LANCZOS)
+        im.thumbnail((size, size), Image.Resampling.LANCZOS)
         if im.mode == "CMYK":
             im = im.convert("RGB")
         im.save(output_file, "PNG")
