@@ -1,149 +1,174 @@
 #!/usr/bin/env python3
 
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# Author: Mariano Simone (http://marianosimone.com)
-# Version: 1.0
-# Name: epub-thumbnailer
-# Description: An implementation of a cover thumbnailer for epub files
-# Installation: pip3 install Pillow
+# Installation requirements:
+# $ pip3 install Pillow
 
 # This script is from "epub-thumbnailer" project command script.
 
-import os
-import re
 from io import BytesIO
+from pathlib import Path
+from typing import Optional, List, Callable
+from urllib.request import urlopen
 import sys
-from xml.dom import minidom
-
-try:
-    from urllib.request import urlopen # Python 3
-except ImportError:
-    from urllib import urlopen # Python 2
-
 import zipfile
-try:
-    from PIL import Image # Python 3
-except ImportError:
-    import Image # Python 2
+import xml.etree.ElementTree as ET
 
-img_ext_regex = re.compile(r'^.*\.(jpg|jpeg|png)$', flags=re.IGNORECASE)
-cover_regex = re.compile(r'.*cover.*\.(jpg|jpeg|png)', flags=re.IGNORECASE)
+from PIL import Image
 
-def get_cover_from_manifest(epub):
-    rootfile_path, rootfile_root = _get_rootfile_root(epub)
+class EpubCoverExtractor:
+    """Extract and resize cover images from EPUB files."""
+    
+    def __init__(self, input_path: str, output_path: Path, size: int):
+        self.input_path = input_path
+        self.output_path = output_path
+        self.size = size
+        self.epub: Optional[zipfile.ZipFile] = None
+    
+    def load_epub(self) -> None:
+        """Load EPUB file from path or URL."""
+        if Path(self.input_path).is_file():
+            file_data = Path(self.input_path).read_bytes()
+        else:
+            file_data = urlopen(self.input_path).read()
+        self.epub = zipfile.ZipFile(BytesIO(file_data), "r")
 
-    # find possible cover in meta
-    cover_id = None
-    for meta in rootfile_root.getElementsByTagName("meta"):
-        if meta.getAttribute("name") == "cover":
-            cover_id = meta.getAttribute("content")
-            break
+    def get_cover_from_manifest(self) -> Optional[str]:
+        """Extract cover path from EPUB manifest."""
+        if not self.epub:
+            return None
+            
+        try:
+            container = self.epub.read("META-INF/container.xml")
+            container_tree = ET.fromstring(container)
+            rootfile = container_tree.find(".//{urn:oasis:names:tc:opendocument:xmlns:container}rootfile")
+            if rootfile is None or (rootfile_path := rootfile.get("full-path")) is None:
+                return None
+            
+            content = self.epub.read(rootfile_path)
+            content_tree = ET.fromstring(content)
+            
+            # Find cover image reference in manifest
+            images = []
+            for item in content_tree.findall(".//{http://www.idpf.org/2007/opf}item"):
+                if item.get("id", "").lower().startswith("cover"):
+                    return item.get("href")
+                if item.get("media-type", "").startswith("image/"):
+                    images.append(item.get("href"))
+                    
+            return images[0] if images else None
+            
+        except Exception:
+            return None
 
-    # find the manifest element
-    manifest = rootfile_root.getElementsByTagName("manifest")[0]
-    for item in manifest.getElementsByTagName("item"):
-        item_id = item.getAttribute("id")
-        item_properties = item.getAttribute("properties")
-        item_href = item.getAttribute("href")
-        item_href_is_image = img_ext_regex.match(item_href.lower())
-        item_id_might_be_cover = item_id == cover_id or ('cover' in item_id and item_href_is_image)
-        item_properties_might_be_cover = item_properties == cover_id or ('cover' in item_properties and item_href_is_image)
-        if item_id_might_be_cover or item_properties_might_be_cover:
-            return os.path.join(os.path.dirname(rootfile_path), item_href)
+    def get_cover_by_guide(self) -> Optional[str]:
+        """Extract cover path from EPUB guide."""
+        if not self.epub:
+            return None
+            
+        try:
+            container = self.epub.read("META-INF/container.xml")
+            container_tree = ET.fromstring(container)
+            rootfile = container_tree.find(".//{urn:oasis:names:tc:opendocument:xmlns:container}rootfile")
+            if rootfile is None or (rootfile_path := rootfile.get("full-path")) is None:
+                return None
+                
+            content = self.epub.read(rootfile_path)
+            content_tree = ET.fromstring(content)
+            
+            # Check guide reference
+            guide_ref = content_tree.find(".//{http://www.idpf.org/2007/opf}reference[@type='cover']")
+            if guide_ref is not None:
+                return guide_ref.get("href")
+                
+        except Exception:
+            return None
+        
+        return None
 
-    return None
+    def get_cover_by_filename(self) -> Optional[str]:
+        """Find cover image by common filename patterns."""
+        if not self.epub:
+            return None
+            
+        cover_patterns = [
+            "cover.jpg", "cover.jpeg", "cover.png",
+            "Cover.jpg", "Cover.jpeg", "Cover.png"
+        ]
+        
+        images = []
+        for filename in self.epub.namelist():
+            if any(pattern in filename for pattern in cover_patterns):
+                images.append(self.epub.getinfo(filename))
+                
+        return max(images, key=lambda f: f.file_size).filename if images else None
 
-def get_cover_by_guide(epub):
-    rootfile_path, rootfile_root = _get_rootfile_root(epub)
+    def extract_and_save_cover(self, cover_path: str) -> bool:
+        """Extract, resize and save cover image."""
+        if not cover_path or not self.epub:
+            return False
+            
+        try:
+            cover_data = self.epub.read(cover_path)
+            image = Image.open(BytesIO(cover_data))
+            image.thumbnail((self.size, self.size), Image.Resampling.LANCZOS)
+            
+            if image.mode == "CMYK":
+                image = image.convert("RGB")
+                
+            image.save(self.output_path, "PNG")
+            return True
+            
+        except Exception as e:
+            print(f"Error saving cover: {e}", file=sys.stderr)
+            return False
 
-    for ref in rootfile_root.getElementsByTagName("reference"):
-        if ref.getAttribute("type") == "cover":
-            cover_href = ref.getAttribute("href")
-            cover_file_path = os.path.join(os.path.dirname(rootfile_path), cover_href)
+    def extract(self) -> bool:
+        """Try all strategies to extract cover image."""
+        self.load_epub()
+        
+        strategies: List[Callable] = [
+            self.get_cover_from_manifest,
+            self.get_cover_by_guide, 
+            self.get_cover_by_filename
+        ]
+        
+        for strategy in strategies:
+            try:
+                if cover_path := strategy():
+                    if self.extract_and_save_cover(cover_path):
+                        return True
+            except Exception as e:
+                print(f"Error with {strategy.__name__}: {e}", file=sys.stderr)
+                
+        return False
 
-            # is html
-            cover_file = epub.open(cover_file_path)
-            cover_dom = minidom.parseString(cover_file.read())
-            imgs = cover_dom.getElementsByTagName("img")
-            if imgs:
-                img = imgs[0]
-                img_path = img.getAttribute("src")
-                return os.path.relpath(os.path.join(os.path.dirname(cover_file_path), img_path))
-    return None
-
-def _get_rootfile_root(epub):
-    # open the main container
-    container = epub.open("META-INF/container.xml")
-    container_root = minidom.parseString(container.read())
-
-    # locate the rootfile
-    elem = container_root.getElementsByTagName("rootfile")[0]
-    rootfile_path = elem.getAttribute("full-path")
-
-    # open the rootfile
-    rootfile = epub.open(rootfile_path)
-    return rootfile_path, minidom.parseString(rootfile.read())
-
-def get_cover_by_filename(epub):
-    no_matching_images = []
-    for fileinfo in epub.filelist:
-        if cover_regex.match(fileinfo.filename):
-            return fileinfo.filename
-        if img_ext_regex.match(fileinfo.filename):
-            no_matching_images.append(fileinfo)
-    return _choose_best_image(no_matching_images)
-
-def _choose_best_image(images):
-    if images:
-        return max(images, key=lambda f: f.file_size)
-    return None
-
-def extract_cover(cover_path):
-    if cover_path:
-        cover = epub.open(cover_path)
-        im = Image.open(BytesIO(cover.read()))
-        im.thumbnail((size, size), Image.Resampling.LANCZOS)
-        if im.mode == "CMYK":
-            im = im.convert("RGB")
-        im.save(output_file, "PNG")
-        return True
-    return False
-
-# Which file are we working with?
-input_file = sys.argv[1]
-# Where do does the file have to be saved?
-output_file = sys.argv[2]
-# Required size?
-size = int(sys.argv[3])
-
-# An epub is just a zip
-if os.path.isfile(input_file):
-    file_url = open(input_file, "rb")
-else:
-    file_url = urlopen(input_file)
-
-epub = zipfile.ZipFile(BytesIO(file_url.read()), "r")
-
-extraction_strategies = [get_cover_from_manifest, get_cover_by_guide, get_cover_by_filename]
-
-for strategy in extraction_strategies:
+def parse_args() -> tuple:
+    """Parse command line arguments."""
+    if len(sys.argv) != 4:
+        print("Usage: thumbnailer-epub.py <input> <output> <size>", file=sys.stderr)
+        sys.exit(1)
+        
+    input_path = sys.argv[1]
+    output_path = Path(sys.argv[2])
+    
     try:
-        cover_path = strategy(epub)
-        if extract_cover(cover_path):
-            exit(0)
-    except Exception as ex:
-        print("Error getting cover using %s: " % strategy.__name__, ex)
+        size = int(sys.argv[3])
+        if size <= 0:
+            raise ValueError("Size must be positive")
+    except ValueError as e:
+        print(f"Invalid size: {e}", file=sys.stderr)
+        sys.exit(1)
+        
+    return input_path, output_path, size
 
-exit(1)
+def main() -> None:
+    """Main entry point."""
+    input_path, output_path, size = parse_args()
+    
+    extractor = EpubCoverExtractor(input_path, output_path, size)
+    if not extractor.extract():
+        print("Failed to extract cover image", file=sys.stderr)
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
