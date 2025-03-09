@@ -176,17 +176,27 @@ The argument FILE must be the absolute path."
   "Display LINES-LIST string as a block with beautified frame border."
   (format
    "
-┏━§ ✂ %s
+┌%s┐
 %s
-┗━§ ✂ %s
+└%s┘
 \n"
-   (make-string (- fill-column 6) ?━)
+   (make-string (- fill-column 2) ?─)
    (mapconcat
     (lambda (line)
-      (concat "┃" line))
+      (concat "│ "
+              line
+              (make-string
+               (if (< (length line) (- fill-column 4))
+                   (- fill-column (length line) 4)
+                 0)
+               ?\ )
+              " │"))
     lines-list
     "\n")
-   (make-string (- fill-column 6) ?━)))
+   (make-string (- fill-column 2) ?─)))
+
+;; TEST:
+;; (org-link-beautify--display-content-block '("hello world" "hello, name" "hello"))
 
 (defun org-link-beautify--display-org-content (org-content)
   "Display ORG-CONTENT in `org-mode'."
