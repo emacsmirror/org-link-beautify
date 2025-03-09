@@ -253,6 +253,30 @@ The argument FILE must be the absolute path."
 ;;  "console.log(\"hello, world!\");"
 ;;  "console.log(1 + 3);")
 
+;;; Invoke external Ruby script file or code.
+
+(defcustom org-link-beautify-ruby-interpreter (executable-find "ruby")
+  "Specify Ruby interpreter to run ruby scripts or code."
+  :type 'string
+  :safe #'stringp)
+
+(defun org-link-beautify--ruby-script-run (ruby-script-file)
+  "Run RUBY-SCRIPT-FILE through shell command."
+  (shell-command-to-string
+   (format "%s %s" org-link-beautify-ruby-interpreter ruby-script-file)))
+
+(defun org-link-beautify--ruby-command-to-string (&rest code-lines)
+  "Run Ruby CODE-LINES through shell command."
+  (shell-command-to-string
+   (concat "ruby -e "
+           ;; solve double quote character issue.
+           "\"" (string-replace "\"" "\\\"" (string-join code-lines "\n")) "\"")))
+
+;; TEST:
+;; (org-link-beautify--ruby-command-to-string
+;;  "puts 'hello, world'"
+;;  (format "puts 'hello, %s'" user-full-name))
+
 ;;; Iconify for link
 
 (defun org-link-beautify--get-link-description (position)
