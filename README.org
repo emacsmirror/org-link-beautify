@@ -125,11 +125,16 @@ The new implementation is based on Org mode new ~org-link-parameter~ =:preview= 
   sudo pacman -S --noconfirm gnome-epub-thumbnailer
   #+end_src
 
-- EPUB file cover image preview with "=scripts/thumbnailer-epub.py=" script requires Python =PIL/Pillow=.
+- EPUB file cover image preview with script "=scripts/thumbnailer-epub.py=" requires Python =PIL/Pillow=.
 
   #+begin_src shell
-  python  -m pip install Pillow
   python3 -m pip install Pillow
+  #+end_src
+
+- video file thumbnailer preview with script "=scripts/thumbnailer-video.py="
+
+  #+begin_src sh
+  python3 -m pip install ffmpeg-python
   #+end_src
 
 ** MELPA

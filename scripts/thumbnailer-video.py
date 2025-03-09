@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+## Installation requirements:
+# pip install ffmpeg-python
+
 ## command usage:
 ## Generate thumbnail from first frame
 # python thumbnailer-video.py input.mp4 thumbnail.jpg
