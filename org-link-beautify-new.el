@@ -136,7 +136,7 @@ The argument FILE must be the absolute path."
   "Action of displaying QR code for Org link at point in new buffer in ARGS."
   (interactive)
   (when (derived-mode-p 'org-mode)
-    (if-let ((url (org-element-property-raw :raw-link (org-element-context))))
+    (if-let* ((url (org-element-property-raw :raw-link (org-element-context))))
         (if (require 'qrencode nil t)
             (qrencode-string url)
           (package-install 'qrencode)
@@ -311,10 +311,10 @@ The argument FILE must be the absolute path."
   (let ((type (org-element-property :type link))
         (extension (file-name-extension path)))
     (pcase type
-      ("file" (if-let (extension (file-name-extension path))
+      ("file" (if-let* (extension (file-name-extension path))
                   (nerd-icons-icon-for-extension extension)
                 (nerd-icons-icon-for-dir path)))
-      ("attachment" (if-let (extension (file-name-extension path))
+      ("attachment" (if-let* (extension (file-name-extension path))
                         (nerd-icons-icon-for-extension extension)
                       (nerd-icons-icon-for-dir path)))
       ("http" (nerd-icons-icon-for-url (concat type ":" path)))
@@ -596,7 +596,7 @@ This function will apply file type function based on file extension."
                                   ((string-match "\\([[:digit:]]+\\)\\+\\+\\(.*\\)" search-option) ; "40++0.00"
                                    (match-string 1 search-option))
                                   (t search-option)))
-                              (if-let ((search-option (match-string 2 path)))
+                              (if-let* ((search-option (match-string 2 path)))
                                   (string-to-number
                                    (cond
                                     ((string-prefix-p "P" search-option) ; "P42"
