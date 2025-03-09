@@ -683,10 +683,27 @@ EPUB preview."
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
         (pcase (file-name-nondirectory org-link-beautify-epub-preview-command)
-          ("epub-thumbnailer"           ; for macOS "epub-thumbnailer" command
+          ("epub-thumbnailer"           ; for macOS command "epub-thumbnailer"
            (make-process
             :name proc-name
             :command (list org-link-beautify-epub-preview-command
+                           epub-file
+                           thumbnail-file
+                           (number-to-string thumbnail-size))
+            :buffer proc-buffer
+            :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
+            :sentinel (lambda (proc event)
+                        (if org-link-beautify-enable-debug-p
+                            (message (format "> proc: %s\n> event: %s" proc event))
+                          ;; (when (string= event "finished\n")
+                          ;;   (kill-buffer (process-buffer proc))
+                          ;;   (kill-process proc))
+                          ))))
+          ("thumbnailer-epub.py"           ; for script "scripts/epub-thumbnailer.py"
+           (make-process
+            :name proc-name
+            :command (list org-link-beautify-python-interpreter
+                           org-link-beautify-epub-preview-command
                            epub-file
                            thumbnail-file
                            (number-to-string thumbnail-size))

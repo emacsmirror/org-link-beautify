@@ -125,11 +125,7 @@ The new implementation is based on Org mode new ~org-link-parameter~ =:preview= 
   sudo pacman -S --noconfirm gnome-epub-thumbnailer
   #+end_src
 
-  For macOS:
-
-  https://github.com/marianosimone/epub-thumbnailer
-
-- EPUB file cover image preview with "=scripts/thumbnailer-ebook.py=" script requires Python =PIL/Pillow=.
+- EPUB file cover image preview with "=scripts/thumbnailer-epub.py=" script requires Python =PIL/Pillow=.
 
   #+begin_src shell
   python  -m pip install Pillow
