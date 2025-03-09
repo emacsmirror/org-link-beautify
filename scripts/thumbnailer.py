@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 
+## installation requirements:
+# pip install thumbnail
+
+## usage:
+# python thumbnailer.py input_file thumbnail.jpg [thumbnail_size]
+
 import sys
 from thumbnail import generate_thumbnail
 
