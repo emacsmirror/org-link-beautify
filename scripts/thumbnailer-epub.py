@@ -19,6 +19,8 @@
 # Description: An implementation of a cover thumbnailer for epub files
 # Installation: see README
 
+# This script is from "epub-thumbnailer" project command script.
+
 import os
 import re
 from io import BytesIO
@@ -26,15 +28,15 @@ import sys
 from xml.dom import minidom
 
 try:
-    from urllib.request import urlopen
-except ImportError:  # Python 2
-    from urllib import urlopen
+    from urllib.request import urlopen # Python 3
+except ImportError:
+    from urllib import urlopen # Python 2
 
 import zipfile
 try:
-    from PIL import Image
+    from PIL import Image # Python 3
 except ImportError:
-    import Image
+    import Image # Python 2
 
 img_ext_regex = re.compile(r'^.*\.(jpg|jpeg|png)$', flags=re.IGNORECASE)
 cover_regex = re.compile(r'.*cover.*\.(jpg|jpeg|png)', flags=re.IGNORECASE)
