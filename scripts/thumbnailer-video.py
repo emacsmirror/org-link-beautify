@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 
 ## Installation requirements:
-# pip install ffmpeg-python
+# $ pip install ffmpeg-python
 
 ## command usage:
 ## Generate thumbnail from first frame
-# python thumbnailer-video.py input.mp4 thumbnail.jpg
+# $ python thumbnailer-video.py input.mp4 thumbnail.jpg
 #
 ## Generate thumbnail at 30 seconds
-# python thumbnailer-video.py input.mp4 thumbnail.jpg -t 30
+# $ python thumbnailer-video.py input.mp4 thumbnail.jpg -t 30
 #
 ## Generate thumbnail with specific width (preserving aspect ratio)
-# python thumbnailer-video.py input.mp4 thumbnail.jpg -w 640
+# $ python thumbnailer-video.py input.mp4 thumbnail.jpg -w 640
 
 import argparse
 import ffmpeg
