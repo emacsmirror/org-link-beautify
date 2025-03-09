@@ -17,7 +17,7 @@
 # Version: 1.0
 # Name: epub-thumbnailer
 # Description: An implementation of a cover thumbnailer for epub files
-# Installation: see README
+# Installation: pip3 install Pillow
 
 # This script is from "epub-thumbnailer" project command script.
 
