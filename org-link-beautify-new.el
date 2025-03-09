@@ -640,7 +640,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
 ;;; file: .epub
 
 (defcustom org-link-beautify-epub-preview-command
-  (let ((script (expand-file-name "scripts/thumbnailer-ebook.py" (file-name-directory (or load-file-name (buffer-file-name))))))
+  (let ((script (expand-file-name "scripts/thumbnailer-epub.py" (file-name-directory (or load-file-name (buffer-file-name))))))
     (cl-case system-type
       (gnu/linux (if (executable-find "gnome-epub-thumbnailer")
                      "gnome-epub-thumbnailer"
