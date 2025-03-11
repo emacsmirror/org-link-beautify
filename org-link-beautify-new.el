@@ -434,7 +434,7 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
                                   (propertize "]" 'face '(:inherit nil :underline nil :foreground "orange"))))
       (overlay-put ov 'keymap  org-link-beautify-keymap))))
 
-;;; General thumbnail generator.
+;;; General thumbnail generator with Python "thumbnail.py" library.
 
 (defvar org-link-beautify-thumbnailer-script
   (expand-file-name "scripts/thumbnailer.py" (file-name-directory (or load-file-name (buffer-file-name))))
@@ -448,51 +448,57 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
            (search-option (match-string 2 path))
            (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path input-file))
            (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base input-file))))
-           (thumbnail-size 600)
-           (proc-name (format "org-link-beautify thumbnailer - %s" (file-name-base input-file)))
-           (proc-buffer (format " *org-link-beautify thumbnailer - %s*" (file-name-base input-file)))
-           (proc (get-process proc-name)))
-      (make-process
-       :name proc-name
-       :command (list org-link-beautify-thumbnailer-script
-                      input-file
-                      thumbnail-file
-                      (number-to-string thumbnail-size))
-       :buffer proc-buffer
-       :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
-       :sentinel (lambda (proc event)
-                   (when org-link-beautify-enable-debug-p
-                     (message (format "> proc: %s\n> event: %s" proc event)))
-                   ;; (when (string= event "finished\n")
-                   ;;   (kill-buffer (process-buffer proc))
-                   ;;   (kill-process proc))
-                   ))
+           (thumbnail-size 600))
+      (unless (file-exists-p thumbnail-file)
+        (let* ((proc-name (format "org-link-beautify thumbnailer - %s" (file-name-base input-file)))
+               (proc-buffer (format " *org-link-beautify thumbnailer - %s*" (file-name-base input-file)))
+               (proc (get-process proc-name)))
+          (make-process
+           :name proc-name
+           :command (list org-link-beautify-thumbnailer-script
+                          input-file
+                          thumbnail-file
+                          (number-to-string thumbnail-size))
+           :buffer proc-buffer
+           :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
+           :sentinel (lambda (proc event)
+                       (when org-link-beautify-enable-debug-p
+                         ;; DEBUG:
+                         (message (format "> proc: %s\n> event: %s" proc event)))
+                       ;; (when (string= event "finished\n")
+                       ;;   (kill-buffer (process-buffer proc))
+                       ;;   (kill-process proc))
+                       ))))
       ;; return the thumbnail file as result.
       thumbnail-file)))
 
+(defun org-link-beautify-overlay-display-image (ov image &optional align)
+  "Display IMAGE object created by `create-image' on overlay OV in ALIGN position."
+  ;; See bug#59902. We cannot rely on Emacs to update image if the file has changed.
+  (image-flush image) ; refresh image in cache if file changed.
+  (overlay-put ov 'display image)
+  (overlay-put ov 'face    'default)
+  (overlay-put ov 'keymap  org-link-beautify-keymap)
+  (when align
+    (overlay-put ov
+                 'before-string (propertize " "
+                                            'face 'default
+                                            'display (pcase align
+                                                       ("center" `(space :align-to (- center (0.5 . ,image))))
+                                                       ("right"  `(space :align-to (- right ,image))))))))
+
 (defun org-link-beautify-preview-thumbnail (ov path link)
   "Display thumbnail on overlay OV from PATH at element LINK."
-  (if-let* (( (display-graphic-p))
-            (thumbnail-file (expand-file-name path))
+  (if-let* ((_ (display-graphic-p))
+            (thumbnail-file (org-link-beautify-thumbnailer path))
             ;; ((string-match-p (image-file-name-regexp) thumbnail-file))
-            ((file-exists-p thumbnail-file)))
+            ( (file-exists-p thumbnail-file)))
       (let* ((width (or (org-display-inline-image--width link) 300))
              (align (org-image--align link))
              (image (org--create-inline-image thumbnail-file width)))
-        (when image                     ; Add image to overlay
-	      ;; See bug#59902. We cannot rely on Emacs to update image if the file has changed.
-          (image-flush image) ; refresh image in cache if file changed.
-	      (overlay-put ov 'display image)
-	      (overlay-put ov 'face    'default)
-	      (overlay-put ov 'keymap  org-link-beautify-keymap)
-          (when align
-            (overlay-put ov
-                         'before-string (propertize " "
-                                                    'face 'default
-                                                    'display (pcase align
-                                                               ("center" `(space :align-to (- center (0.5 . ,image))))
-                                                               ("right"  `(space :align-to (- right ,image)))))))
-          t))))
+        (if image                     ; Add image to overlay
+	        (org-link-beautify-overlay-display-image ov image align)
+          nil))))
 
 ;;; Preview file: link type
 
@@ -525,7 +531,8 @@ This function will apply file type function based on file extension."
       (org-link-beautify-preview-file-archive ov path link))
      ((member extension org-link-beautify-source-code-preview-list)
       (org-link-beautify-preview-file-source-code ov path link))
-     (t (org-link-beautify-iconify ov path link)))))
+     (t (or (org-link-beautify-preview-thumbnail ov path link)
+            (org-link-beautify-iconify ov path link))))))
 
 (defun org-link-beautify-preview-attachment (ov path link)
   "Preview attachment file of PATH over OV overlay position for LINK element.
@@ -547,24 +554,14 @@ This function will apply file type function based on file extension."
   (if-let* (( (display-graphic-p))
             (file (expand-file-name path))
             ;; ((string-match-p (image-file-name-regexp) file))
-            ((file-exists-p file)))
+            ( (file-exists-p file)))
       (let* ((align (org-image--align link))
              (width (org-display-inline-image--width link))
              (image (org--create-inline-image file width)))
-        (when image                     ; Add image to overlay
-	      ;; See bug#59902. We cannot rely on Emacs to update image if the file has changed.
-          (image-flush image) ; refresh image in cache if file changed.
-	      (overlay-put ov 'display image)
-	      (overlay-put ov 'face    'default)
-	      (overlay-put ov 'keymap  org-link-beautify-keymap)
-          (when align
-            (overlay-put ov
-                         'before-string (propertize " "
-                                                    'face 'default
-                                                    'display (pcase align
-                                                               ("center" `(space :align-to (- center (0.5 . ,image))))
-                                                               ("right"  `(space :align-to (- right ,image)))))))
-          t))))
+        (if image                     ; Add image to overlay
+	        ;; See bug#59902. We cannot rely on Emacs to update image if the file has changed.
+            (org-link-beautify-overlay-display-image ov image align)
+          nil))))
 
 ;;; file: .pdf
 
@@ -672,9 +669,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
             (width (or 300 (org-display-inline-image--width link) org-link-beautify-pdf-preview-size))
             (image (org--create-inline-image thumbnail-file width)))
       (prog1 ov
-        (overlay-put ov 'display image)
-	    (overlay-put ov 'face    'default)
-	    (overlay-put ov 'keymap  org-link-beautify-keymap))
+        (org-link-beautify-overlay-display-image ov image))
     (org-link-beautify-iconify ov path link)))
 
 ;;; file: .epub
@@ -779,9 +774,7 @@ EPUB preview."
             (width (or 300 (org-display-inline-image--width link) org-link-beautify-ebook-preview-size))
             (image (org--create-inline-image thumbnail-file width)))
       (prog1 ov
-        (overlay-put ov 'display image)
-	    (overlay-put ov 'face    'default)
-	    (overlay-put ov 'keymap  org-link-beautify-keymap))
+        (org-link-beautify-overlay-display-image ov image))
     (org-link-beautify-iconify ov path link)))
 
 ;;; file: .mobi, .azw3
@@ -851,9 +844,7 @@ You can install software `libmobi' to get command `mobitool'."
             (width (or 300 (org-display-inline-image--width link)))
             (image (org--create-inline-image thumbnail-file width)))
       (prog1 ov
-        (overlay-put ov 'display image)
-	    (overlay-put ov 'face    'default)
-	    (overlay-put ov 'keymap  org-link-beautify-keymap))
+        (org-link-beautify-overlay-display-image ov image))
     (org-link-beautify-iconify ov path link)))
 
 ;;; FictionBook2 (.fb2, .fb2.zip) file cover preview
@@ -935,9 +926,7 @@ You can install software `libmobi' to get command `mobitool'."
             (width (or 300 (org-display-inline-image--width link)))
             (image (org--create-inline-image thumbnail-file width)))
       (prog1 ov
-        (overlay-put ov 'display image)
-	    (overlay-put ov 'face    'default)
-	    (overlay-put ov 'keymap  org-link-beautify-keymap))
+        (org-link-beautify-overlay-display-image ov image))
     (org-link-beautify-iconify ov path link)))
 
 ;;; Source Code File
@@ -1037,9 +1026,7 @@ You can install software `libmobi' to get command `mobitool'."
             ((file-exists-p thumbnail-file))
             (image (create-image thumbnail-file nil nil :width 800)))
       (prog1 ov
-        (overlay-put ov 'display image)
-	    (overlay-put ov 'face    'default)
-	    (overlay-put ov 'keymap  org-link-beautify-keymap))
+        (org-link-beautify-overlay-display-image ov image))
     (if-let* ((source-code (org-link-beautify--preview-source-code-file path)))
         (prog1 ov
           (overlay-put ov 'after-string source-code)
@@ -1139,9 +1126,7 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
             ((file-exists-p thumbnail-file))
             (image (create-image thumbnail-file nil nil :width (or org-link-beautify-comic-preview-size 300))))
       (prog1 ov
-        (overlay-put ov 'display image)
-	    (overlay-put ov 'face    'default)
-	    (overlay-put ov 'keymap  org-link-beautify-keymap))
+        (org-link-beautify-overlay-display-image ov image))
     (org-link-beautify-iconify ov path link)))
 
 ;;; file: [video]
@@ -1259,9 +1244,7 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
             ((file-exists-p thumbnail-file))
             (image (create-image thumbnail-file nil nil :width 400)))
       (prog1 ov
-        (overlay-put ov 'display image)
-	    (overlay-put ov 'face    'default)
-	    (overlay-put ov 'keymap  org-link-beautify-keymap))
+        (org-link-beautify-overlay-display-image ov image))
     (org-link-beautify-iconify ov path link)))
 
 ;;; file: [audio]
@@ -1337,9 +1320,7 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
             ((file-exists-p thumbnail-file))
             (image (create-image thumbnail-file nil nil :width (or org-link-beautify-audio-preview-size 300))))
       (prog1 ov
-        (overlay-put ov 'display image)
-	    (overlay-put ov 'face    'default)
-	    (overlay-put ov 'keymap  org-link-beautify-keymap))
+        (org-link-beautify-overlay-display-image ov image))
     (org-link-beautify-iconify ov path link)))
 
 ;;; file: [subtitle]
@@ -1395,9 +1376,7 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
             ((file-exists-p thumbnail-file))
             (image (create-image thumbnail-file nil nil :width (or org-link-beautify-subtitle-preview-size 300))))
       (prog1 ov
-        (overlay-put ov 'display image)
-	    (overlay-put ov 'face    'default)
-	    (overlay-put ov 'keymap  org-link-beautify-keymap))
+        (org-link-beautify-overlay-display-image ov image))
     (if-let* ((text (org-link-beautify--generate-preview-for-file-subtitle path)))
         (prog1 ov
           (overlay-put ov 'after-string text)
@@ -1463,9 +1442,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
             (width (org-display-inline-image--width link))
             (image (org--create-inline-image thumbnail-file width)))
       (prog1 ov
-        (overlay-put ov 'display image)
-	    (overlay-put ov 'face    'default)
-	    (overlay-put ov 'keymap  org-link-beautify-keymap))
+        (org-link-beautify-overlay-display-image ov image))
     (org-link-beautify-iconify ov path link)))
 
 ;;; epub: link type
@@ -1651,9 +1628,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
             ((file-exists-p thumbnail-file))
             (image (create-image thumbnail-file nil nil :width (or org-link-beautify-url-preview-size 600))))
       (prog1 ov
-        (overlay-put ov 'display image)
-	    (overlay-put ov 'face    'default)
-	    (overlay-put ov 'keymap  org-link-beautify-keymap))
+        (org-link-beautify-overlay-display-image ov image))
     (org-link-beautify-iconify ov path link)))
 
 ;;; Insert Org link without description based on smart detecting file extension.
