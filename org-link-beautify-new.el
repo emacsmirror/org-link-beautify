@@ -184,12 +184,18 @@ The argument FILE must be the absolute path."
    (mapconcat
     (lambda (line)
       (concat "│ "
-              line
-              (make-string
-               (if (< (length line) (- fill-column 4))
-                   (- fill-column (length line) 4)
-                 0)
-               ?\ )
+              (let* ((line-length-max (- fill-column 4))
+                     (line-length (length line))
+                     (line-text (if (< line-length line-length-max)
+                                    line
+                                  (let ((ellipsis (truncate-string-ellipsis)))
+                                    (concat (truncate-string-to-width line (- line-length-max (length ellipsis))) ellipsis))))
+                     (spaces (make-string
+                              (if (< (length line-text) line-length-max)
+                                  (- line-length-max (length line-text))
+                                0)
+                              ?\ )))
+                (concat line-text spaces))
               " │"))
     lines-list
     "\n")
