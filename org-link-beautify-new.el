@@ -485,7 +485,8 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
                                             'face 'default
                                             'display (pcase align
                                                        ("center" `(space :align-to (- center (0.5 . ,image))))
-                                                       ("right"  `(space :align-to (- right ,image))))))))
+                                                       ("right"  `(space :align-to (- right ,image)))))))
+  t)
 
 (defun org-link-beautify-preview-thumbnail (ov path link)
   "Display thumbnail on overlay OV from PATH at element LINK."
