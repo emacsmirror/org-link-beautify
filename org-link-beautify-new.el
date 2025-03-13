@@ -416,22 +416,22 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
     (unless (overlay-get ov 'org-image-overlay)
       (overlay-put ov
                    'display (concat
-                             (propertize "[" 'face `( :inherit nil
-                                                      :underline nil
+                             (propertize "[" 'face `( :inherit 'default
+                                                      :underline t
                                                       :foreground ,(if (face-foreground 'shadow)
                                                                        (color-lighten-name (face-foreground 'shadow) 2)
                                                                      "gray40")))
                              (propertize description 'face (org-link-beautify--return-warning-face ov path link))
-                             (propertize "]" 'face `( :inherit nil
-                                                      :underline nil
+                             (propertize "]" 'face `( :inherit 'default
+                                                      :underline t
                                                       :foreground ,(if (face-foreground 'shadow)
                                                                        (color-lighten-name (face-foreground 'shadow) 2)
                                                                      "gray40")))))
       (overlay-put ov
                    'after-string (concat
-                                  (propertize "[" 'face '(:inherit nil :underline nil :foreground "orange"))
-                                  icon
-                                  (propertize "]" 'face '(:inherit nil :underline nil :foreground "orange"))))
+                                  (propertize "[" 'face '(:inherit 'default :foreground "orange"))
+                                  (propertize icon 'face '(:slant 'normal))
+                                  (propertize "]" 'face '(:inherit 'default :foreground "orange"))))
       (overlay-put ov 'keymap  org-link-beautify-keymap))))
 
 ;;; General thumbnail generator with Python "thumbnail.py" library.
