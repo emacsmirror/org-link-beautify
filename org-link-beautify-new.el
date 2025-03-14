@@ -1535,9 +1535,29 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
 
 ;;; git: link type
 
+(defcustom org-link-beautify-git-preview nil
+  "Whether enable git: link type preview."
+  :type 'boolean
+  :safe #'booleanp
+  :group 'org-link-beautify)
+
+(defun org-link-beautify--generate-preview-for-git (ov path link)
+  "Get the content on OV overlay of PATH at LINK element."
+  (when (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
+    (let* ((file-path (match-string 1 path))
+           (commit (match-string 2 path))
+           ;; TODO: use `vc-git-*' or `magit' API to get git commit blob content.
+           (commit-diff (vc-git-symbolic-commit commit))
+           (text (concat "\n" (org-link-beautify--display-content-block commit-diff))))
+      text)))
+
 (defun org-link-beautify-preview-git (ov path link)
   "Preview git: link of PATH over OV overlay position for LINK element."
-  (org-link-beautify-iconify ov path link))
+  (if org-link-beautify-git-preview
+      (when-let* ((text (org-link-beautify--generate-preview-for-git ov path link)))
+        (overlay-put ov 'after-string text)
+        (overlay-put ov 'face 'org-block))
+    (org-link-beautify-iconify ov path link)))
 
 ;;; http[s]: url link type
 
