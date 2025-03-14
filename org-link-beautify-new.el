@@ -112,7 +112,7 @@ The argument FILE must be the absolute path."
        (user-error "[org-link-beautify] Error: the command-line tool 'xclip-copyfile' is not installed!")))
     ;; TODO:
     (windows-nt ))
-  (message "Copied file [%s] to system clipboard." (string-truncate-left file (/ (window-width) 2))))
+  (message "Copied file [%s] to system clipboard" (string-truncate-left file (/ (window-width) 2))))
 
 (defun org-link-beautify-action-copy-file (&optional args)
   "Action of copying the Org link file at point with optional ARGS."
