@@ -416,17 +416,21 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
     (unless (overlay-get ov 'org-image-overlay)
       (overlay-put ov
                    'display (concat
-                             (propertize "[" 'face `( :inherit 'default
-                                                      :underline t
-                                                      :foreground ,(if (face-foreground 'shadow)
-                                                                       (color-lighten-name (face-foreground 'shadow) 2)
-                                                                     "gray40")))
-                             (propertize description 'face (org-link-beautify--return-warning-face ov path link))
-                             (propertize "]" 'face `( :inherit 'default
-                                                      :underline t
-                                                      :foreground ,(if (face-foreground 'shadow)
-                                                                       (color-lighten-name (face-foreground 'shadow) 2)
-                                                                     "gray40")))))
+                             (propertize "["
+                                         'face `( :inherit 'default
+                                                  :underline t
+                                                  :foreground ,(if (face-foreground 'shadow)
+                                                                   (color-lighten-name (face-foreground 'shadow) 2)
+                                                                 "gray40")))
+                             (propertize description
+                                         'face (org-link-beautify--return-warning-face ov path link)
+                                         'read-only t 'inhibit-isearch t 'intangible t)
+                             (propertize "]"
+                                         'face `( :inherit 'default
+                                                  :underline t
+                                                  :foreground ,(if (face-foreground 'shadow)
+                                                                   (color-lighten-name (face-foreground 'shadow) 2)
+                                                                 "gray40")))))
       (overlay-put ov
                    'after-string (concat
                                   (propertize "[" 'face '(:inherit 'default :foreground "orange"))
