@@ -1731,12 +1731,12 @@ This is for link image previewing to get around function `org-link-preview'
       ("irc" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
       ("wechat" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
       ("magnet" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("git" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git))
+      ;; ("git" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git))
       ("eww" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; EWW
       ("chrome" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
       ("edge" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
       ("mu4e" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("web-browser" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git))
+      ;; ("web-browser" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-browser))
       
       ;; org-ref link types
       ("cite" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
@@ -1749,9 +1749,9 @@ This is for link image previewing to get around function `org-link-preview'
       ("org-ql-search" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; extension `org-ql'
       ("org-contact" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-org-contact)) ; extension `org-contacts'
       ("org-bookmark" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-org-bookmark)) ; extension `org-bookmarks'
-      ("orgit-rev" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git)) ; extension `orgit'
-      ("orgit-log" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git)) ; extension `orgit'
-      ("orgit" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git))     ; extension `orgit'
+      ;; ("orgit-rev" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git)) ; extension `orgit'
+      ;; ("orgit-log" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git)) ; extension `orgit'
+      ;; ("orgit" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git))     ; extension `orgit'
       ("excalidraw" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-excalidraw)) ; extension `org-excalidraw'
       
       ;; org-media-note link types
