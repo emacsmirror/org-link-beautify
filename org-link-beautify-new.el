@@ -477,7 +477,8 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
       thumbnail-file)))
 
 (defun org-link-beautify-overlay-display-image (ov image &optional align)
-  "Display IMAGE object created by `create-image' on overlay OV in ALIGN position."
+  "Display IMAGE object on overlay OV in ALIGN position.
+The IMAGE object is created by `create-image' from `org--create-inline-image'."
   ;; See bug#59902. We cannot rely on Emacs to update image if the file has changed.
   (image-flush image) ; refresh image in cache if file changed.
   (overlay-put ov 'display image)
