@@ -95,6 +95,19 @@ Package `dwim-shell-command' is missing, please install it")))))
 
 (define-key org-link-beautify-keymap (kbd "M-o") #'org-link-beautify-action-goto-file-in-dired)
 
+;; ;; NOTE: It will override all link type handlers.
+;; (defun org-link-beautify-action-browse-url (&optional link-str)
+;;   "Visit the URL in LINK-STR with `browse-url'."
+;;   (interactive)
+;;   (let ((link-type (org-element-property :type (org-element-link-parser)))
+;;         (link-raw (or link-str (org-element-property :raw-link (org-element-link-parser)))))
+;;     (if (member link-type '("http" "https"))
+;;         (browse-url link-raw)
+;;       ;; `org-link-open-from-string'
+;;       (org-link-open link-raw))))
+;;
+;; (define-key org-link-beautify-keymap (kbd "C-o") #'org-link-beautify-action-browse-url)
+
 (defun org-link-beautify--copy-file-to-clipboard (file)
   "Copy the FILE on path to clipboard.
 The argument FILE must be the absolute path."
