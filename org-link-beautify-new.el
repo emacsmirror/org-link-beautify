@@ -436,7 +436,8 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
                                   (propertize "[" 'face '(:inherit 'default :foreground "orange"))
                                   (propertize icon 'face '(:slant 'normal))
                                   (propertize "]" 'face '(:inherit 'default :foreground "orange"))))
-      (overlay-put ov 'keymap  org-link-beautify-keymap))))
+      (overlay-put ov 'keymap  org-link-beautify-keymap))
+    t))
 
 ;;; General thumbnail generator with Python "thumbnail.py" library.
 
