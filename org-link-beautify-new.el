@@ -447,7 +447,8 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
       (overlay-put ov
                    'after-string (concat
                                   (propertize "[" 'face '(:inherit 'default :foreground "orange"))
-                                  (propertize icon 'face '(:slant 'normal))
+                                  icon
+                                  ;; (propertize icon 'face '(:slant 'normal))
                                   (propertize "]" 'face '(:inherit 'default :foreground "orange"))))
       (overlay-put ov 'keymap  org-link-beautify-keymap))
     t))
