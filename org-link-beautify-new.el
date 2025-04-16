@@ -1,10 +1,10 @@
 ;;; org-link-beautify-new.el --- Beautify Org Links -*- lexical-binding: t; -*-
 
 ;; Authors: stardiviner <numbchild@gmail.com>
-;; Package-Requires: ((emacs "29.1") (org "9.7.17") (nerd-icons "0.0.1") (qrencode "1.3"))
+;; Package-Requires: ((emacs "30.1") (org "9.7.17") (nerd-icons "0.0.1") (qrencode "1.3"))
 ;; Version: 2.0.0
 ;; Keywords: hypermedia
-;; homepage: https://repo.or.cz/org-link-beautify.git
+;; Homepage: https://repo.or.cz/org-link-beautify.git
 
 ;; org-link-beautify is free software; you can redistribute it and/or modify it
 ;; under the terms of the GNU General Public License as published by
