@@ -53,7 +53,7 @@
   :prefix "org-link-beautify-"
   :group 'org)
 
-(defcustom org-link-beautify-thumbnails-dir 'current-working-directory
+(defcustom olb/thumbnails-dir 'current-working-directory
   "The directory of generated thumbnails.
 
 By default option value with symbol 'current-working-directory the
@@ -64,20 +64,21 @@ set this option to 'user-home which represent to ~/.cache/thumbnails/."
   :safe #'symbolp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-enable-debug-p nil
+(defcustom olb/enable-debug-p nil
   "Whether enable org-link-beautify print debug info."
   :type 'boolean
-  :safe #'booleanp)
+  :safe #'booleanp
+  :group 'org-link-beautify)
 
 
 ;;; overlay keymap keybindings
 
-(defvar org-link-beautify-keymap
+(defvar olb/keymap
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map image-map) ; inherit `image-map' keybindings on preview thumbnail image.
     map))
 
-(defun org-link-beautify-action-goto-file-in-dired ()
+(defun olb/action-goto-file-in-dired ()
   "Action of opening Dired and goto the link file position."
   (interactive)
   (when (derived-mode-p 'org-mode)
@@ -93,10 +94,10 @@ set this option to 'user-home which represent to ~/.cache/thumbnails/."
         (user-error "Jumped to position of link file.
 Package `dwim-shell-command' is missing, please install it")))))
 
-(define-key org-link-beautify-keymap (kbd "M-o") #'org-link-beautify-action-goto-file-in-dired)
+(define-key olb/keymap (kbd "M-o") #'olb/action-goto-file-in-dired)
 
 ;; ;; NOTE: It will override all link type handlers.
-;; (defun org-link-beautify-action-browse-url (&optional link-str)
+;; (defun olb/action-browse-url (&optional link-str)
 ;;   "Visit the URL in LINK-STR with `browse-url'."
 ;;   (interactive)
 ;;   (let ((link-type (org-element-property :type (org-element-link-parser)))
@@ -106,9 +107,9 @@ Package `dwim-shell-command' is missing, please install it")))))
 ;;       ;; `org-link-open-from-string'
 ;;       (org-link-open link-raw))))
 ;;
-;; (define-key org-link-beautify-keymap (kbd "C-o") #'org-link-beautify-action-browse-url)
+;; (define-key olb/keymap (kbd "C-o") #'olb/action-browse-url)
 
-(defun org-link-beautify--copy-file-to-clipboard (file)
+(defun olb/-copy-file-to-clipboard (file)
   "Copy the FILE on path to clipboard.
 The argument FILE must be the absolute path."
   (cl-case system-type
@@ -127,7 +128,7 @@ The argument FILE must be the absolute path."
     (windows-nt ))
   (message "Copied file [%s] to system clipboard" (string-truncate-left file (/ (window-width) 2))))
 
-(defun org-link-beautify-action-copy-file (&optional args)
+(defun olb/action-copy-file (&optional args)
   "Action of copying the Org link file at point with optional ARGS."
   (interactive "P")
   (when (derived-mode-p 'org-mode)
@@ -140,12 +141,12 @@ The argument FILE must be the absolute path."
         (if (and (eq (car element) 'link)
                  (string-equal (org-element-property :type element) "file"))
             (let ((file-path (expand-file-name (org-element-property :path element))))
-              (org-link-beautify--copy-file-to-clipboard file-path))
+              (olb/-copy-file-to-clipboard file-path))
           (message "[org-link-beautify] No action executed on link"))))))
 
-(define-key org-link-beautify-keymap (kbd "M-w") #'org-link-beautify-action-copy-file)
+(define-key olb/keymap (kbd "M-w") #'olb/action-copy-file)
 
-(defun org-link-beautify-action-qrcode-for-url (&optional args)
+(defun olb/action-qrcode-for-url (&optional args)
   "Action of displaying QR code for Org link at point in new buffer in ARGS."
   (interactive)
   (when (derived-mode-p 'org-mode)
@@ -158,21 +159,21 @@ The argument FILE must be the absolute path."
           (org-fill-paragraph t t)
         (org-fill-paragraph)))))
 
-(define-key org-link-beautify-keymap (kbd "M-q") 'org-link-beautify-action-qrcode-for-url)
+(define-key olb/keymap (kbd "M-q") 'olb/action-qrcode-for-url)
 
 ;;; helper functions
 
-(defun org-link-beautify--get-thumbnails-dir-path (file)
+(defun olb/-get-thumbnails-dir-path (file)
   "Return the FILE thumbnail directory's path."
   (if file
-      (cl-case org-link-beautify-thumbnails-dir
+      (cl-case olb/thumbnails-dir
         (current-working-directory
          (concat (file-name-directory file) ".thumbnails/"))
         (user-home
          (expand-file-name "~/.cache/thumbnails/")))
     (user-error "[org-link-beautify] Error: the paramter `file' of function `org-link-beautify--get-thumbnails-dir-path' is nil")))
 
-(defun org-link-beautify--ensure-thumbnails-dir (thumbnails-dir)
+(defun olb/-ensure-thumbnails-dir (thumbnails-dir)
   "Ensure THUMBNAILS-DIR exist, if not ,create it."
   (if (file-exists-p (file-name-parent-directory thumbnails-dir))
       (unless (file-directory-p thumbnails-dir)
@@ -181,11 +182,11 @@ The argument FILE must be the absolute path."
         (make-directory thumbnails-dir t)
       (warn "[org-link-beautify] thumbnails directory parent directory does not exist"))))
 
-(defun org-link-beautify--notify-generate-thumbnail-failed (source-file &optional _thumbnail-file)
+(defun olb/-notify-generate-thumbnail-failed (source-file &optional _thumbnail-file)
   "Notify that generating THUMBNAIL-FILE for SOURCE-FILE failed."
   (message "[org-link-beautify] Failed to generate thumbnail for file %s" source-file))
 
-(defun org-link-beautify--display-content-block (lines-list)
+(defun olb/-display-content-block (lines-list)
   "Display LINES-LIST string as a block with beautified frame border."
   (format
    "
@@ -215,9 +216,9 @@ The argument FILE must be the absolute path."
    (make-string (- fill-column 2) ?─)))
 
 ;; TEST:
-;; (org-link-beautify--display-content-block '("hello world" "hello, name" "hello"))
+;; (olb/-display-content-block '("hello world" "hello, name" "hello"))
 
-(defun org-link-beautify--display-org-content (org-content)
+(defun olb/-display-org-content (org-content)
   "Display ORG-CONTENT in `org-mode'."
   (with-temp-buffer
     (let ((org-startup-with-link-previews nil))
@@ -233,17 +234,17 @@ The argument FILE must be the absolute path."
 
 ;;; Invoke external Python script file or code.
 
-(defcustom org-link-beautify-python-interpreter (executable-find "python3")
+(defcustom olb/python-interpreter (executable-find "python3")
   "Specify Python interpreter to run python scripts or code."
   :type 'string
   :safe #'stringp)
 
-(defun org-link-beautify--python-script-run (python-script-file)
+(defun olb/-python-script-run (python-script-file)
   "Run PYTHON-SCRIPT-FILE through shell command."
   (shell-command-to-string
-   (format "%s %s" org-link-beautify-python-interpreter python-script-file)))
+   (format "%s %s" olb/python-interpreter python-script-file)))
 
-(defun org-link-beautify--python-command-to-string (&rest code-lines)
+(defun olb/-python-command-to-string (&rest code-lines)
   "Run Python CODE-LINES through shell command."
   (shell-command-to-string
    (concat "python -c "
@@ -251,7 +252,7 @@ The argument FILE must be the absolute path."
            "\"" (string-replace "\"" "\\\"" (string-join code-lines "\n")) "\"")))
 
 ;; TEST:
-;; (org-link-beautify--python-command-to-string
+;; (olb/-python-command-to-string
 ;;  "import numpy as np"
 ;;  "print(np.arange(6))"
 ;;  "print(\"blah blah\")"
@@ -259,42 +260,42 @@ The argument FILE must be the absolute path."
 
 ;;; Invoke external JavaScript script file or code.
 
-(defcustom org-link-beautify-javascript-interpreter (executable-find "node")
+(defcustom olb/javascript-interpreter (executable-find "node")
   "Specify JavaScript interpreter to run JavaScript scripts or code."
   :type 'string
   :safe #'stringp)
 
-(defun org-link-beautify--javascript-script-run (javascript-script-file)
+(defun olb/-javascript-script-run (javascript-script-file)
   "Run JAVASCRIPT-SCRIPT-FILE through shell command."
   (shell-command-to-string
-   (format "%s %s" org-link-beautify-javascript-interpreter javascript-script-file)))
+   (format "%s %s" olb/javascript-interpreter javascript-script-file)))
 
-(defun org-link-beautify--javascript-command-to-string (&rest code-lines)
+(defun olb/-javascript-command-to-string (&rest code-lines)
   "Run JavaScript CODE-LINES through shell command."
   (shell-command-to-string
-   (concat org-link-beautify-javascript-interpreter
+   (concat olb/javascript-interpreter
            " --eval "
            ;; solve double quote character issue.
            "\"" (string-replace "\"" "\\\"" (string-join code-lines "\n")) "\"")))
 
 ;; TEST:
-;; (org-link-beautify--javascript-command-to-string
+;; (olb/-javascript-command-to-string
 ;;  "console.log(\"hello, world!\");"
 ;;  "console.log(1 + 3);")
 
 ;;; Invoke external Ruby script file or code.
 
-(defcustom org-link-beautify-ruby-interpreter (executable-find "ruby")
+(defcustom olb/ruby-interpreter (executable-find "ruby")
   "Specify Ruby interpreter to run ruby scripts or code."
   :type 'string
   :safe #'stringp)
 
-(defun org-link-beautify--ruby-script-run (ruby-script-file)
+(defun olb/-ruby-script-run (ruby-script-file)
   "Run RUBY-SCRIPT-FILE through shell command."
   (shell-command-to-string
-   (format "%s %s" org-link-beautify-ruby-interpreter ruby-script-file)))
+   (format "%s %s" olb/ruby-interpreter ruby-script-file)))
 
-(defun org-link-beautify--ruby-command-to-string (&rest code-lines)
+(defun olb/-ruby-command-to-string (&rest code-lines)
   "Run Ruby CODE-LINES through shell command."
   (shell-command-to-string
    (concat "ruby -e "
@@ -302,13 +303,13 @@ The argument FILE must be the absolute path."
            "\"" (string-replace "\"" "\\\"" (string-join code-lines "\n")) "\"")))
 
 ;; TEST:
-;; (org-link-beautify--ruby-command-to-string
+;; (olb/-ruby-command-to-string
 ;;  "puts 'hello, world'"
 ;;  (format "puts 'hello, %s'" user-full-name))
 
 ;;; Iconify for link
 
-(defun org-link-beautify--get-link-description (position)
+(defun olb/-get-link-description (position)
   "Get the link description at POSITION (fuzzy but faster version)."
   (save-excursion
     (goto-char position)
@@ -327,7 +328,7 @@ The argument FILE must be the absolute path."
           (goto-char position)
           (and (org-in-regexp org-link-bracket-re) (match-string 2)))))))
 
-(defun org-link-beautify--return-warning-face (ov path link)
+(defun olb/-return-warning-face (ov path link)
   "Return warning face if PATH does not exist on OV overlay at LINK element."
   (when (string-equal (org-element-property :type link) "file")
     (if (and (not (file-remote-p path))
@@ -335,7 +336,7 @@ The argument FILE must be the absolute path."
         'org-link
       'error)))
 
-(defun org-link-beautify--return-icon (ov path link)
+(defun olb/-return-icon (ov path link)
   "Return icon for PATH on OV overlay at LINK element."
   (let ((type (org-element-property :type link))
         (extension (file-name-extension path)))
@@ -420,12 +421,12 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
        ;; handle when returned link type is `nil'.
        (nerd-icons-mdicon "nf-md-progress_question" :face 'nerd-icons-lyellow)))))
 
-(defun org-link-beautify-iconify (ov path link)
+(defun olb/iconify (ov path link)
   "Iconify PATH over OV overlay position for LINK element."
   (when-let* ((begin (org-element-begin link))
               (end (org-element-end link))
-              (description (org-link-beautify--get-link-description begin))
-              (icon (org-link-beautify--return-icon ov path link)))
+              (description (olb/-get-link-description begin))
+              (icon (olb/-return-icon ov path link)))
     (unless (overlay-get ov 'org-image-overlay)
       (overlay-put ov
                    'display (concat
@@ -436,7 +437,7 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
                                                                    (color-lighten-name (face-foreground 'shadow) 2)
                                                                  "gray40")))
                              (propertize description
-                                         'face (org-link-beautify--return-warning-face ov path link)
+                                         'face (olb/-return-warning-face ov path link)
                                          'read-only t 'inhibit-isearch t 'intangible t)
                              (propertize "]"
                                          'face `( :inherit 'default
@@ -450,22 +451,22 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
                                   icon
                                   ;; (propertize icon 'face '(:slant 'normal))
                                   (propertize "]" 'face '(:inherit 'default :foreground "orange"))))
-      (overlay-put ov 'keymap  org-link-beautify-keymap))
+      (overlay-put ov 'keymap  olb/keymap))
     t))
 
 ;;; General thumbnail generator with Python "thumbnail.py" library.
 
-(defvar org-link-beautify-thumbnailer-script
+(defvar olb/thumbnailer-script
   (expand-file-name "scripts/thumbnailer.py" (file-name-directory (or load-file-name (buffer-file-name))))
   "The path of general thumbnailer script.")
 
-(defun org-link-beautify-thumbnailer (path)
+(defun olb/thumbnailer (path)
   "Generate thumbnail image for file of PATH over OV overlay position for LINK element."
   (when (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
     (let* ((file-path (match-string 1 path))
            (input-file (expand-file-name (org-link-unescape file-path)))
            (search-option (match-string 2 path))
-           (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path input-file))
+           (thumbnails-dir (olb/-get-thumbnails-dir-path input-file))
            (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base input-file))))
            (thumbnail-size 600))
       (unless (file-exists-p thumbnail-file)
@@ -474,14 +475,14 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
                (proc (get-process proc-name)))
           (make-process
            :name proc-name
-           :command (list org-link-beautify-thumbnailer-script
+           :command (list olb/thumbnailer-script
                           input-file
                           thumbnail-file
                           (number-to-string thumbnail-size))
            :buffer proc-buffer
            :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
            :sentinel (lambda (proc event)
-                       (when org-link-beautify-enable-debug-p
+                       (when olb/enable-debug-p
                          ;; DEBUG:
                          (message (format "> proc: %s\n> event: %s" proc event)))
                        ;; (when (string= event "finished\n")
@@ -491,7 +492,7 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
       ;; return the thumbnail file as result.
       thumbnail-file)))
 
-(defun org-link-beautify-overlay-display-image (ov image &optional align)
+(defun olb/overlay-display-image (ov image &optional align)
   "Display IMAGE object on overlay OV in ALIGN position.
 The IMAGE object is created by `create-image' from `org--create-inline-image'."
   ;; See bug#59902. We cannot rely on Emacs to update image if the file has changed.
@@ -499,7 +500,7 @@ The IMAGE object is created by `create-image' from `org--create-inline-image'."
   (image--set-property image :mask 'heuristic)
   (overlay-put ov 'display image)
   (overlay-put ov 'face    'default)
-  (overlay-put ov 'keymap  org-link-beautify-keymap)
+  (overlay-put ov 'keymap  olb/keymap)
   (when align
     (overlay-put ov
                  'before-string (propertize " "
@@ -509,69 +510,70 @@ The IMAGE object is created by `create-image' from `org--create-inline-image'."
                                                        ("right"  `(space :align-to (- right ,image)))))))
   t)
 
-(defun org-link-beautify-preview-thumbnail (ov path link)
+(defun olb/preview-thumbnail (ov path link)
   "Display thumbnail on overlay OV from PATH at element LINK."
   (if-let* ((_ (display-graphic-p))
-            (thumbnail-file (org-link-beautify-thumbnailer path))
+            (thumbnail-file (olb/thumbnailer path))
             ;; ((string-match-p (image-file-name-regexp) thumbnail-file))
             ( (file-exists-p thumbnail-file)))
       (let* ((width (or (org-display-inline-image--width link) 300))
              (align (org-image--align link))
              (image (org--create-inline-image thumbnail-file width)))
         (if image                     ; Add image to overlay
-	        (org-link-beautify-overlay-display-image ov image align)
+	        (olb/overlay-display-image ov image align)
           nil))))
 
 ;;; Preview file: link type
 
-(defun org-link-beautify-preview-file (ov path link)
+(defun olb/preview-file (ov path link)
   "Preview file of PATH over OV overlay position for LINK element.
 This function will apply file type function based on file extension."
-  (let ((extension (file-name-extension path)))
-    (cond
-     ((null extension) ; no file extension, it's directory.
-      (org-link-beautify-iconify ov path link))
-     ((string-match-p (image-file-name-regexp) path) ; `org-link-beautify-image-preview-list'
-      (org-link-beautify-preview-file-image ov path link))
-     ((string-equal extension "pdf")
-      (org-link-beautify-preview-file-pdf ov path link))
-     ((string-equal extension "epub")
-      (org-link-beautify-preview-file-epub ov path link))
-     ((string-match-p "\\(mobi\\|azw3\\)" extension)
-      (org-link-beautify-preview-file-kindle ov path link))
-     ((string-match-p "\\.fb2\\(\\.zip\\)?" path)
-      (org-link-beautify-preview-file-fictionbook2 ov path link))
-     ((member extension org-link-beautify-comic-preview-list)
-      (org-link-beautify-preview-file-comic ov path link))
-     ((member extension org-link-beautify-video-preview-list)
-      (org-link-beautify-preview-file-video ov path link))
-     ((member extension org-link-beautify-audio-preview-list)
-      (org-link-beautify-preview-file-audio ov path link))
-     ((member extension org-link-beautify-subtitle-preview-list)
-      (org-link-beautify-preview-file-subtitle ov path link))
-     ((member extension org-link-beautify-archive-preview-list)
-      (org-link-beautify-preview-file-archive ov path link))
-     ((member extension org-link-beautify-source-code-preview-list)
-      (org-link-beautify-preview-file-source-code ov path link))
-     (t (or (org-link-beautify-preview-thumbnail ov path link)
-            (org-link-beautify-iconify ov path link))))))
+  (if-let* ((extension (file-name-extension path)))
+      (cond
+       ((null extension) ; no file extension, it's directory.
+        (olb/iconify ov path link))
+       ((string-match-p (image-file-name-regexp) path) ; `olb/image-preview-list'
+        (olb/preview-file-image ov path link))
+       ((string-equal extension "pdf")
+        (olb/preview-file-pdf ov path link))
+       ((string-equal extension "epub")
+        (olb/preview-file-epub ov path link))
+       ((string-match-p "\\(mobi\\|azw3\\)" extension)
+        (olb/preview-file-kindle ov path link))
+       ((string-match-p "\\.fb2\\(\\.zip\\)?" path)
+        (olb/preview-file-fictionbook2 ov path link))
+       ((member extension olb/comic-preview-list)
+        (olb/preview-file-comic ov path link))
+       ((member extension olb/video-preview-list)
+        (olb/preview-file-video ov path link))
+       ((member extension olb/audio-preview-list)
+        (olb/preview-file-audio ov path link))
+       ((member extension olb/subtitle-preview-list)
+        (olb/preview-file-subtitle ov path link))
+       ((member extension olb/archive-preview-list)
+        (olb/preview-file-archive ov path link))
+       ((member extension olb/source-code-preview-list)
+        (olb/preview-file-source-code ov path link))
+       (t (or (olb/preview-thumbnail ov path link)
+              (olb/iconify ov path link))))))
 
-(defun org-link-beautify-preview-attachment (ov path link)
+
+(defun olb/preview-attachment (ov path link)
   "Preview attachment file of PATH over OV overlay position for LINK element.
 This function will apply file type function based on file extension."
   (org-with-point-at (org-element-begin link)
-    (org-link-beautify-preview-file ov (org-attach-expand path) link)))
+    (olb/preview-file ov (org-attach-expand path) link)))
 
 ;;; file: [image]
 
-(defcustom org-link-beautify-image-preview-list
+(defcustom olb/image-preview-list
   '("jpg" "jpeg" "png" "gif" "webp")
   "A list of image file types be supported with thumbnails."
   :type 'list
   :safe #'listp
   :group 'org-link-beautify)
 
-(defun org-link-beautify-preview-file-image (ov path link)
+(defun olb/preview-file-image (ov path link)
   "Preview image file of PATH over OV overlay position for LINK element."
   (if-let* (( (display-graphic-p))
             (file (expand-file-name path))
@@ -582,12 +584,12 @@ This function will apply file type function based on file extension."
              (image (org--create-inline-image file width)))
         (if image                     ; Add image to overlay
 	        ;; See bug#59902. We cannot rely on Emacs to update image if the file has changed.
-            (org-link-beautify-overlay-display-image ov image align)
+            (olb/overlay-display-image ov image align)
           nil))))
 
 ;;; file: .pdf
 
-(defcustom org-link-beautify-pdf-preview-command
+(defcustom olb/pdf-preview-command
   (cond
    ((executable-find "pdftocairo") "pdftocairo")
    ((executable-find "pdf2svg") "pdf2svg"))
@@ -596,19 +598,19 @@ This function will apply file type function based on file extension."
   :safe #'stringp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-pdf-preview-size 300
+(defcustom olb/pdf-preview-size 300
   "The PDF preview image size."
   :type 'number
   :safe #'numberp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-pdf-preview-default-page-number 1
+(defcustom olb/pdf-preview-default-page-number 1
   "The default PDF preview page number."
   :type 'number
   :safe #'numberp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-pdf-preview-image-format 'png
+(defcustom olb/pdf-preview-image-format 'png
   "The format of PDF file preview image."
   :type '(choice
           :tag "The format of PDF file preview image."
@@ -618,7 +620,7 @@ This function will apply file type function based on file extension."
   :safe #'symbolp
   :group 'org-link-beautify)
 
-(defun org-link-beautify--generate-preview-for-file-pdf (path)
+(defun olb/-generate-preview-for-file-pdf (path)
   "Generate THUMBNAIL-FILE with THUMBNAIL-SIZE for .pdf file of PATH."
   (when (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
     (let* ((file-path (match-string 1 path))
@@ -639,29 +641,29 @@ This function will apply file type function based on file extension."
                                     ((string-match "\\([[:digit:]]+\\)\\+\\+\\(.*\\)" search-option) ; "40++0.00"
                                      (match-string 1 search-option))
                                     (t search-option)))
-                                org-link-beautify-pdf-preview-default-page-number)))
+                                olb/pdf-preview-default-page-number)))
            (pdf-file (expand-file-name (org-link-unescape file-path)))
-           (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path pdf-file))
+           (thumbnails-dir (olb/-get-thumbnails-dir-path pdf-file))
            (thumbnail-file (expand-file-name
                             (if (= pdf-page-number 1) ; if have page number ::N specified.
                                 (format "%s%s.%s"
                                         thumbnails-dir (file-name-base pdf-file)
-                                        (symbol-name org-link-beautify-pdf-preview-image-format))
+                                        (symbol-name olb/pdf-preview-image-format))
                               (format "%s%s-P%s.%s"
                                       thumbnails-dir (file-name-base pdf-file) pdf-page-number
-                                      (symbol-name org-link-beautify-pdf-preview-image-format)))))
+                                      (symbol-name olb/pdf-preview-image-format)))))
            (thumbnail-size 600)
            (proc-name (format "org-link-beautify pdf preview - %s" pdf-file))
            (proc-buffer (format " *org-link-beautify pdf preview - %s*" pdf-file))
            (proc (get-process proc-name)))
-      (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
+      (olb/-ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
-        (pcase (file-name-nondirectory org-link-beautify-pdf-preview-command)
+        (pcase (file-name-nondirectory olb/pdf-preview-command)
           ("pdftocairo"
            (start-process
             proc-name proc-buffer
             "pdftocairo"
-            (pcase org-link-beautify-pdf-preview-image-format
+            (pcase olb/pdf-preview-image-format
               ('png "-png")
               ('jpeg "-jpeg")
               ('svg "-svg"))
@@ -669,34 +671,34 @@ This function will apply file type function based on file extension."
             "-f" (number-to-string pdf-page-number)
             pdf-file (file-name-sans-extension thumbnail-file)))
           ("pdf2svg"
-           (unless (eq org-link-beautify-pdf-preview-image-format 'svg)
+           (unless (eq olb/pdf-preview-image-format 'svg)
              (warn "The pdf2svg only supports convert PDF to SVG format.
 Please adjust `org-link-beautify-pdf-preview-command' to `pdftocairo' or
 Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
            (start-process
             proc-name proc-buffer
             "pdf2svg" pdf-file thumbnail-file (number-to-string pdf-page-number)))))
-      (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
-        (org-link-beautify--notify-generate-thumbnail-failed path thumbnail-file))
+      (when (and olb/enable-debug-p (not (file-exists-p thumbnail-file)))
+        (olb/-notify-generate-thumbnail-failed path thumbnail-file))
       ;; return the thumbnail file as result.
       thumbnail-file)))
 
-(defun org-link-beautify-preview-file-pdf (ov path link)
+(defun olb/preview-file-pdf (ov path link)
   "Preview pdf file of PATH over OV overlay position for LINK element."
   (if-let* (( (display-graphic-p))
-            (org-link-beautify-pdf-preview-command)
-            (thumbnail-file (org-link-beautify--generate-preview-for-file-pdf path))
+            (olb/pdf-preview-command)
+            (thumbnail-file (olb/-generate-preview-for-file-pdf path))
             ((file-exists-p thumbnail-file))
             ;; NOTE: limite thumbnail image inline display width to hardcoded 300.
-            (width (or 300 (org-display-inline-image--width link) org-link-beautify-pdf-preview-size))
+            (width (or 300 (org-display-inline-image--width link) olb/pdf-preview-size))
             (image (org--create-inline-image thumbnail-file width)))
       (prog1 ov
-        (org-link-beautify-overlay-display-image ov image))
-    (org-link-beautify-iconify ov path link)))
+        (olb/overlay-display-image ov image))
+    (olb/iconify ov path link)))
 
 ;;; file: .epub
 
-(defcustom org-link-beautify-epub-preview-command
+(defcustom olb/epub-preview-command
   (let ((script (expand-file-name "scripts/thumbnailer-epub.py" (file-name-directory (or load-file-name (buffer-file-name))))))
     (cl-case system-type
       (gnu/linux (if (executable-find "gnome-epub-thumbnailer")
@@ -714,13 +716,13 @@ EPUB preview."
   :safe #'stringp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-ebook-preview-size 600
+(defcustom olb/ebook-preview-size 600
   "The EPUB cover preview image size."
   :type 'number
   :safe #'numberp
   :group 'org-link-beautify)
 
-(defun org-link-beautify--generate-preview-for-file-epub (path)
+(defun olb/-generate-preview-for-file-epub (path)
   "Generate THUMBNAIL-FILE with THUMBNAIL-SIZE for .epub file of PATH."
   (when (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
     (let* ((file-path (match-string 1 path))
@@ -728,29 +730,29 @@ EPUB preview."
            ;; TODO: currently epub file page number thumbnail is not supported by `org-link-beautify-epub-preview-command'.
            (epub-page-number (if search-option (string-to-number search-option) 1))
            (epub-file (expand-file-name (org-link-unescape file-path)))
-           (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path epub-file))
+           (thumbnails-dir (olb/-get-thumbnails-dir-path epub-file))
            (thumbnail-file (expand-file-name
                             (if (or (null epub-page-number) (= epub-page-number 1)) ; if have page number ::N specified.
                                 (format "%s%s.png" thumbnails-dir (file-name-base epub-file))
                               (format "%s%s-P%s.png" thumbnails-dir (file-name-base epub-file) epub-page-number))))
-           (thumbnail-size (or org-link-beautify-ebook-preview-size 600))
+           (thumbnail-size (or olb/ebook-preview-size 600))
            (proc-name (format "org-link-beautify epub preview - %s" epub-file))
            (proc-buffer (format " *org-link-beautify epub preview - %s*" epub-file))
            (proc (get-process proc-name)))
-      (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
+      (olb/-ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
-        (pcase (file-name-nondirectory org-link-beautify-epub-preview-command)
+        (pcase (file-name-nondirectory olb/epub-preview-command)
           ("epub-thumbnailer"           ; for macOS command "epub-thumbnailer"
            (make-process
             :name proc-name
-            :command (list org-link-beautify-epub-preview-command
+            :command (list olb/epub-preview-command
                            epub-file
                            thumbnail-file
                            (number-to-string thumbnail-size))
             :buffer proc-buffer
             :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
             :sentinel (lambda (proc event)
-                        (if org-link-beautify-enable-debug-p
+                        (if olb/enable-debug-p
                             (message (format "> proc: %s\n> event: %s" proc event))
                           ;; (when (string= event "finished\n")
                           ;;   (kill-buffer (process-buffer proc))
@@ -759,15 +761,15 @@ EPUB preview."
           ("thumbnailer-epub.py"           ; for script "scripts/epub-thumbnailer.py"
            (make-process
             :name proc-name
-            :command (list org-link-beautify-python-interpreter
-                           org-link-beautify-epub-preview-command
+            :command (list olb/python-interpreter
+                           olb/epub-preview-command
                            epub-file
                            thumbnail-file
                            (number-to-string thumbnail-size))
             :buffer proc-buffer
             :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
             :sentinel (lambda (proc event)
-                        (if org-link-beautify-enable-debug-p
+                        (if olb/enable-debug-p
                             (message (format "> proc: %s\n> event: %s" proc event))
                           ;; (when (string= event "finished\n")
                           ;;   (kill-buffer (process-buffer proc))
@@ -776,32 +778,32 @@ EPUB preview."
           ("gnome-epub-thumbnailer"                 ; for Linux "gnome-epub-thumbnailer"
            (start-process
             proc-name proc-buffer
-            org-link-beautify-epub-preview-command
+            olb/epub-preview-command
             epub-file thumbnail-file
-            (when org-link-beautify-ebook-preview-size "--size")
-            (when org-link-beautify-ebook-preview-size (number-to-string thumbnail-size))))
+            (when olb/ebook-preview-size "--size")
+            (when olb/ebook-preview-size (number-to-string thumbnail-size))))
           (_ (user-error "This system platform currently not supported by org-link-beautify.\n Please contribute code to support"))))
-      (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
-        (org-link-beautify--notify-generate-thumbnail-failed epub-file thumbnail-file))
+      (when (and olb/enable-debug-p (not (file-exists-p thumbnail-file)))
+        (olb/-notify-generate-thumbnail-failed epub-file thumbnail-file))
       ;; return the thumbnail file as result.
       thumbnail-file)))
 
-(defun org-link-beautify-preview-file-epub (ov path link)
+(defun olb/preview-file-epub (ov path link)
   "Preview epub file of PATH over OV overlay position for LINK element."
   (if-let* (( (display-graphic-p))
-            (org-link-beautify-epub-preview-command)
-            (thumbnail-file (org-link-beautify--generate-preview-for-file-epub path))
+            (olb/epub-preview-command)
+            (thumbnail-file (olb/-generate-preview-for-file-epub path))
             ((file-exists-p thumbnail-file))
             ;; NOTE: limite thumbnail image inline display width to hardcoded 300.
-            (width (or 300 (org-display-inline-image--width link) org-link-beautify-ebook-preview-size))
+            (width (or 300 (org-display-inline-image--width link) olb/ebook-preview-size))
             (image (org--create-inline-image thumbnail-file width)))
       (prog1 ov
-        (org-link-beautify-overlay-display-image ov image))
-    (org-link-beautify-iconify ov path link)))
+        (olb/overlay-display-image ov image))
+    (olb/iconify ov path link)))
 
 ;;; file: .mobi, .azw3
 
-(defcustom org-link-beautify-kindle-preview-command
+(defcustom olb/kindle-preview-command
   (cl-case system-type
     (gnu/linux (executable-find "mobitool"))
     (darwin (executable-find "mobitool")))
@@ -816,30 +818,30 @@ You can install software `libmobi' to get command `mobitool'."
   :safe #'stringp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-kindle-preview-size 300
+(defcustom olb/kindle-preview-size 300
   "The Kindle cover preview image size."
   :type 'number
   :safe #'numberp
   :group 'org-link-beautify)
 
-(defun org-link-beautify--generate-preview-for-file-kindle (path)
+(defun olb/-generate-preview-for-file-kindle (path)
   "Generate THUMBNAIL-FILE with THUMBNAIL-SIZE for .mobi & .azw3 file of PATH."
   (when (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
     (let* ((file-path (match-string 1 path))
            (kindle-page-number (or (match-string 2 path) 1))
            (kindle-file (expand-file-name (org-link-unescape file-path)))
-           (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path kindle-file))
+           (thumbnails-dir (olb/-get-thumbnails-dir-path kindle-file))
            (thumbnail-file (expand-file-name
                             (if (or (null kindle-page-number) (= kindle-page-number 1)) ; if have page number ::N specified.
                                 (format "%s%s.jpg" thumbnails-dir (file-name-base kindle-file))
                               (format "%s%s-P%s.jpg" thumbnails-dir (file-name-base kindle-file) kindle-page-number))))
-           (thumbnail-size (or org-link-beautify-ebook-preview-size 600))
+           (thumbnail-size (or olb/ebook-preview-size 600))
            (proc-name (format "org-link-beautify kindle preview - %s" kindle-file))
            (proc-buffer (format " *org-link-beautify kindle preview - %s*" kindle-file))
            (proc (get-process proc-name)))
-      (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
+      (olb/-ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
-        (pcase (file-name-nondirectory org-link-beautify-kindle-preview-command)
+        (pcase (file-name-nondirectory olb/kindle-preview-command)
           ("mobitool"
            ;; mobitool dumped cover image thumbnail filename can't be specified in command-line argument.
            (let ((mobitool-cover-file (concat thumbnails-dir (file-name-base kindle-file) "_cover.jpg")))
@@ -851,39 +853,39 @@ You can install software `libmobi' to get command `mobitool'."
              (when (file-exists-p mobitool-cover-file)
                (rename-file mobitool-cover-file thumbnail-file))))
           (_ (user-error "[org-link-beautify] Error: Can't find command tool to dump kindle ebook file cover"))))
-      (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
-        (org-link-beautify--notify-generate-thumbnail-failed kindle-file thumbnail-file))
+      (when (and olb/enable-debug-p (not (file-exists-p thumbnail-file)))
+        (olb/-notify-generate-thumbnail-failed kindle-file thumbnail-file))
       ;; return the thumbnail file as result.
       thumbnail-file)))
 
-(defun org-link-beautify-preview-file-kindle (ov path link)
+(defun olb/preview-file-kindle (ov path link)
   "Preview kindle .mobi or .azw3 file of PATH over OV overlay position for LINK element."
   (if-let* (( (display-graphic-p))
-            (org-link-beautify-kindle-preview-command)
-            (thumbnail-file (org-link-beautify--generate-preview-for-file-kindle path))
+            (olb/kindle-preview-command)
+            (thumbnail-file (olb/-generate-preview-for-file-kindle path))
             ((file-exists-p thumbnail-file))
             ;; NOTE: limite epub file thumbnail image inline display width to hardcoded 300.
             (width (or 300 (org-display-inline-image--width link)))
             (image (org--create-inline-image thumbnail-file width)))
       (prog1 ov
-        (org-link-beautify-overlay-display-image ov image))
-    (org-link-beautify-iconify ov path link)))
+        (olb/overlay-display-image ov image))
+    (olb/iconify ov path link)))
 
 ;;; FictionBook2 (.fb2, .fb2.zip) file cover preview
 
-(defcustom org-link-beautify-fictionbook2-preview (featurep 'fb2-reader)
+(defcustom olb/fictionbook2-preview (featurep 'fb2-reader)
   "Whether enable FictionBook2 ebook files covert preview?"
   :type 'boolean
   :safe #'booleanp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-fictionbook2-preview-size 300
+(defcustom olb/fictionbook2-preview-size 300
   "The FictionBook2 cover preview image size."
   :type 'number
   :safe #'numberp
   :group 'org-link-beautify)
 
-(defun org-link-beautify-fictionbook2--extract-cover (file-path)
+(defun olb/fictionbook2--extract-cover (file-path)
   "Extract cover image data for FictionBook2 at FILE-PATH."
   (if-let* (;; reference `fb2-reader-mode'
             (book (or (fb2-reader-parse-file-as-xml file-path)
@@ -903,57 +905,57 @@ You can install software `libmobi' to get command `mobitool'."
       image
     'no-cover))
 
-(defun org-link-beautify-fictionbook2--save-cover (image thumbnail-file)
+(defun olb/fictionbook2--save-cover (image thumbnail-file)
   "Save FictionBook2 cover IMAGE to THUMBNAIL-FILE."
   ;; `image-save': This writes the original image data to a file.
   (with-temp-buffer
     (insert (plist-get (cdr image) :data))
     (write-region (point-min) (point-max) thumbnail-file)))
 
-(defun org-link-beautify--generate-preview-for-file-fictionbook2 (path)
+(defun olb/-generate-preview-for-file-fictionbook2 (path)
   "Generate THUMBNAIL-FILE with THUMBNAIL-SIZE for .fb2 & .fb2.zip file of PATH."
   (when (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
     (let* ((file-path (match-string 1 path))
            (search-option (match-string 2 path))
            (fictionbook2-file (expand-file-name (org-link-unescape file-path)))
-           (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path fictionbook2-file))
+           (thumbnails-dir (olb/-get-thumbnails-dir-path fictionbook2-file))
            (thumbnail-file (cond
                             ((string-match-p "\\.fb2.zip$" path)
                              (expand-file-name
                               (format "%s%s.png" thumbnails-dir (string-replace ".fb2" "" (file-name-base fictionbook2-file)))))
                             ((string-match-p "\\.fb2$" path)
                              (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base fictionbook2-file))))))
-           (thumbnail-size (or org-link-beautify-fictionbook2-preview-size 600))
+           (thumbnail-size (or olb/fictionbook2-preview-size 600))
            (proc-name (format "org-link-beautify fictionbook preview - %s" fictionbook2-file))
            (proc-buffer (format " *org-link-beautify fictionbook preview - %s*" fictionbook2-file))
            (proc (get-process proc-name)))
-      (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
+      (olb/-ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
-        (let ((cover-image (org-link-beautify-fictionbook2--extract-cover fictionbook2-file)))
+        (let ((cover-image (olb/fictionbook2--extract-cover fictionbook2-file)))
           (if (eq cover-image 'no-cover)
               (message "[org-link-beautify] FictionBook2 preview failed to extract cover image")
-            (org-link-beautify-fictionbook2--save-cover cover-image thumbnail-file))))
-      (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
-        (org-link-beautify--notify-generate-thumbnail-failed fictionbook2-file thumbnail-file))
+            (olb/fictionbook2--save-cover cover-image thumbnail-file))))
+      (when (and olb/enable-debug-p (not (file-exists-p thumbnail-file)))
+        (olb/-notify-generate-thumbnail-failed fictionbook2-file thumbnail-file))
       ;; return the thumbnail file as result.
       thumbnail-file)))
 
-(defun org-link-beautify-preview-file-fictionbook2 (ov path link)
+(defun olb/preview-file-fictionbook2 (ov path link)
   "Preview FictionBook2 .fb2, .fb2.zip file of PATH over OV overlay position for LINK element."
-  (if-let* ((org-link-beautify-fictionbook2-preview)
+  (if-let* ((olb/fictionbook2-preview)
             ( (display-graphic-p))
-            (thumbnail-file (org-link-beautify--generate-preview-for-file-fictionbook2 path))
+            (thumbnail-file (olb/-generate-preview-for-file-fictionbook2 path))
             ((file-exists-p thumbnail-file))
             ;; NOTE: limite thumbnail image inline display width to hardcoded 300.
             (width (or 300 (org-display-inline-image--width link)))
             (image (org--create-inline-image thumbnail-file width)))
       (prog1 ov
-        (org-link-beautify-overlay-display-image ov image))
-    (org-link-beautify-iconify ov path link)))
+        (olb/overlay-display-image ov image))
+    (olb/iconify ov path link)))
 
 ;;; Source Code File
 
-(defcustom org-link-beautify-source-code-preview-command
+(defcustom olb/source-code-preview-command
   (cond
    ((executable-find "silicon") "silicon")
    ((executable-find "germanium") "germanium"))
@@ -962,7 +964,7 @@ You can install software `libmobi' to get command `mobitool'."
   :safe #'stringp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-source-code-preview-list
+(defcustom olb/source-code-preview-list
   '(; "org" "txt" "markdown" "md"
     "lisp" "scm" "clj" "cljs"
     "py" "rb" "pl"
@@ -974,13 +976,13 @@ You can install software `libmobi' to get command `mobitool'."
   :safe #'listp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-source-code-preview-max-lines 30
+(defcustom olb/source-code-preview-max-lines 30
   "The maximum lines number of file for previewing."
   :type 'number
   :safe #'numberp
   :group 'org-link-beautify)
 
-(defun org-link-beautify--preview-source-code-file (file)
+(defun olb/-preview-source-code-file (file)
   "Return first 10 lines of FILE."
   (with-temp-buffer
     (condition-case nil
@@ -992,7 +994,7 @@ You can install software `libmobi' to get command `mobitool'."
           ;; the inserted text from known formats by calling format-decode,
           ;; which see.
           (insert-file-contents file)
-          (org-link-beautify--display-content-block
+          (olb/-display-content-block
            ;; This `cl-loop' extract a LIST of string lines from the file content.
            (cl-loop repeat 10
                     unless (eobp)
@@ -1004,25 +1006,25 @@ You can install software `libmobi' to get command `mobitool'."
        (message "Unable to read file %S" file)
 	   nil))))
 
-(defun org-link-beautify--generate-preview-for-file-source-code (path)
+(defun olb/-generate-preview-for-file-source-code (path)
   "Generate THUMBNAIL-FILE with THUMBNAIL-SIZE for source code file of PATH."
   (when (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
     (let* ((file-path (match-string 1 path))
            (search-option (match-string 2 path))
            (source-code-file (expand-file-name (org-link-unescape file-path)))
-           (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path source-code-file))
+           (thumbnails-dir (olb/-get-thumbnails-dir-path source-code-file))
            (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base source-code-file))))
            (thumbnail-size 600)
            (proc-name (format "org-link-beautify code preview - %s" source-code-file))
            (proc-buffer (format " *org-link-beautify code preview - %s*" source-code-file))
            (proc (get-process proc-name)))
-      (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
+      (olb/-ensure-thumbnails-dir thumbnails-dir)
       (unless (and (file-exists-p thumbnail-file)
                    ;; limit to maximum 30 lines of file.
                    (> (string-to-number (shell-command-to-string (format "cat %s | wc -l" source-code-file)))
-                      org-link-beautify-source-code-preview-max-lines))
+                      olb/source-code-preview-max-lines))
         (unless proc
-          (pcase (file-name-nondirectory org-link-beautify-source-code-preview-command)
+          (pcase (file-name-nondirectory olb/source-code-preview-command)
             ("silicon"
              (start-process
               proc-name proc-buffer
@@ -1035,88 +1037,88 @@ You can install software `libmobi' to get command `mobitool'."
               proc-name proc-buffer
               "germanium" source-code-file "-o" thumbnail-file
               "--no-line-number" "--no-window-access-bar")))))
-      (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
-        (org-link-beautify--notify-generate-thumbnail-failed fictionbook2-file thumbnail-file))
+      (when (and olb/enable-debug-p (not (file-exists-p thumbnail-file)))
+        (olb/-notify-generate-thumbnail-failed fictionbook2-file thumbnail-file))
       ;; return the thumbnail file as result.
       thumbnail-file)))
 
-(defun org-link-beautify-preview-file-source-code (ov path link)
+(defun olb/preview-file-source-code (ov path link)
   "Preview source code file of PATH over OV overlay position for LINK element."
   (if-let* (( (display-graphic-p))
-            (org-link-beautify-source-code-preview-command)
-            (thumbnail-file (org-link-beautify--generate-preview-for-file-source-code path))
+            (olb/source-code-preview-command)
+            (thumbnail-file (olb/-generate-preview-for-file-source-code path))
             ((file-exists-p thumbnail-file))
             (image (create-image thumbnail-file nil nil :width 800)))
       (prog1 ov
-        (org-link-beautify-overlay-display-image ov image))
-    (if-let* ((source-code (org-link-beautify--preview-source-code-file path)))
+        (olb/overlay-display-image ov image))
+    (if-let* ((source-code (olb/-preview-source-code-file path)))
         (prog1 ov
           (overlay-put ov 'after-string source-code)
 	      (overlay-put ov 'face    'org-block))
-      (org-link-beautify-iconify ov path link))))
+      (olb/iconify ov path link))))
 
 ;;; file: [comic]
 
-(defcustom org-link-beautify-comic-preview-command
+(defcustom olb/comic-preview-command
   (cl-case system-type
-    (darwin (or (executable-find "qlmanage") org-link-beautify-thumbnailer-script))
-    (gnu/linux org-link-beautify-thumbnailer-script))
+    (darwin (or (executable-find "qlmanage") olb/thumbnailer-script))
+    (gnu/linux olb/thumbnailer-script))
   "Whether enable CDisplay Archived Comic Book Formats cover preview.
 File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
   :type 'string
   :safe #'stringp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-comic-preview-list
+(defcustom olb/comic-preview-list
   '("cbr" "cbz" "cb7" "cba" "cbt")
   "A list of comic file types be supported with thumbnails."
   :type 'list
   :safe #'listp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-comic-preview-size 500
+(defcustom olb/comic-preview-size 500
   "The CDisplay Archived Comic Book Formats cover preview image size."
   :type 'number
   :safe #'numberp
   :group 'org-link-beautify)
 
-(defun org-link-beautify--generate-preview-for-file-comic (path)
+(defun olb/-generate-preview-for-file-comic (path)
   "Generate THUMBNAIL-FILE with THUMBNAIL-SIZE for CDisplay Archived Comic Book: .cbz, .cbr etc file of PATH."
   (when (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
     (let* ((file-path (match-string 1 path))
            (comic-file (expand-file-name (org-link-unescape file-path)))
-           (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path comic-file))
+           (thumbnails-dir (olb/-get-thumbnails-dir-path comic-file))
            (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base comic-file))))
-           (thumbnail-size (or org-link-beautify-comic-preview-size 1080))
+           (thumbnail-size (or olb/comic-preview-size 1080))
            (proc-name (format "org-link-beautify comic preview - %s" (file-name-base file-path)))
            (proc-buffer (format " *org-link-beautify comic preview - %s*" (file-name-base file-path)))
            (proc (get-process proc-name)))
-      (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
+      (olb/-ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
         (unless proc
           (cl-case system-type
             (gnu/linux
-             (pcase (file-name-nondirectory org-link-beautify-comic-preview-command)
+             (pcase (file-name-nondirectory olb/comic-preview-command)
                ("cbconvert"              ; https://github.com/gen2brain/cbconvert
                 (start-process
                  proc-name
                  proc-buffer
-                 org-link-beautify-comic-preview-command
+                 olb/comic-preview-command
                  "cover" comic-file "--output" thumbnails-dir
-                 (if org-link-beautify-comic-preview-size
+                 (if olb/comic-preview-size
                      "--width")
-                 (if org-link-beautify-comic-preview-size
+                 (if olb/comic-preview-size
                      (number-to-string thumbnail-size))))
-               ("thumbnailer.py" (org-link-beautify-thumbnailer file-path))))
+               ("thumbnailer.py" (olb/thumbnailer file-path))))
             (darwin
              ;; for macOS "qlmanage" command
              ;; $ qlmanage -t "ラセン恐怖閣-マリコとニジロー1-DL版.cbz" - 2.0 -s 1080 -o ".thumbnails"
-             (pcase (file-name-nondirectory org-link-beautify-comic-preview-command)
+             (pcase (file-name-nondirectory olb/comic-preview-command)
                ("qlmanage"
                 (let ((qlmanage-thumbnail-file (concat thumbnails-dir (file-name-nondirectory comic-file) ".png")))
                   (make-process
                    :name proc-name
-                   :command (list org-link-beautify-comic-preview-command
+                   :command (list olb/comic-preview-command
                                   "-t"
                                   comic-file
                                   "-o" thumbnails-dir
@@ -1124,7 +1126,7 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
                    :buffer proc-buffer
                    :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
                    :sentinel (lambda (proc event)
-                               (if org-link-beautify-enable-debug-p
+                               (if olb/enable-debug-p
                                    (message (format "> proc: %s\n> event: %s" proc event))
                                  ;; (when (string= event "finished\n")
                                  ;;   (kill-buffer (process-buffer proc))
@@ -1133,31 +1135,31 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
                   ;; then rename [file.extension.png] to [file.png]
                   (when (file-exists-p qlmanage-thumbnail-file)
                     (rename-file qlmanage-thumbnail-file thumbnail-file))))
-               ("thumbnailer.py" (org-link-beautify-thumbnailer file-path))))
+               ("thumbnailer.py" (olb/thumbnailer file-path))))
             (t (user-error "This system platform currently not supported by org-link-beautify.\n Please contribute code to support")))))
-      (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
-        (org-link-beautify--notify-generate-thumbnail-failed comic-file thumbnail-file))
+      (when (and olb/enable-debug-p (not (file-exists-p thumbnail-file)))
+        (olb/-notify-generate-thumbnail-failed comic-file thumbnail-file))
       ;; return the thumbnail file as result.
       thumbnail-file)))
 
-(defun org-link-beautify-preview-file-comic (ov path link)
+(defun olb/preview-file-comic (ov path link)
   "Preview comic .cbz or .cbr file of PATH over OV overlay position for LINK element."
   (if-let* (( (display-graphic-p))
-            (org-link-beautify-comic-preview-command)
-            (thumbnail-file (org-link-beautify--generate-preview-for-file-comic path))
+            (olb/comic-preview-command)
+            (thumbnail-file (olb/-generate-preview-for-file-comic path))
             ((file-exists-p thumbnail-file))
-            (image (create-image thumbnail-file nil nil :width (or org-link-beautify-comic-preview-size 300))))
+            (image (create-image thumbnail-file nil nil :width (or olb/comic-preview-size 300))))
       (prog1 ov
-        (org-link-beautify-overlay-display-image ov image))
-    (org-link-beautify-iconify ov path link)))
+        (olb/overlay-display-image ov image))
+    (olb/iconify ov path link)))
 
 ;;; file: [video]
 
-(defvar org-link-beautify-video-thumbnailer-script
+(defvar olb/video-thumbnailer-script
   (expand-file-name "scripts/thumbnailer-video.py" (file-name-directory (or load-file-name (buffer-file-name))))
   "The path of video thumbnailer script.")
 
-(defcustom org-link-beautify-video-preview-command
+(defcustom olb/video-preview-command
   (cl-case system-type
     ;; for macOS, use `qlmanage' on priority
     (darwin (or (executable-find "qlmanage") (executable-find "ffmpeg")))
@@ -1166,44 +1168,44 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
     ;; for general, use `ffmpeg'
     ;; $ ffmpeg -i video.mp4 -ss 00:01:00.000 -vframes 1 -vcodec png -an -f rawvideo -s 119x64 out.png
     (t (or (executable-find "ffmpeg")
-           org-link-beautify-video-thumbnailer-script
-           org-link-beautify-thumbnailer-script)))
+           olb/video-thumbnailer-script
+           olb/thumbnailer-script)))
   "The available command to preview video."
   :type 'string
   :safe #'stringp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-video-preview-list
+(defcustom olb/video-preview-list
   '("mp4" "webm" "mkv" "mov" "mpeg" "ogg" "ogv" "rmvb" "rm" "avi" "m4v" "flv")
   "A list of video file types be supported with thumbnails."
   :type 'list
   :safe #'listp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-video-preview-size 600
+(defcustom olb/video-preview-size 600
   "The video thumbnail image size."
   :type 'number
   :safe #'numberp
   :group 'org-link-beautify)
 
-(defun org-link-beautify--generate-preview-for-file-video (path)
+(defun olb/-generate-preview-for-file-video (path)
   "Generate THUMBNAIL-FILE with THUMBNAIL-SIZE for video .mp4 etc file of PATH."
   (when (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
     (let* ((file-path (match-string 1 path))
            (search-option (match-string 2 path))
            (video-file (expand-file-name (org-link-unescape file-path)))
            (video-filename (file-name-nondirectory video-file))
-           (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path video-file))
+           (thumbnails-dir (olb/-get-thumbnails-dir-path video-file))
            (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base video-file))))
-           (thumbnail-size (or org-link-beautify-video-preview-size 600))
+           (thumbnail-size (or olb/video-preview-size 600))
            (proc-name (format "org-link-beautify video preview - %s" video-filename))
            (proc-buffer (format " *org-link-beautify video preview - %s*" video-filename))
            (proc (get-process proc-name)))
-      (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
+      (olb/-ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
         ;; detect process already running?
         (unless proc
-          (pcase (file-name-nondirectory org-link-beautify-video-preview-command)
+          (pcase (file-name-nondirectory olb/video-preview-command)
             ("ffmpeg"
              ;; $ ffmpeg -i video.mp4 -ss 00:00:00.001 -vframes 1 -vcodec png -an -f rawvideo -s 119x64 out.png
              (let ((thumbnail-width thumbnail-size)
@@ -1240,38 +1242,38 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
             ("thumbnailer-video.py"
              (make-process
               :name proc-name
-              :command (list org-link-beautify-video-thumbnailer-script
+              :command (list olb/video-thumbnailer-script
                              input-file
                              thumbnail-file
                              (number-to-string thumbnail-size))
               :buffer proc-buffer
               :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
               :sentinel (lambda (proc event)
-                          (when org-link-beautify-enable-debug-p
+                          (when olb/enable-debug-p
                             (message (format "> proc: %s\n> event: %s" proc event)))
                           ;; (when (string= event "finished\n")
                           ;;   (kill-buffer (process-buffer proc))
                           ;;   (kill-process proc))
                           ))))))
-      (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
-        (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file))
+      (when (and olb/enable-debug-p (not (file-exists-p thumbnail-file)))
+        (olb/-notify-generate-thumbnail-failed video-file thumbnail-file))
       ;; return the thumbnail file as result.
       thumbnail-file)))
 
-(defun org-link-beautify-preview-file-video (ov path link)
+(defun olb/preview-file-video (ov path link)
   "Preview video file of PATH over OV overlay position for LINK element."
   (if-let* (( (display-graphic-p))
-            (org-link-beautify-video-preview-command)
-            (thumbnail-file (org-link-beautify--generate-preview-for-file-video path))
+            (olb/video-preview-command)
+            (thumbnail-file (olb/-generate-preview-for-file-video path))
             ((file-exists-p thumbnail-file))
             (image (create-image thumbnail-file nil nil :width 400)))
       (prog1 ov
-        (org-link-beautify-overlay-display-image ov image))
-    (org-link-beautify-iconify ov path link)))
+        (olb/overlay-display-image ov image))
+    (olb/iconify ov path link)))
 
 ;;; file: [audio]
 
-(defcustom org-link-beautify-audio-preview-command
+(defcustom olb/audio-preview-command
   (cl-case system-type
     (darwin (or (executable-find "ffmpeg") (executable-find "qlmanage")))
     (gnu/linux (or (executable-find "ffmpeg") (executable-find "audiowaveform"))))
@@ -1280,35 +1282,35 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
   :safe #'stringp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-audio-preview-list '("mp3" "wav" "flac" "ogg" "m4a" "opus" "dat")
+(defcustom olb/audio-preview-list '("mp3" "wav" "flac" "ogg" "m4a" "opus" "dat")
   "A list of audio file types be supported generating audio wave form image."
   :type 'list
   :safe #'listp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-audio-preview-size 600
+(defcustom olb/audio-preview-size 600
   "The audio wave form image size."
   :type 'number
   :safe #'numberp
   :group 'org-link-beautify)
 
-(defun org-link-beautify--generate-preview-for-file-audio (path)
+(defun olb/-generate-preview-for-file-audio (path)
   "Generate THUMBNAIL-FILE with THUMBNAIL-SIZE for audio .mp3 etc file of PATH."
   (when (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
     (let* ((file-path (match-string 1 path))
            (search-option (match-string 2 path))
            (audio-file (expand-file-name (org-link-unescape file-path)))
            (audio-filename (file-name-nondirectory audio-file))
-           (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path audio-file))
+           (thumbnails-dir (olb/-get-thumbnails-dir-path audio-file))
            (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base audio-file))))
-           (thumbnail-size (or org-link-beautify-audio-preview-size 300))
+           (thumbnail-size (or olb/audio-preview-size 300))
            (proc-name (format "org-link-beautify audio preview - %s" audio-filename))
            (proc-buffer (format " *org-link-beautify audio preview - %s*" audio-filename))
            (proc (get-process proc-name)))
-      (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
+      (olb/-ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
         (unless proc
-          (pcase (file-name-nondirectory org-link-beautify-audio-preview-command)
+          (pcase (file-name-nondirectory olb/audio-preview-command)
             ("ffmpeg"
              (start-process
               proc-name proc-buffer
@@ -1329,92 +1331,92 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
              (start-process
               proc-name proc-buffer
               "audiowaveform" "-i" audio-file "-o" thumbnail-file)))))
-      (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
-        (org-link-beautify--notify-generate-thumbnail-failed audio-file thumbnail-file))
+      (when (and olb/enable-debug-p (not (file-exists-p thumbnail-file)))
+        (olb/-notify-generate-thumbnail-failed audio-file thumbnail-file))
       ;; return the thumbnail file as result.
       thumbnail-file)))
 
-(defun org-link-beautify-preview-file-audio (ov path link)
+(defun olb/preview-file-audio (ov path link)
   "Preview audio file of PATH over OV overlay position for LINK element."
   (if-let* (( (display-graphic-p))
-            (org-link-beautify-audio-preview-command)
-            (thumbnail-file (org-link-beautify--generate-preview-for-file-audio path))
+            (olb/audio-preview-command)
+            (thumbnail-file (olb/-generate-preview-for-file-audio path))
             ((file-exists-p thumbnail-file))
-            (image (create-image thumbnail-file nil nil :width (or org-link-beautify-audio-preview-size 300))))
+            (image (create-image thumbnail-file nil nil :width (or olb/audio-preview-size 300))))
       (prog1 ov
-        (org-link-beautify-overlay-display-image ov image))
-    (org-link-beautify-iconify ov path link)))
+        (olb/overlay-display-image ov image))
+    (olb/iconify ov path link)))
 
 ;;; file: [subtitle]
 
-(defcustom org-link-beautify-subtitle-preview-command org-link-beautify-thumbnailer-script
+(defcustom olb/subtitle-preview-command olb/thumbnailer-script
   "The command to preview subtitle file."
   :type 'string
   :safe #'stringp
   :group 'org-link-beautify)
 
 ;; https://en.wikipedia.org/wiki/Subtitles
-(defcustom org-link-beautify-subtitle-preview-list
+(defcustom olb/subtitle-preview-list
   '("ass" "srt" "sub" "vtt" "ssf")
   "A list of subtitle file types support previewing."
   :type 'list
   :safe #'listp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-subtitle-preview-size 300
+(defcustom olb/subtitle-preview-size 300
   "The subtitle preview image size."
   :type 'number
   :safe #'numberp
   :group 'org-link-beautify)
 
-(defun org-link-beautify--generate-preview-for-file-subtitle (path)
+(defun olb/-generate-preview-for-file-subtitle (path)
   "Generate THUMBNAIL-FILE with THUMBNAIL-SIZE for subtitle file of PATH."
   (when (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
     (let* ((file-path (match-string 1 path))
            (search-option (match-string 2 path))
            (subtitle-file (expand-file-name (org-link-unescape file-path))))
-      (if-let* ((org-link-beautify-subtitle-preview-command)
-                (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path subtitle-file))
+      (if-let* ((olb/subtitle-preview-command)
+                (thumbnails-dir (olb/-get-thumbnails-dir-path subtitle-file))
                 (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base subtitle-file))))
-                (thumbnail-size (or org-link-beautify-subtitle-preview-size 200))
+                (thumbnail-size (or olb/subtitle-preview-size 200))
                 (proc-name (format "org-link-beautify subtitle preview - %s" subtitle-file))
                 (proc-buffer (format " *org-link-beautify subtile preview - %s*" subtitle-file))
                 (proc (get-process proc-name)))
           (prog1 thumbnail-file ; return the thumbnail file as result.
             (unless (file-exists-p thumbnail-file)
-              (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
-              (pcase (file-name-nondirectory org-link-beautify-subtitle-preview-command)
-                ("thumbnailer.py" (org-link-beautify-thumbnailer file-path)))))
+              (olb/-ensure-thumbnails-dir thumbnails-dir)
+              (pcase (file-name-nondirectory olb/subtitle-preview-command)
+                ("thumbnailer.py" (olb/thumbnailer file-path)))))
         (let* ((subtitle-file-context (split-string (shell-command-to-string (format "head -n 20 '%s'" subtitle-file)) "\n"))
-               (text (concat "\n" (org-link-beautify--display-content-block subtitle-file-context))))
+               (text (concat "\n" (olb/-display-content-block subtitle-file-context))))
           ;; return the subtitle file context as result.
           text)))))
 
-(defun org-link-beautify-preview-file-subtitle (ov path link)
+(defun olb/preview-file-subtitle (ov path link)
   "Preview subtitle file of PATH over OV overlay position for LINK element."
   (if-let* (( (display-graphic-p))
-            (org-link-beautify-subtitle-preview-command)
-            (thumbnail-file (org-link-beautify--generate-preview-for-file-subtitle path))
+            (olb/subtitle-preview-command)
+            (thumbnail-file (olb/-generate-preview-for-file-subtitle path))
             ((file-exists-p thumbnail-file))
-            (image (create-image thumbnail-file nil nil :width (or org-link-beautify-subtitle-preview-size 300))))
+            (image (create-image thumbnail-file nil nil :width (or olb/subtitle-preview-size 300))))
       (prog1 ov
-        (org-link-beautify-overlay-display-image ov image))
-    (if-let* ((text (org-link-beautify--generate-preview-for-file-subtitle path)))
+        (olb/overlay-display-image ov image))
+    (if-let* ((text (olb/-generate-preview-for-file-subtitle path)))
         (prog1 ov
           (overlay-put ov 'after-string text)
 	      (overlay-put ov 'face         'default))
-      (org-link-beautify-iconify ov path link))))
+      (olb/iconify ov path link))))
 
 ;;; file: [archive file]
 
-(defcustom org-link-beautify-archive-preview-list
+(defcustom olb/archive-preview-list
   '("zip" "rar" "7z" "gz" "tar" "tar.gz" "tar.bz2" "xz" "zst")
   "A list of archive file types support previewing."
   :type 'list
   :safe #'listp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-archive-preview-command-alist
+(defcustom olb/archive-preview-command-alist
   '(("zip" . "unzip -l")
     ("rar" . "unrar l")
     ("7z" . "7z l -ba") ; -ba - suppress headers; undocumented.
@@ -1430,78 +1432,78 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
   :type '(alist :value-type (group string))
   :group 'org-link-beautify)
 
-(defun org-link-beautify--generate-preview-for-file-archive (path)
+(defun olb/-generate-preview-for-file-archive (path)
   "Get the files list preview of archive file at PATH."
   (when (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
     (let* ((file-path (match-string 1 path))
            (search-option (match-string 2 path))
            (archive-file (expand-file-name (org-link-unescape file-path)))
            (archive-extension (file-name-extension archive-file))
-           (command (cdr (assoc archive-extension org-link-beautify-archive-preview-command-alist)))
+           (command (cdr (assoc archive-extension olb/archive-preview-command-alist)))
            (execute-command (format "%s '%s'" command archive-file))
            (archive-files-list (split-string (shell-command-to-string execute-command) "\n"))
-           (text (concat "\n" (org-link-beautify--display-content-block archive-files-list))))
+           (text (concat "\n" (olb/-display-content-block archive-files-list))))
       ;; return the files list in archive file as result.
       text)))
 
-(defun org-link-beautify-preview-file-archive (ov path link)
+(defun olb/preview-file-archive (ov path link)
   "Preview archive file link of PATH over OV overlay position for LINK element."
-  (if-let* ((text (org-link-beautify--generate-preview-for-file-archive path)))
+  (if-let* ((text (olb/-generate-preview-for-file-archive path)))
       (prog1 ov
         (overlay-put ov 'after-string text)
 	    (overlay-put ov 'face         'default)
-	    (overlay-put ov 'keymap       org-link-beautify-keymap))
-    (org-link-beautify-iconify ov path link)))
+	    (overlay-put ov 'keymap       olb/keymap))
+    (olb/iconify ov path link)))
 
 ;;; pdf: & docview: link type
 
-(defun org-link-beautify-preview-pdf (ov path link)
+(defun olb/preview-pdf (ov path link)
   "Preview pdf: link of PATH over OV overlay position for LINK element."
   (if-let* (( (display-graphic-p))
-            (thumbnail-file (org-link-beautify--generate-preview-for-file-pdf path))
+            (thumbnail-file (olb/-generate-preview-for-file-pdf path))
             ((file-exists-p thumbnail-file))
             ;; reference `org--create-inline-image'
             (width (org-display-inline-image--width link))
             (image (org--create-inline-image thumbnail-file width)))
       (prog1 ov
-        (org-link-beautify-overlay-display-image ov image))
-    (org-link-beautify-iconify ov path link)))
+        (olb/overlay-display-image ov image))
+    (olb/iconify ov path link)))
 
 ;;; epub: link type
 
-(defalias 'org-link-beautify-preview-epub 'org-link-beautify-preview-file-epub
+(defalias 'olb/preview-epub 'olb/preview-file-epub
   "Preview epub: link of PATH over OV overlay position for LINK element.")
 
 ;;; nov: link type
 
-(defalias 'org-link-beautify-preview-nov 'org-link-beautify-preview-epub
+(defalias 'olb/preview-nov 'olb/preview-epub
   "Preview nov: link of PATH over OV overlay position for LINK element.")
 
 ;;; video: link type
 
-(defalias 'org-link-beautify-preview-video 'org-link-beautify-preview-file-video
+(defalias 'olb/preview-video 'olb/preview-file-video
   "Preview video: link of PATH over OV overlay position for LINK element.")
 
 ;;; audio: link type
 
-(defalias 'org-link-beautify-preview-audio 'org-link-beautify-preview-file-audio
+(defalias 'olb/preview-audio 'olb/preview-file-audio
   "Preview audio: link of PATH over OV overlay position for LINK element.")
 
 ;;; org-contact: link type
 
-(defun org-link-beautify--generate-preview-for-org-contacts (name)
+(defun olb/-generate-preview-for-org-contacts (name)
   "Get the avatar of org-contact in NAME."
   (let* ((epom (org-contacts-search-contact name)))
     (org-contacts-get-avatar-icon epom)))
 
 ;;; TEST:
-;; (org-link-beautify--generate-preview-for-org-contacts "stardiviner")
+;; (olb/-generate-preview-for-org-contacts "stardiviner")
 
-(defun org-link-beautify-preview-org-contact (ov path link)
+(defun olb/preview-org-contact (ov path link)
   "Preview org-contct: link of PATH over OV overlay position for LINK element."
   (if-let* ((name path)
             ( (display-graphic-p))
-            (image (org-link-beautify--generate-preview-for-org-contacts name)))
+            (image (olb/-generate-preview-for-org-contacts name)))
       (prog1 ov
         (overlay-put ov 'display image)
         (overlay-put ov 'after-string (concat
@@ -1513,13 +1515,13 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
                                        (propertize "{" 'face '(:foreground "purple2"))
                                        (propertize text 'face 'org-verbatim)
                                        (propertize "}" 'face '(:foreground "purple2"))))
-      (org-link-beautify-iconify ov path link))))
+      (olb/iconify ov path link))))
 
 ;;; org-bookmark: link type
 
 (require 'org-bookmarks nil t)
 
-(defun org-link-beautify--generate-preview-for-org-bookmarks (path)
+(defun olb/-generate-preview-for-org-bookmarks (path)
   "Get the bookmark content at title PATH."
   (when (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
     (let* ((bookmark-title (match-string 1 path))
@@ -1527,62 +1529,62 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
            ;; reference `org-bookmarks-link-open'
            (bookmark-content (org-bookmarks--get-bookmark-content path))
            (cwd (file-name-directory org-bookmarks-file))
-           (text (concat "\n" (org-link-beautify--display-org-content bookmark-content))))
+           (text (concat "\n" (olb/-display-org-content bookmark-content))))
       ;; return the files list in archive file as result.
       text)))
 
-(defun org-link-beautify-preview-org-bookmark (ov path link)
+(defun olb/preview-org-bookmark (ov path link)
   "Preview org-bookmark: link of PATH over OV overlay position for LINK element."
   (if-let* (((require 'org-bookmarks nil t))
-            (text (org-link-beautify--generate-preview-for-org-bookmarks path)))
+            (text (olb/-generate-preview-for-org-bookmarks path)))
       (prog1 ov
         (overlay-put ov 'after-string text)
         (overlay-put ov 'face         'org-link))
-    (org-link-beautify-iconify ov path link)))
+    (olb/iconify ov path link)))
 
 ;;; excalidraw: link type
 
-(defun org-link-beautify-preview-excalidraw (ov path link)
+(defun olb/preview-excalidraw (ov path link)
   "Preview excalidraw file of PATH over OV overlay position for LINK element."
   ;; TODO: reference `org-excalidraw--shell-cmd-to-svg'
   nil)
 
 ;;; geo: link type
 
-(defun org-link-beautify-preview-geography (ov path link)
+(defun olb/preview-geography (ov path link)
   "Preview geo: link of PATH over OV overlay position for LINK element."
   ;; TODO
   nil)
 
 ;;; git: link type
 
-(defcustom org-link-beautify-git-preview nil
+(defcustom olb/git-preview nil
   "Whether enable git: link type preview."
   :type 'boolean
   :safe #'booleanp
   :group 'org-link-beautify)
 
-(defun org-link-beautify--generate-preview-for-git (ov path link)
+(defun olb/-generate-preview-for-git (ov path link)
   "Get the content on OV overlay of PATH at LINK element."
   (when (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
     (let* ((file-path (match-string 1 path))
            (commit (match-string 2 path))
            ;; TODO: use `vc-git-*' or `magit' API to get git commit blob content.
            (commit-diff (vc-git-symbolic-commit commit))
-           (text (concat "\n" (org-link-beautify--display-content-block commit-diff))))
+           (text (concat "\n" (olb/-display-content-block commit-diff))))
       text)))
 
-(defun org-link-beautify-preview-git (ov path link)
+(defun olb/preview-git (ov path link)
   "Preview git: link of PATH over OV overlay position for LINK element."
-  (if org-link-beautify-git-preview
-      (when-let* ((text (org-link-beautify--generate-preview-for-git ov path link)))
+  (if olb/git-preview
+      (when-let* ((text (olb/-generate-preview-for-git ov path link)))
         (overlay-put ov 'after-string text)
         (overlay-put ov 'face 'org-block))
-    (org-link-beautify-iconify ov path link)))
+    (olb/iconify ov path link)))
 
 ;;; http[s]: url link type
 
-(defcustom org-link-beautify-url-preview-command
+(defcustom olb/url-preview-command
   (cl-case system-type
     (darwin
      (cond
@@ -1606,35 +1608,35 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
   :safe #'stringp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-url-preview-size 800
+(defcustom olb/url-preview-size 800
   "The url web page thumbnail image size."
   :type 'number
   :safe #'numberp
   :group 'org-link-beautify)
 
-(defun org-link-beautify--generate-preview-for-url (ov path link)
+(defun olb/-generate-preview-for-url (ov path link)
   "Generate screenshot archive for the URL PATH web page on OV overlay at LINK element."
   (let* ((type (org-element-property :type link))
          (url (concat type ":" path))
-         (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path (buffer-file-name)))
+         (thumbnails-dir (olb/-get-thumbnails-dir-path (buffer-file-name)))
          (thumbnail-filename (format "org-link-beautify screenshot of sha1 URL %s.png" (sha1 url)))
          (thumbnail-file (expand-file-name thumbnail-filename thumbnails-dir))
          (html-archive-file (concat (file-name-sans-extension thumbnail-file) ".html"))
-         (thumbnail-size (or org-link-beautify-url-preview-size 1000))
+         (thumbnail-size (or olb/url-preview-size 1000))
          (proc-name (format "org-link-beautify url screenshot - %s" url))
          (proc-buffer (format " *org-link-beautify url screenshot - %s*" url))
          (proc (get-process proc-name)))
-    (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
+    (olb/-ensure-thumbnails-dir thumbnails-dir)
     (unless (or (file-exists-p thumbnail-file)
                 (file-exists-p html-archive-file))
-      (when org-link-beautify-url-preview-command
+      (when olb/url-preview-command
         (unless proc
-          (pcase org-link-beautify-url-preview-command
+          (pcase olb/url-preview-command
             ((or "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" "google-chrome")
              ;; $ google-chrome --headless --screenshot=screenshot.png "https://www.chromestatus.com/"
              (start-process
               proc-name proc-buffer
-              org-link-beautify-url-preview-command
+              olb/url-preview-command
               "--headless"
               (format "--screenshot=%s" thumbnail-file)
               url))
@@ -1659,23 +1661,23 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
                             (when (string= event "finished\n")
                               (kill-buffer (process-buffer proc))
                               (kill-process proc))))))))))
-    (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
-      (org-link-beautify--notify-generate-thumbnail-failed url thumbnail-file))))
+    (when (and olb/enable-debug-p (not (file-exists-p thumbnail-file)))
+      (olb/-notify-generate-thumbnail-failed url thumbnail-file))))
 
-(defun org-link-beautify-preview-url (ov path link)
+(defun olb/preview-url (ov path link)
   "Preview http[s]: URL link of PATH over OV overlay position for LINK element."
   (if-let* (( (display-graphic-p))
-            (org-link-beautify-url-preview-command)
-            (thumbnail-file (org-link-beautify--generate-preview-for-url ov path link))
+            (olb/url-preview-command)
+            (thumbnail-file (olb/-generate-preview-for-url ov path link))
             ((file-exists-p thumbnail-file))
-            (image (create-image thumbnail-file nil nil :width (or org-link-beautify-url-preview-size 600))))
+            (image (create-image thumbnail-file nil nil :width (or olb/url-preview-size 600))))
       (prog1 ov
-        (org-link-beautify-overlay-display-image ov image))
-    (org-link-beautify-iconify ov path link)))
+        (olb/overlay-display-image ov image))
+    (olb/iconify ov path link)))
 
 ;;; Insert Org link without description based on smart detecting file extension.
 
-(defun org-link-beautify-remove-description (orig-func link-raw &optional link-description)
+(defun olb/remove-description (orig-func link-raw &optional link-description)
   "Advice function to remove LINK-DESCRIPTION from LINK-RAW around ORIG-FUNC.
 
 This is for link image previewing to get around function `org-link-preview'
@@ -1708,97 +1710,97 @@ This is for link image previewing to get around function `org-link-preview'
 ;;; minor mode `org-link-beautify-mode'
 
 ;;;###autoload
-(defun org-link-beautify-enable ()
+(defun olb/enable ()
   "Enable `org-link-beautify'."
   (dolist (link-type (mapcar #'car org-link-parameters))
     (pcase link-type
-      ("file" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-file)) ; `org-link-preview-file',
-      ("attachment" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-attachment)) ; `org-attach-preview-file'
-      ("docview" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-pdf)) ; extension `doc-view'
-      ("pdfview" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-pdf)) ; extension `pdf-tools'
-      ("pdf" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-pdf))
-      ("epub" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-epub))
-      ("nov" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-nov)) ; extension `nov'
-      ("geo" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-geography))
-      ("http" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("https" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("ftp" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("file" (org-link-set-parameters link-type :preview #'olb/preview-file)) ; `org-link-preview-file',
+      ("attachment" (org-link-set-parameters link-type :preview #'olb/preview-attachment)) ; `org-attach-preview-file'
+      ("docview" (org-link-set-parameters link-type :preview #'olb/preview-pdf)) ; extension `doc-view'
+      ("pdfview" (org-link-set-parameters link-type :preview #'olb/preview-pdf)) ; extension `pdf-tools'
+      ("pdf" (org-link-set-parameters link-type :preview #'olb/preview-pdf))
+      ("epub" (org-link-set-parameters link-type :preview #'olb/preview-epub))
+      ("nov" (org-link-set-parameters link-type :preview #'olb/preview-nov)) ; extension `nov'
+      ("geo" (org-link-set-parameters link-type :preview #'olb/preview-geography))
+      ("http" (org-link-set-parameters link-type :preview #'olb/iconify))
+      ("https" (org-link-set-parameters link-type :preview #'olb/iconify))
+      ("ftp" (org-link-set-parameters link-type :preview #'olb/iconify))
 
       ;; Org mode internal link types
-      ("custom-id" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("id" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("coderef" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("elisp" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("eshell" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("shell" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("man" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("woman" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("info" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("help" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("shortdoc" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("custom-id" (org-link-set-parameters link-type :preview #'olb/iconify))
+      ("id" (org-link-set-parameters link-type :preview #'olb/iconify))
+      ("coderef" (org-link-set-parameters link-type :preview #'olb/iconify))
+      ("elisp" (org-link-set-parameters link-type :preview #'olb/iconify))
+      ("eshell" (org-link-set-parameters link-type :preview #'olb/iconify))
+      ("shell" (org-link-set-parameters link-type :preview #'olb/iconify))
+      ("man" (org-link-set-parameters link-type :preview #'olb/iconify))
+      ("woman" (org-link-set-parameters link-type :preview #'olb/iconify))
+      ("info" (org-link-set-parameters link-type :preview #'olb/iconify))
+      ("help" (org-link-set-parameters link-type :preview #'olb/iconify))
+      ("shortdoc" (org-link-set-parameters link-type :preview #'olb/iconify))
       
       ;; Org mode external link types
-      ("grep" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("occur" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("mailto" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("news" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("rss" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("elfeed" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; extension `elfeed'
-      ("wikipedia" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("irc" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("wechat" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("magnet" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ;; ("git" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git))
-      ("eww" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; EWW
-      ("chrome" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("edge" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("mu4e" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ;; ("web-browser" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-browser))
+      ("grep" (org-link-set-parameters link-type :preview #'olb/iconify))
+      ("occur" (org-link-set-parameters link-type :preview #'olb/iconify))
+      ("mailto" (org-link-set-parameters link-type :preview #'olb/iconify))
+      ("news" (org-link-set-parameters link-type :preview #'olb/iconify))
+      ("rss" (org-link-set-parameters link-type :preview #'olb/iconify))
+      ("elfeed" (org-link-set-parameters link-type :preview #'olb/iconify)) ; extension `elfeed'
+      ("wikipedia" (org-link-set-parameters link-type :preview #'olb/iconify))
+      ("irc" (org-link-set-parameters link-type :preview #'olb/iconify))
+      ("wechat" (org-link-set-parameters link-type :preview #'olb/iconify))
+      ("magnet" (org-link-set-parameters link-type :preview #'olb/iconify))
+      ;; ("git" (org-link-set-parameters link-type :preview #'olb/preview-git))
+      ("eww" (org-link-set-parameters link-type :preview #'olb/iconify)) ; EWW
+      ("chrome" (org-link-set-parameters link-type :preview #'olb/iconify))
+      ("edge" (org-link-set-parameters link-type :preview #'olb/iconify))
+      ("mu4e" (org-link-set-parameters link-type :preview #'olb/iconify))
+      ;; ("web-browser" (org-link-set-parameters link-type :preview #'olb/preview-browser))
       
       ;; org-ref link types
-      ("cite" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("ref" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("doi" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("bibtex" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("bibliography" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("cite" (org-link-set-parameters link-type :preview #'olb/iconify))
+      ("ref" (org-link-set-parameters link-type :preview #'olb/iconify))
+      ("doi" (org-link-set-parameters link-type :preview #'olb/iconify))
+      ("bibtex" (org-link-set-parameters link-type :preview #'olb/iconify))
+      ("bibliography" (org-link-set-parameters link-type :preview #'olb/iconify))
       
       ;; org-mode extensions link types
-      ("org-ql-search" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; extension `org-ql'
-      ("org-contact" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-org-contact)) ; extension `org-contacts'
-      ("org-bookmark" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-org-bookmark)) ; extension `org-bookmarks'
-      ;; ("orgit-rev" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git)) ; extension `orgit'
-      ;; ("orgit-log" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git)) ; extension `orgit'
-      ;; ("orgit" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git))     ; extension `orgit'
-      ("excalidraw" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-excalidraw)) ; extension `org-excalidraw'
+      ("org-ql-search" (org-link-set-parameters link-type :preview #'olb/iconify)) ; extension `org-ql'
+      ("org-contact" (org-link-set-parameters link-type :preview #'olb/preview-org-contact)) ; extension `org-contacts'
+      ("org-bookmark" (org-link-set-parameters link-type :preview #'olb/preview-org-bookmark)) ; extension `org-bookmarks'
+      ;; ("orgit-rev" (org-link-set-parameters link-type :preview #'olb/preview-git)) ; extension `orgit'
+      ;; ("orgit-log" (org-link-set-parameters link-type :preview #'olb/preview-git)) ; extension `orgit'
+      ;; ("orgit" (org-link-set-parameters link-type :preview #'olb/preview-git))     ; extension `orgit'
+      ("excalidraw" (org-link-set-parameters link-type :preview #'olb/preview-excalidraw)) ; extension `org-excalidraw'
       
       ;; org-media-note link types
-      ("video" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-video)) ; `org-media-note'
-      ("audio" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-audio)) ; `org-media-note'
-      ("videocite" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-video)) ; `org-media-note'
-      ("audiocite" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-audio)) ; `org-media-note'
+      ("video" (org-link-set-parameters link-type :preview #'olb/preview-video)) ; `org-media-note'
+      ("audio" (org-link-set-parameters link-type :preview #'olb/preview-audio)) ; `org-media-note'
+      ("videocite" (org-link-set-parameters link-type :preview #'olb/preview-video)) ; `org-media-note'
+      ("audiocite" (org-link-set-parameters link-type :preview #'olb/preview-audio)) ; `org-media-note'
       
       ;; other link types
-      ("eaf" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; extension `emacs-application-framework'
-      ("javascript" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; Org mode inline source code link
-      ("js" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; Org mode inline source code link
-      ("vscode" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; Visual Studio Code
-      ("macappstore" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; Mac App Store
-      ("fuzzy" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; org-mode internal raw link type
-      (_ (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))))
+      ("eaf" (org-link-set-parameters link-type :preview #'olb/iconify)) ; extension `emacs-application-framework'
+      ("javascript" (org-link-set-parameters link-type :preview #'olb/iconify)) ; Org mode inline source code link
+      ("js" (org-link-set-parameters link-type :preview #'olb/iconify)) ; Org mode inline source code link
+      ("vscode" (org-link-set-parameters link-type :preview #'olb/iconify)) ; Visual Studio Code
+      ("macappstore" (org-link-set-parameters link-type :preview #'olb/iconify)) ; Mac App Store
+      ("fuzzy" (org-link-set-parameters link-type :preview #'olb/iconify)) ; org-mode internal raw link type
+      (_ (org-link-set-parameters link-type :preview #'olb/iconify))))
   ;; remove link description
-  (advice-add 'org-link-make-string :around #'org-link-beautify-remove-description))
+  (advice-add 'org-link-make-string :around #'olb/remove-description))
 
 ;;;###autoload
-(defun org-link-beautify-disable ()
+(defun olb/disable ()
   "Disable `org-link-beautify'."
   (dolist (link-type (mapcar #'car org-link-parameters))
     (pcase link-type
       ("file" (org-link-set-parameters "file" :preview #'org-link-preview-file))
       ("attachment" (org-link-set-parameters "attachment" :preview #'org-attach-preview-file))
       (_ (org-link-set-parameters link-type :preview nil))))
-  (advice-remove 'org-link-make-string #'org-link-beautify-remove-description))
+  (advice-remove 'org-link-make-string #'olb/remove-description))
 
-(defvar org-link-beautify-mode-map
+(defvar olb/mode-map
   (let ((map (make-sparse-keymap)))
     map)
   "The `org-link-beautify-mode' minor mode map.")
@@ -1810,13 +1812,18 @@ This is for link image previewing to get around function `org-link-preview'
   :global t
   :init-value nil
   :lighter " ߷"
-  :keymap org-link-beautify-mode-map ; avoid to enable `org-link-beautify-keymap' globally everywhere.
+  :keymap olb/mode-map ; avoid to enable `olb/keymap' globally everywhere.
   (if org-link-beautify-mode
-      (org-link-beautify-enable)
-    (org-link-beautify-disable)))
+      (olb/enable)
+    (olb/disable)))
 
 
 
 (provide 'org-link-beautify-new)
 
 ;;; org-link-beautify-new.el ends here
+
+;; Local Variables:
+;; read-symbol-shorthands: (("olb/" . "org-link-beautify-") (":olb/" . ":org-link-beautify-"))
+;; package-lint--sane-prefixes: "^olb/"
+;; End:
