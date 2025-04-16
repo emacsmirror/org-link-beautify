@@ -557,6 +557,7 @@ This function will apply file type function based on file extension."
        (t (or (olb/preview-thumbnail ov path link)
               (olb/iconify ov path link))))))
 
+;;; Preview attachment: link type
 
 (defun olb/preview-attachment (ov path link)
   "Preview attachment file of PATH over OV overlay position for LINK element.
