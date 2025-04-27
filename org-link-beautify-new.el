@@ -497,7 +497,7 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
 The IMAGE object is created by `create-image' from `org--create-inline-image'."
   ;; See bug#59902. We cannot rely on Emacs to update image if the file has changed.
   (image-flush image) ; refresh image in cache if file changed.
-  (image--set-property image :mask 'heuristic)
+  ;; (image--set-property image :mask 'heuristic) ; NOTE: caused image partially displaying vanished
   (overlay-put ov 'display image)
   (overlay-put ov 'face    'default)
   (overlay-put ov 'keymap  olb/keymap)
