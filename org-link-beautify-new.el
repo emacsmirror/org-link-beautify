@@ -475,10 +475,12 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
                (proc (get-process proc-name)))
           (make-process
            :name proc-name
-           :command (list olb/thumbnailer-script
+           :command (list olb/python-interpreter
+                          olb/thumbnailer-script
                           input-file
                           thumbnail-file
-                          (number-to-string thumbnail-size))
+                          "--type" "thumbnail" ;; firstpage
+                          "--size" (number-to-string thumbnail-size))
            :buffer proc-buffer
            :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
            :sentinel (lambda (proc event)
