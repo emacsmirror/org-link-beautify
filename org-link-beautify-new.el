@@ -700,19 +700,10 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
 ;;; file: .epub
 
 (defcustom olb/epub-preview-command
-  (let ((script (expand-file-name "scripts/thumbnailer-epub.py" (file-name-directory (or load-file-name (buffer-file-name))))))
-    (cl-case system-type
-      (gnu/linux (if (executable-find "gnome-epub-thumbnailer")
-                     "gnome-epub-thumbnailer"
-                   script))
-      (darwin (if (executable-find "epub-thumbnailer")
-                  "epub-thumbnailer"
-                script))
-      (t script)))
+  (or (expand-file-name "scripts/thumbnailer-epub.py" (file-name-directory (or load-file-name (buffer-file-name))))
+      (expand-file-name "scripts/thumbnailer.py" (file-name-directory (or load-file-name (buffer-file-name)))))
   "Whether enable EPUB files cover preview?
-If command \"gnome-epub-thumbnailer\" is available, enable EPUB
-preview by default. You can set this option to nil to disable
-EPUB preview."
+You can set this option to nil to disable EPUB preview."
   :type 'string
   :safe #'stringp
   :group 'org-link-beautify)
@@ -743,22 +734,6 @@ EPUB preview."
       (olb/-ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
         (pcase (file-name-nondirectory olb/epub-preview-command)
-          ("epub-thumbnailer"           ; for macOS command "epub-thumbnailer"
-           (make-process
-            :name proc-name
-            :command (list olb/epub-preview-command
-                           epub-file
-                           thumbnail-file
-                           (number-to-string thumbnail-size))
-            :buffer proc-buffer
-            :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
-            :sentinel (lambda (proc event)
-                        (if olb/enable-debug-p
-                            (message (format "> proc: %s\n> event: %s" proc event))
-                          ;; (when (string= event "finished\n")
-                          ;;   (kill-buffer (process-buffer proc))
-                          ;;   (kill-process proc))
-                          ))))
           ("thumbnailer-epub.py"           ; for script "scripts/epub-thumbnailer.py"
            (make-process
             :name proc-name
@@ -776,13 +751,7 @@ EPUB preview."
                           ;;   (kill-buffer (process-buffer proc))
                           ;;   (kill-process proc))
                           ))))
-          ("gnome-epub-thumbnailer"                 ; for Linux "gnome-epub-thumbnailer"
-           (start-process
-            proc-name proc-buffer
-            olb/epub-preview-command
-            epub-file thumbnail-file
-            (when olb/ebook-preview-size "--size")
-            (when olb/ebook-preview-size (number-to-string thumbnail-size))))
+          ("thumbnailer.py" (olb/thumbnailer file-path))
           (_ (user-error "This system platform currently not supported by org-link-beautify.\n Please contribute code to support"))))
       (when (and olb/enable-debug-p (not (file-exists-p thumbnail-file)))
         (olb/-notify-generate-thumbnail-failed epub-file thumbnail-file))

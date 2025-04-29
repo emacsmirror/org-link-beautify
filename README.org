@@ -117,14 +117,6 @@ The new implementation is based on Org mode new ~org-link-parameter~ =:preview= 
   brew install poppler pdf2svg
   #+end_src
 
-- EPUB file cover image preview need command "=gnome-epub-thumbnailer="
-
-  For Arch Linux:
-
-  #+begin_src shell :dir /sudo:: :results none
-  sudo pacman -S --noconfirm gnome-epub-thumbnailer
-  #+end_src
-
 - EPUB file cover image preview with script "=scripts/thumbnailer-epub.py=" requires Python =PIL/Pillow=.
 
   #+begin_src shell
