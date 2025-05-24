@@ -494,6 +494,8 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
       ;; return the thumbnail file as result.
       thumbnail-file)))
 
+;;; overlay displaying the preview thumbnail
+
 (defun org-link-beautify-overlay-display-image (ov image &optional align)
   "Display IMAGE object on overlay OV in ALIGN position.
 The IMAGE object is created by `create-image' from `org--create-inline-image'."
