@@ -40,6 +40,13 @@
 (require 'nerd-icons)
 (require 'qrencode)
 
+(declare-function org-attach-preview-file "org-attach" (ov path link))
+(declare-function vc-git-symbolic-commit "vc-git" (commit &optional force))
+(declare-function org-contacts-get-avatar-icon "org-contacts" (&optional pom))
+(declare-function org-contacts-search-contact "org-contacts" (name))
+(declare-function org-attach-expand "org-attach" (file))
+(declare-function org-attach-reveal "org-attach" ())
+
 ;; (require 'fb2-reader)
 (declare-function fb2-reader--create-image "fb2-reader" (data type &rest props))
 (declare-function fb2-reader--extract-image-data "fb2-reader" (book attributes &optional tags))
