@@ -33,6 +33,9 @@
 (require 'org) ; including `ol'
 (require 'org-element)
 (require 'org-element-ast)
+;; (eq (plist-get (cdr (assoc "attachment" org-link-parameters)) :preview) 'org-attach-preview-file)
+(unless (assoc "attachment" org-link-parameters)
+  (require 'org-attach))
 (require 'cl-lib)
 (require 'color)
 (require 'faces)
@@ -1702,7 +1705,10 @@ This is for link image previewing to get around function `org-link-preview'
   (dolist (link-type (mapcar #'car org-link-parameters))
     (pcase link-type
       ("file" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-file)) ; `org-link-preview-file',
-      ("attachment" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-attachment)) ; `org-attach-preview-file'
+      ("attachment"
+       (require 'org-attach)
+       (with-eval-after-load "org-attach"
+         (org-link-set-parameters link-type :preview #'org-link-beautify-preview-attachment))) ; `org-attach-preview-file'
       ("docview" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-pdf)) ; extension `doc-view'
       ("pdfview" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-pdf)) ; extension `pdf-tools'
       ("pdf" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-pdf))
