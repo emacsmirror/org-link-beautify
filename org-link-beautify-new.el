@@ -503,6 +503,11 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
 
 ;;; overlay displaying the preview thumbnail
 
+(defvar org-link-beautify-preview-thumbnail-exclude-list
+  '("txt")
+  "A list of exclude file extensions for `org-link-beautify-preview-thumbnail'.
+The function `org-link-beautify-thumbnailer' invoked Python script `thumbnailer.py'.")
+
 (defun org-link-beautify-overlay-display-image (ov image &optional align)
   "Display IMAGE object on overlay OV in ALIGN position.
 The IMAGE object is created by `create-image' from `org--create-inline-image'."
@@ -523,16 +528,17 @@ The IMAGE object is created by `create-image' from `org--create-inline-image'."
 
 (defun org-link-beautify-preview-thumbnail (ov path link)
   "Display thumbnail on overlay OV from PATH at element LINK."
-  (if-let* ((_ (display-graphic-p))
-            (thumbnail-file (org-link-beautify-thumbnailer path))
-            ;; ((string-match-p (image-file-name-regexp) thumbnail-file))
-            ( (file-exists-p thumbnail-file)))
-      (let* ((width (or (org-display-inline-image--width link) 300))
-             (align (org-image--align link))
-             (image (org--create-inline-image thumbnail-file width)))
-        (if image                     ; Add image to overlay
-	        (org-link-beautify-overlay-display-image ov image align)
-          nil))))
+  (unless (member (file-name-extension path) org-link-beautify-preview-thumbnail-exclude-list)
+    (if-let* ((_ (display-graphic-p))
+              (thumbnail-file (org-link-beautify-thumbnailer path))
+              ;; ((string-match-p (image-file-name-regexp) thumbnail-file))
+              ( (file-exists-p thumbnail-file)))
+        (let* ((width (or (org-display-inline-image--width link) 300))
+               (align (org-image--align link))
+               (image (org--create-inline-image thumbnail-file width)))
+          (if image                        ; Add image to overlay
+              (org-link-beautify-overlay-display-image ov image align)
+            nil)))))
 
 ;;; Preview file: link type
 
