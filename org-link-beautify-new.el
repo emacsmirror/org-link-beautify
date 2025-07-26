@@ -441,7 +441,7 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
       (overlay-put ov
                    'display (concat
                              (propertize "["
-                                         'face `( :inherit 'default
+                                         'face `( :inherit default
                                                   :underline t
                                                   :foreground ,(if (face-foreground 'shadow)
                                                                    (color-lighten-name (face-foreground 'shadow) 2)
@@ -450,17 +450,17 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
                                          'face (org-link-beautify--return-warning-face ov path link)
                                          'read-only t 'inhibit-isearch t 'intangible t)
                              (propertize "]"
-                                         'face `( :inherit 'default
+                                         'face `( :inherit default
                                                   :underline t
                                                   :foreground ,(if (face-foreground 'shadow)
                                                                    (color-lighten-name (face-foreground 'shadow) 2)
                                                                  "gray40")))))
       (overlay-put ov
                    'after-string (concat
-                                  (propertize "[" 'face '(:inherit 'default :foreground "orange"))
+                                  (propertize "[" 'face '(:inherit default :foreground "orange"))
                                   icon
                                   ;; (propertize icon 'face '(:slant 'normal))
-                                  (propertize "]" 'face '(:inherit 'default :foreground "orange"))))
+                                  (propertize "]" 'face '(:inherit default :foreground "orange"))))
       (overlay-put ov 'keymap  org-link-beautify-keymap))
     t))
 
