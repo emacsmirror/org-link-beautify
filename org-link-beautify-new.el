@@ -475,7 +475,7 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
 It requires Python package 'thumbnail' installed.
 $ pip install thumbnail")
 
-(defun org-link-beautify-thumbnailer (path)
+(defun org-link-beautify-thumbnailer (path &optional proc-name proc-buffer)
   "Generate thumbnail image for file of PATH over OV overlay position for LINK element."
   (when (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
     (let* ((file-path (match-string 1 path))
@@ -485,9 +485,8 @@ $ pip install thumbnail")
            (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base input-file))))
            (thumbnail-size 600))
       (unless (file-exists-p thumbnail-file)
-        (let* ((proc-name (format "org-link-beautify thumbnailer - %s" (file-name-base input-file)))
-               (proc-buffer (format " *org-link-beautify thumbnailer - %s*" (file-name-base input-file)))
-               (proc (get-process proc-name)))
+        (let* ((proc-name (or proc-name (format "org-link-beautify thumbnailer - %s" (file-name-base input-file))))
+               (proc-buffer (or proc-buffer (format " *org-link-beautify thumbnailer - %s*" (file-name-base input-file)))))
           (make-process
            :name proc-name
            :command (list org-link-beautify-python-interpreter
@@ -692,8 +691,7 @@ This function will apply file type function based on file extension."
                                       (symbol-name org-link-beautify-pdf-preview-image-format)))))
            (thumbnail-size 600)
            (proc-name (format "org-link-beautify pdf preview - %s" pdf-file))
-           (proc-buffer (format " *org-link-beautify pdf preview - %s*" pdf-file))
-           (proc (get-process proc-name)))
+           (proc-buffer (format " *org-link-beautify pdf preview - %s*" pdf-file)))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
         (pcase (file-name-nondirectory org-link-beautify-pdf-preview-command)
@@ -769,8 +767,7 @@ $ pip3 install Pillow"
                               (format "%s%s-P%s.png" thumbnails-dir (file-name-base epub-file) epub-page-number))))
            (thumbnail-size (or org-link-beautify-ebook-preview-size 600))
            (proc-name (format "org-link-beautify epub preview - %s" epub-file))
-           (proc-buffer (format " *org-link-beautify epub preview - %s*" epub-file))
-           (proc (get-process proc-name)))
+           (proc-buffer (format " *org-link-beautify epub preview - %s*" epub-file)))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
         (pcase (file-name-nondirectory org-link-beautify-epub-preview-command)
@@ -791,7 +788,7 @@ $ pip3 install Pillow"
                           ;;   (kill-buffer (process-buffer proc))
                           ;;   (kill-process proc))
                           ))))
-          ("thumbnailer.py" (org-link-beautify-thumbnailer file-path))
+          ("thumbnailer.py" (org-link-beautify-thumbnailer file-path proc-name proc-buffer))
           (_ (user-error "This system platform currently not supported by org-link-beautify.\n Please contribute code to support"))))
       (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
         (org-link-beautify--notify-generate-thumbnail-failed epub-file thumbnail-file))
@@ -937,8 +934,7 @@ You can install software `libmobi' to get command `mobitool'."
                              (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base fictionbook2-file))))))
            (thumbnail-size (or org-link-beautify-fictionbook2-preview-size 600))
            (proc-name (format "org-link-beautify fictionbook preview - %s" fictionbook2-file))
-           (proc-buffer (format " *org-link-beautify fictionbook preview - %s*" fictionbook2-file))
-           (proc (get-process proc-name)))
+           (proc-buffer (format " *org-link-beautify fictionbook preview - %s*" fictionbook2-file)))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
         (let ((cover-image (org-link-beautify-fictionbook2--extract-cover fictionbook2-file)))
@@ -1119,7 +1115,7 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
                      "--width")
                  (if org-link-beautify-comic-preview-size
                      (number-to-string thumbnail-size))))
-               ("thumbnailer.py" (org-link-beautify-thumbnailer file-path))))
+               ("thumbnailer.py" (org-link-beautify-thumbnailer file-path proc-name proc-buffer))))
             (darwin
              ;; for macOS "qlmanage" command
              ;; $ qlmanage -t "ラセン恐怖閣-マリコとニジロー1-DL版.cbz" - 2.0 -s 1080 -o ".thumbnails"
@@ -1145,7 +1141,7 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
                   ;; then rename [file.extension.png] to [file.png]
                   (when (file-exists-p qlmanage-thumbnail-file)
                     (rename-file qlmanage-thumbnail-file thumbnail-file))))
-               ("thumbnailer.py" (org-link-beautify-thumbnailer file-path))))
+               ("thumbnailer.py" (org-link-beautify-thumbnailer file-path proc-name proc-buffer))))
             (t (user-error "This system platform currently not supported by org-link-beautify.\n Please contribute code to support")))))
       (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
         (org-link-beautify--notify-generate-thumbnail-failed comic-file thumbnail-file))
@@ -1394,13 +1390,12 @@ $ pip install ffmpeg-python")
                 (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base subtitle-file))))
                 (thumbnail-size (or org-link-beautify-subtitle-preview-size 200))
                 (proc-name (format "org-link-beautify subtitle preview - %s" subtitle-file))
-                (proc-buffer (format " *org-link-beautify subtile preview - %s*" subtitle-file))
-                (proc (get-process proc-name)))
+                (proc-buffer (format " *org-link-beautify subtile preview - %s*" subtitle-file)))
           (prog1 thumbnail-file ; return the thumbnail file as result.
             (unless (file-exists-p thumbnail-file)
               (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
               (pcase (file-name-nondirectory org-link-beautify-subtitle-preview-command)
-                ("thumbnailer.py" (org-link-beautify-thumbnailer file-path)))))
+                ("thumbnailer.py" (org-link-beautify-thumbnailer file-path proc-name proc-buffer)))))
         (let* ((subtitle-file-context (split-string (shell-command-to-string (format "head -n 20 '%s'" subtitle-file)) "\n"))
                (text (concat "\n" (org-link-beautify--display-content-block subtitle-file-context))))
           ;; return the subtitle file context as result.
