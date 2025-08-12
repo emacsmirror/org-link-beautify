@@ -590,6 +590,9 @@ This function will apply file type function based on file extension."
        ;; Source Code
        ((member extension org-link-beautify-source-code-preview-list)
         (org-link-beautify-preview-file-source-code ov path link))
+       ;; file:/path/to/file.html (single HTML file for offline archived webpage)
+       ((member extension '("html" "mhtml" "mht" "webarchive"))
+        (org-link-beautify-preview-file-offline-webpage ov path link))
        (t (or (org-link-beautify-preview-thumbnail ov path link)
               (org-link-beautify-iconify ov path link))))))
 
@@ -1462,6 +1465,57 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
         (overlay-put ov 'after-string text)
 	    (overlay-put ov 'face         'default)
 	    (overlay-put ov 'keymap       org-link-beautify-keymap))
+    (org-link-beautify-iconify ov path link)))
+
+;;; file: [offline webpage archived single HTML file]
+
+(defcustom org-link-beautify-offline-webpage-preview-command org-link-beautify-thumbnailer-script
+  "The command to preview offline webpage file."
+  :type 'string
+  :safe #'stringp
+  :group 'org-link-beautify)
+
+(defcustom org-link-beautify-offline-webpage-preview-list
+  '("html" "mhtml" "mht" "webarchive")
+  "A list of offline webpage archive file types support previewing."
+  :type 'list
+  :safe #'listp
+  :group 'org-link-beautify)
+
+(defcustom org-link-beautify-offline-webpage-preview-size 800
+  "The subtitle preview image size."
+  :type 'number
+  :safe #'numberp
+  :group 'org-link-beautify)
+
+(defun org-link-beautify--generate-preview-for-file-offline-webpage (path)
+  "Generate THUMBNAIL-FILE with THUMBNAIL-SIZE for offline webpage file of PATH."
+  (when (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
+    (let* ((file-path (match-string 1 path))
+           ;; (search-option (match-string 2 path))
+           (offline-webpage-file (expand-file-name (org-link-unescape file-path))))
+      (if-let* ((org-link-beautify-offline-webpage-preview-command)
+                (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path offline-webpage-file))
+                (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base offline-webpage-file))))
+                (thumbnail-size (or org-link-beautify-offline-webpage-preview-size 600))
+                (proc-name (format "org-link-beautify offline webpage preview - %s" offline-webpage-file))
+                (proc-buffer (format " *org-link-beautify offline webpage preview - %s*" offline-webpage-file)))
+          (prog1 thumbnail-file ; return the thumbnail file as result.
+            (unless (file-exists-p thumbnail-file)
+              (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
+              (pcase (file-name-nondirectory org-link-beautify-offline-webpage-preview-command)
+                ("thumbnailer.py" (org-link-beautify-thumbnailer file-path proc-name proc-buffer))))
+            (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+              (org-link-beautify--notify-generate-thumbnail-failed audio-file thumbnail-file)))))))
+
+(defun org-link-beautify-preview-file-offline-webpage (ov path link)
+  "Preview offline webpage archived single file."
+  (if-let* (( (display-graphic-p))
+            (org-link-beautify-offline-webpage-preview-command)
+            (thumbnail-file (org-link-beautify--generate-preview-for-file-offline-webpage path))
+            ((file-exists-p thumbnail-file))
+            (image (create-image thumbnail-file nil nil :width (or org-link-beautify-offline-webpage-preview-size 600))))
+      (org-link-beautify-overlay-display-image ov image)
     (org-link-beautify-iconify ov path link)))
 
 ;;; pdf: & docview: link type
