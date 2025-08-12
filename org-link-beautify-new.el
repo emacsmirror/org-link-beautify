@@ -357,16 +357,16 @@ The argument FILE must be the absolute path."
       ("attachment" (if-let* (extension (file-name-extension path))
                         (nerd-icons-icon-for-extension extension)
                       (nerd-icons-icon-for-dir path)))
-      ("http" (nerd-icons-icon-for-url (concat type ":" path)))
-      ("https" (nerd-icons-icon-for-url (concat type ":" path)))
-      ("ftp" (nerd-icons-icon-for-url (concat type ":" path)))
+      ("http" (nerd-icons-icon-for-url (concat type ":" path) :face 'nerd-icons-dsilver))
+      ("https" (nerd-icons-icon-for-url (concat type ":" path) :face 'nerd-icons-green))
+      ("ftp" (nerd-icons-icon-for-url (concat type ":" path) :face 'nerd-icons-purple))
       ;; Org mode internal link types
       ("custom-id" (nerd-icons-mdicon "nf-md-text_box_search_outline" :face 'nerd-icons-blue))
       ("id" (nerd-icons-mdicon "nf-md-text_search" :face 'nerd-icons-blue))
       ("coderef" (nerd-icons-codicon "nf-cod-references" :face 'nerd-icons-cyan))
-      ("elisp" (nerd-icons-icon-for-file "file.el"))
-      ("eshell" (nerd-icons-icon-for-mode 'eshell-mode))
-      ("shell" (nerd-icons-icon-for-mode 'shell-mode))
+      ("elisp" (nerd-icons-icon-for-file "file.el" :face 'nerd-icons-purple))
+      ("eshell" (nerd-icons-icon-for-mode 'eshell-mode :face 'nerd-icons-cyan))
+      ("shell" (nerd-icons-icon-for-mode 'shell-mode :face 'nerd-icons-cyan))
       ("man" (nerd-icons-mdicon "nf-md-file_document_outline" :face 'nerd-icons-lblue))
       ("woman" (nerd-icons-mdicon "nf-md-file_document_outline" :face 'nerd-icons-blue-alt))
       ("info" (nerd-icons-mdicon "nf-md-information_outline" :face 'nerd-icons-lblue))
@@ -376,7 +376,7 @@ The argument FILE must be the absolute path."
       ("cite" (nerd-icons-codicon "nf-cod-references" :face 'nerd-icons-cyan))
       ;; Org mode external link types
       ("eaf" (nerd-icons-mdicon "nf-md-apps" :face 'nerd-icons-blue)) ; emacs-application-framework
-      ("eww" (nerd-icons-icon-for-mode 'eww-mode)) ; EWW
+      ("eww" (nerd-icons-icon-for-mode 'eww-mode :face 'nerd-icons-lgreen)) ; EWW
       ("chrome" (nerd-icons-mdicon "nf-md-google_chrome" :face 'nerd-icons-lorange))
       ("edge" (nerd-icons-mdicon "nf-md-microsoft_edge" :face 'nerd-icons-green))
       ("mu4e" (nerd-icons-mdicon "nf-md-email_search_outline" :face 'nerd-icons-blue))
