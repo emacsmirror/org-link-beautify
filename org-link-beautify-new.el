@@ -470,7 +470,10 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
 
 (defvar org-link-beautify-thumbnailer-script
   (expand-file-name "scripts/thumbnailer.py" (file-name-directory (or load-file-name (buffer-file-name))))
-  "The path of general thumbnailer script.")
+  "The path of general thumbnailer script.
+
+It requires Python package 'thumbnail' installed.
+$ pip install thumbnail")
 
 (defun org-link-beautify-thumbnailer (path)
   "Generate thumbnail image for file of PATH over OV overlay position for LINK element."
@@ -737,7 +740,10 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
   (or (expand-file-name "scripts/thumbnailer-epub.py" (file-name-directory (or load-file-name (buffer-file-name))))
       (expand-file-name "scripts/thumbnailer.py" (file-name-directory (or load-file-name (buffer-file-name)))))
   "Whether enable EPUB files cover preview?
-You can set this option to nil to disable EPUB preview."
+You can set this option to nil to disable EPUB preview.
+
+This script require Python package 'Pillow' installed.
+$ pip3 install Pillow"
   :type 'string
   :safe #'stringp
   :group 'org-link-beautify)
@@ -1161,7 +1167,11 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
 
 (defvar org-link-beautify-video-thumbnailer-script
   (expand-file-name "scripts/thumbnailer-video.py" (file-name-directory (or load-file-name (buffer-file-name))))
-  "The path of video thumbnailer script.")
+  "The path of video thumbnailer script.
+This script requires:
+- FFmpeg
+- Python package 'ffmpeg-python'
+$ pip install ffmpeg-python")
 
 (defcustom org-link-beautify-video-preview-command
   (cl-case system-type
