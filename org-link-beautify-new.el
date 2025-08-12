@@ -552,28 +552,40 @@ The IMAGE object is created by `create-image' from `org--create-inline-image'."
 This function will apply file type function based on file extension."
   (if-let* ((extension (file-name-extension path)))
       (cond
-       ((null extension) ; no file extension, it's directory.
+       ;; no file extension, it's directory.
+       ((null extension)
         (org-link-beautify-iconify ov path link))
-       ((string-match-p (image-file-name-regexp) path) ; `org-link-beautify-image-preview-list'
+       ;; images in `org-link-beautify-image-preview-list'
+       ((string-match-p (image-file-name-regexp) path)
         (org-link-beautify-preview-file-image ov path link))
+       ;; PDF
        ((string-equal extension "pdf")
         (org-link-beautify-preview-file-pdf ov path link))
+       ;; EPUB
        ((string-equal extension "epub")
         (org-link-beautify-preview-file-epub ov path link))
-       ((string-match-p "\\(mobi\\|azw3\\)" extension)
+       ;; Kindle .mobi or .azw3
+       ((string-match-p "\\(mobi\\|azw3\\|azw\\)" extension)
         (org-link-beautify-preview-file-kindle ov path link))
+       ;; .fb2(.zip)
        ((string-match-p "\\.fb2\\(\\.zip\\)?" path)
         (org-link-beautify-preview-file-fictionbook2 ov path link))
+       ;; Comic
        ((member extension org-link-beautify-comic-preview-list)
         (org-link-beautify-preview-file-comic ov path link))
+       ;; Video
        ((member extension org-link-beautify-video-preview-list)
         (org-link-beautify-preview-file-video ov path link))
+       ;; Audio
        ((member extension org-link-beautify-audio-preview-list)
         (org-link-beautify-preview-file-audio ov path link))
+       ;; Subtitle
        ((member extension org-link-beautify-subtitle-preview-list)
         (org-link-beautify-preview-file-subtitle ov path link))
+       ;; Archive
        ((member extension org-link-beautify-archive-preview-list)
         (org-link-beautify-preview-file-archive ov path link))
+       ;; Source Code
        ((member extension org-link-beautify-source-code-preview-list)
         (org-link-beautify-preview-file-source-code ov path link))
        (t (or (org-link-beautify-preview-thumbnail ov path link)
