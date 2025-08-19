@@ -1757,7 +1757,7 @@ This is for link image previewing to get around function `org-link-preview'
               (member link-type '("info" "help" "shortdoc" "man" "woman" "id" "custom-id" "coderef"))
               (member link-type '("elisp" "shell" "js" "javascript" "grep" "occur" "git"))
               (member link-type '("mailto" "rss" "news" "wikipedia" "irc" "magnet" "wechat" "web-browser" "eww" "chrome" "edge"))
-              (member link-type '("org-ql-search" "org-contact" "org-bookmark" "orgit" "orgit-rev" "orgit-log"))
+              (member link-type '("org-ql-search" "org-contact" "org-bookmark"))
               ;; Emacs package special link types
               ;; NOTE: "epub" "nov" page-number thumbnail generating not supported.
               (member link-type '("pdf" "pdfview" "docview")) ; "epub" "nov"
@@ -1834,9 +1834,9 @@ This is for link image previewing to get around function `org-link-preview'
       ("org-ql-search" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; extension `org-ql'
       ("org-contact" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-org-contact)) ; extension `org-contacts'
       ("org-bookmark" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-org-bookmark)) ; extension `org-bookmarks'
-      ;; ("orgit-rev" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git)) ; extension `orgit'
-      ;; ("orgit-log" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git)) ; extension `orgit'
-      ;; ("orgit" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git))     ; extension `orgit'
+      ("orgit-rev" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git)) ; extension `orgit'
+      ("orgit-log" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git)) ; extension `orgit'
+      ("orgit" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git))     ; extension `orgit'
       ("excalidraw" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-excalidraw)) ; extension `org-excalidraw'
       
       ;; org-media-note link types
