@@ -352,10 +352,10 @@ The argument FILE must be the absolute path."
         (extension (file-name-extension path)))
     (pcase type
       ("file" (if-let* (extension (file-name-extension path))
-                  (nerd-icons-icon-for-extension extension)
-                (nerd-icons-icon-for-dir path)))
+                  (nerd-icons-icon-for-extension extension :face '(:slant normal))
+                (nerd-icons-icon-for-dir path :face '(:slant normal))))
       ("attachment" (if-let* (extension (file-name-extension path))
-                        (nerd-icons-icon-for-extension extension)
+                        (nerd-icons-icon-for-extension extension :face '(:slant normal))
                       (nerd-icons-icon-for-dir path :face '(:inherit nerd-icons-blue :slant normal))))
       ("http" (nerd-icons-icon-for-url (concat type ":" path) :face '(:inherit nerd-icons-dsilver :slant normal)))
       ("https" (nerd-icons-icon-for-url (concat type ":" path) :face '(:inherit nerd-icons-green :slant normal)))
@@ -424,7 +424,7 @@ The argument FILE must be the absolute path."
           (t
            (message "[org-link-beautify] DEBUG: link type not supported, add PR for this link type.
 type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
-           (nerd-icons-mdicon "nf-md-progress_question" :face 'nerd-icons-lyellow)))))
+           (nerd-icons-mdicon "nf-md-progress_question" :face '(:inherit nerd-icons-lyellow :slant normal))))))
       (_
        (message "[org-link-beautify] DEBUG: link type not supported, add PR for this link type.
 type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
