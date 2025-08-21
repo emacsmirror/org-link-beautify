@@ -591,7 +591,7 @@ This function will apply file type function based on file extension."
        ((member extension org-link-beautify-source-code-preview-list)
         (org-link-beautify-preview-file-source-code ov path link))
        ;; file:/path/to/file.html (single HTML file for offline archived webpage)
-       ((member extension '("html" "mhtml" "mht" "webarchive"))
+       ((member extension org-link-beautify-offline-webpage-preview-list)
         (org-link-beautify-preview-file-offline-webpage ov path link))
        (t (or (org-link-beautify-preview-thumbnail ov path link)
               (org-link-beautify-iconify ov path link))))))
@@ -1469,7 +1469,18 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
 
 ;;; file: [offline webpage archived single HTML file]
 
-(defcustom org-link-beautify-offline-webpage-preview-command org-link-beautify-thumbnailer-script
+(defcustom org-link-beautify-offline-webpage-preview-command
+  (cl-case system-type
+    (darwin
+     (cond
+      ((file-exists-p "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
+       "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
+      ((executable-find "webkit2png") "webkit2png")))
+    (gnu/linux
+     (cond
+      ((or (executable-find "chrome") (executable-find "google-chrome"))
+       (executable-find "google-chrome"))
+      ((executable-find "webkit2png") "webkit2png"))))
   "The command to preview offline webpage file."
   :type 'string
   :safe #'stringp
@@ -1483,30 +1494,49 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
   :group 'org-link-beautify)
 
 (defcustom org-link-beautify-offline-webpage-preview-size 800
-  "The subtitle preview image size."
+  "The webpage offline saved archive file preview screenshot image size."
   :type 'number
   :safe #'numberp
   :group 'org-link-beautify)
 
 (defun org-link-beautify--generate-preview-for-file-offline-webpage (path)
-  "Generate THUMBNAIL-FILE with THUMBNAIL-SIZE for offline webpage file of PATH."
+  "Generate screenshot for the webpage offline saved archive file at PATH on OV overlay at LINK element."
   (when (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
     (let* ((file-path (match-string 1 path))
            ;; (search-option (match-string 2 path))
-           (offline-webpage-file (expand-file-name (org-link-unescape file-path))))
-      (if-let* ((org-link-beautify-offline-webpage-preview-command)
-                (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path offline-webpage-file))
-                (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base offline-webpage-file))))
-                (thumbnail-size (or org-link-beautify-offline-webpage-preview-size 600))
-                (proc-name (format "org-link-beautify offline webpage preview - %s" offline-webpage-file))
-                (proc-buffer (format " *org-link-beautify offline webpage preview - %s*" offline-webpage-file)))
-          (prog1 thumbnail-file ; return the thumbnail file as result.
-            (unless (file-exists-p thumbnail-file)
-              (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
-              (pcase (file-name-nondirectory org-link-beautify-offline-webpage-preview-command)
-                ("thumbnailer.py" (org-link-beautify-thumbnailer file-path proc-name proc-buffer))))
-            (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
-              (org-link-beautify--notify-generate-thumbnail-failed audio-file thumbnail-file)))))))
+           (offline-webpage-file (expand-file-name (org-link-unescape file-path)))
+           (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path offline-webpage-file))
+           (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base offline-webpage-file))))
+           (thumbnail-size (or org-link-beautify-offline-webpage-preview-size 600))
+           (proc-name (format "org-link-beautify offline webpage preview - %s" offline-webpage-file))
+           (proc-buffer (format " *org-link-beautify offline webpage preview - %s*" offline-webpage-file))
+           (proc (get-process proc-name)))
+      (prog1 thumbnail-file ; return the thumbnail file as result.
+        (unless (file-exists-p thumbnail-file)
+          (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
+          (unless proc
+            (pcase org-link-beautify-offline-webpage-preview-command
+              ;; Google Chrome headless screenshot
+              ((or "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" "chrome" "google-chrome")
+               ;; $ google-chrome --headless --screenshot=screenshot.png /path/to/file.html
+               (start-process
+                proc-name proc-buffer
+                org-link-beautify-offline-webpage-preview-command
+                "--headless"
+                (format "--screenshot=%s" thumbnail-file)
+                offline-webpage-file))
+              ("webkit2png"
+               (make-process
+                :name proc-name
+                :command (list "webkit2png" offline-webpage-file "-o" thumbnail-file)
+                :buffer proc-buffer
+                :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
+                :sentinel (lambda (proc event)
+                            (when (string= event "finished\n")
+                              (kill-buffer (process-buffer proc))
+                              (kill-process proc))))))))
+        (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+          (org-link-beautify--notify-generate-thumbnail-failed offline-webpage-file thumbnail-file))))))
 
 (defun org-link-beautify-preview-file-offline-webpage (ov path link)
   "Preview offline webpage archived single file."
