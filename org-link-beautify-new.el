@@ -1725,7 +1725,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
         (when org-link-beautify-url-preview-command
           (unless proc
             (pcase org-link-beautify-url-preview-command
-              ((or "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" "google-chrome")
+              ((or "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" "google-chrome" "chrome")
                ;; $ google-chrome --headless --screenshot=screenshot.png "https://www.chromestatus.com/"
                (start-process
                 proc-name proc-buffer
