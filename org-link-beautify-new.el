@@ -1522,6 +1522,8 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
                 org-link-beautify-offline-webpage-preview-command
                 "--headless"
                 (format "--screenshot=%s" thumbnail-file)
+                (format "--window-size=%s" "1920,1080")
+                "--hide-scrollbars"
                 offline-webpage-file)))))
         (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
           (org-link-beautify--notify-generate-thumbnail-failed offline-webpage-file thumbnail-file))))))
