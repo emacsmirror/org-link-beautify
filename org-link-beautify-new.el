@@ -1474,13 +1474,11 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
     (darwin
      (cond
       ((file-exists-p "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
-       "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
-      ((executable-find "webkit2png") "webkit2png")))
+       "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")))
     (gnu/linux
      (cond
       ((or (executable-find "chrome") (executable-find "google-chrome"))
-       (executable-find "google-chrome"))
-      ((executable-find "webkit2png") "webkit2png"))))
+       (executable-find "google-chrome")))))
   "The command to preview offline webpage file."
   :type 'string
   :safe #'stringp
@@ -1524,17 +1522,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
                 org-link-beautify-offline-webpage-preview-command
                 "--headless"
                 (format "--screenshot=%s" thumbnail-file)
-                offline-webpage-file))
-              ("webkit2png"
-               (make-process
-                :name proc-name
-                :command (list "webkit2png" offline-webpage-file "-o" thumbnail-file)
-                :buffer proc-buffer
-                :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
-                :sentinel (lambda (proc event)
-                            (when (string= event "finished\n")
-                              (kill-buffer (process-buffer proc))
-                              (kill-process proc))))))))
+                offline-webpage-file)))))
         (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
           (org-link-beautify--notify-generate-thumbnail-failed offline-webpage-file thumbnail-file))))))
 
@@ -1684,16 +1672,12 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
       ;; Google Chrome headless screenshot
       ((file-exists-p "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
-      ;; webkit2png
-      ((executable-find "webkit2png") "webkit2png")
       ;; monolith
       ((executable-find "monolith") "monolith")))
     (gnu/linux
      (cond
       ;; Google Chrome headless screenshot
       ((executable-find "chrome") (executable-find "google-chrome"))
-      ;; webkit2png
-      ((executable-find "webkit2png") "webkit2png")
       ;; monolith
       ((executable-find "monolith") "monolith"))))
   "Find available URL web page screenshot archive command."
@@ -1733,16 +1717,6 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
                 "--headless"
                 (format "--screenshot=%s" thumbnail-file)
                 url))
-              ("webkit2png"
-               (make-process
-                :name proc-name
-                :command (list "webkit2png" url "-o" thumbnail-file)
-                :buffer proc-buffer
-                :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
-                :sentinel (lambda (proc event)
-                            (when (string= event "finished\n")
-                              (kill-buffer (process-buffer proc))
-                              (kill-process proc)))))
               ("monolith"
                (let* ((html-archive-file (concat (file-name-sans-extension thumbnail-file) ".html")))
                  (make-process
