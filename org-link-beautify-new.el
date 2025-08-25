@@ -366,8 +366,8 @@ The argument FILE must be the absolute path."
       ("shell" (nerd-icons-icon-for-mode 'shell-mode :face '(:inherit nerd-icons-cyan :slant normal)))
       ("man" (nerd-icons-mdicon "nf-md-file_document_outline" :face '(:inherit nerd-icons-lblue :slant normal)))
       ("woman" (nerd-icons-mdicon "nf-md-file_document_outline" :face '(:inherit nerd-icons-blue-alt :slant normal)))
-      ("info" (nerd-icons-mdicon "nf-md-information_outline" :face '(:inherit nerd-icons-lblue :slant normal)))
-      ("help" (nerd-icons-mdicon "nf-md-help_circle_outline" :face '(:inherit nerd-icons-lblue :slant normal)))
+      ("info" (nerd-icons-icon-for-mode 'Info-mode))
+      ("help" (nerd-icons-icon-for-mode 'help-mode))
       ("shortdoc" (nerd-icons-mdicon "nf-md-file_link" :face '(:inherit nerd-icons-blue :slant normal)))
       ;; org-ref link types
       ("cite" (nerd-icons-codicon "nf-cod-references" :face '(:inherit nerd-icons-cyan :slant normal)))
