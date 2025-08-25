@@ -351,12 +351,9 @@ The argument FILE must be the absolute path."
   (let ((type (org-element-property :type link))
         (extension (file-name-extension path)))
     (pcase type
-      ("file" (if-let* (extension (file-name-extension path))
-                  (nerd-icons-icon-for-extension extension :face '(:slant normal :weight normal))
-                (nerd-icons-icon-for-dir path :face '(:slant normal :weight normal))))
-      ("attachment" (if-let* (extension (file-name-extension path))
-                        (nerd-icons-icon-for-extension extension :face '(:slant normal :weight normal))
-                      (nerd-icons-icon-for-dir path :face '(:inherit nerd-icons-blue :slant normal :weight normal))))
+      ;; FIXME: the icon is slant.
+      ("file" (nerd-icons-icon-for-file path))
+      ("attachment" (nerd-icons-icon-for-file path))
       ("http" (nerd-icons-icon-for-url (concat type ":" path) :face '(:inherit nerd-icons-dsilver :slant normal :weight normal)))
       ("https" (nerd-icons-icon-for-url (concat type ":" path) :face '(:inherit nerd-icons-green :slant normal :weight normal)))
       ("ftp" (nerd-icons-icon-for-url (concat type ":" path) :face '(:inherit nerd-icons-purple :slant normal :weight normal)))
@@ -459,9 +456,6 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
                    'after-string (concat
                                   (propertize "[" 'face '(:inherit default :foreground "orange"))
                                   icon
-                                  ;; Try to fix the icon is slant, but this solution has a problem
-                                  ;; that the icon face color is unified to blue.
-                                  ;; (propertize icon 'face '(:slant normal))
                                   (propertize "]" 'face '(:inherit default :foreground "orange"))))
       (overlay-put ov 'keymap  org-link-beautify-keymap))
     t))
