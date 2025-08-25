@@ -1843,8 +1843,8 @@ This is for link image previewing to get around function `org-link-preview'
       ("edge" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
       ("mu4e" (with-eval-after-load "mu4e-org"
                 (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ;; ("web-browser" (with-eval-after-load "org-extra-link-types"
-      ;;                  (org-link-set-parameters link-type :preview #'org-link-beautify-preview-browser)))
+      ("web-browser" (with-eval-after-load "org-extra-link-types"
+                       (org-link-set-parameters link-type :preview #'org-link-beautify-preview-file-offline-webpage)))
       
       ;; org-ref link types
       ("ref" (with-eval-after-load "org-ref"
