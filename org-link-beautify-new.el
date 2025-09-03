@@ -122,21 +122,26 @@ Package `dwim-shell-command' is missing, please install it")))))
 (defun org-link-beautify--copy-file-to-clipboard (file)
   "Copy the FILE on path to clipboard.
 The argument FILE must be the absolute path."
-  (cl-case system-type
-    (darwin
-     (do-applescript
-      (format "tell app \"Finder\" to set the clipboard to ( POSIX file \"%s\" )" file)))
-    (gnu/linux
-     ;; - xclip-copyfile :: command copies files into the X clipboard, recursing into directories.
-     ;; - xclip-cutfile :: command Copy the files, but also deletes them afterwards.
-     ;; - xclip-pastefile :: command Paste the files out of the clipboard.
-     ;; - xclip :: command Copy text or files to the clipboard.
-     (if (executable-find "xclip-copyfile")
-         (shell-command (format "xclip-copyfile %s" file))
-       (user-error "[org-link-beautify] Error: the command-line tool 'xclip-copyfile' is not installed!")))
-    ;; TODO:
-    (windows-nt ))
-  (message "Copied file [%s] to system clipboard" (string-truncate-left file (/ (window-width) 2))))
+  (interactive "P")
+  (if current-prefix-arg
+      (let ((destination (read-file-name (format "[org-link-beautify] copy file %s to: " (file-name-nondirectory file)))))
+        (copy-file file destination)
+        (message "[org-link-beautify] Copied file [%s] to [%s]" (file-name-nondirectory file) (file-name-directory file)))
+    (cl-case system-type
+      (darwin
+       (do-applescript
+        (format "tell app \"Finder\" to set the clipboard to ( POSIX file \"%s\" )" file)))
+      (gnu/linux
+       ;; - xclip-copyfile :: command copies files into the X clipboard, recursing into directories.
+       ;; - xclip-cutfile :: command Copy the files, but also deletes them afterwards.
+       ;; - xclip-pastefile :: command Paste the files out of the clipboard.
+       ;; - xclip :: command Copy text or files to the clipboard.
+       (if (executable-find "xclip-copyfile")
+           (shell-command (format "xclip-copyfile %s" file))
+         (user-error "[org-link-beautify] Error: the command-line tool 'xclip-copyfile' is not installed!")))
+      ;; TODO:
+      (windows-nt ))
+    (message "[org-link-beautify] Copied file [%s] to <system clipboard>" (string-truncate-left file (/ (window-width) 2)))))
 
 (defun org-link-beautify-action-copy-file (&optional args)
   "Action of copying the Org link file at point with optional ARGS."
