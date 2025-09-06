@@ -1759,6 +1759,7 @@ This is for link image previewing to get around function `org-link-preview'
               (member extension '("cbr" "cbz" "cb7" "cba" "cbt")) ; comic files
               (member extension '("zip" "rar" "7z" "gz" "tar" "tar.gz" "tar.bz2" "xz" "zst")) ; archive files
               (member extension '("ass" "srt" "sub" "vtt" "ssf")) ; subtitle files
+              (member extension org-link-beautify-offline-webpage-preview-list) ; offline webpage archive file
               (member link-type '("info" "help" "shortdoc" "man" "woman" "id" "custom-id" "coderef"))
               (member link-type '("elisp" "shell" "js" "javascript" "grep" "occur" "git"))
               (member link-type '("mailto" "rss" "news" "wikipedia" "irc" "magnet" "wechat" "web-browser" "eww" "chrome" "edge"))
