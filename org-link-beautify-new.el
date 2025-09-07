@@ -606,7 +606,7 @@ This function will apply file type function based on file extension."
 ;;; file: [image]
 
 (defcustom org-link-beautify-image-preview-list
-  '("jpg" "jpeg" "png" "gif" "webp")
+  image-file-name-extensions
   "A list of image file types be supported with thumbnails."
   :type 'list
   :safe #'listp
@@ -1188,7 +1188,7 @@ $ pip install ffmpeg-python")
   :group 'org-link-beautify)
 
 (defcustom org-link-beautify-video-preview-list
-  '("mp4" "webm" "mkv" "mov" "mpeg" "ogg" "ogv" "rmvb" "rm" "avi" "m4v" "flv")
+  '("avi" "rmvb" "flv" "ogg" "ogv" "mp4" "m4v" "mkv" "mov" "mpeg" "webm" "flv" "ts" "mpg")
   "A list of video file types be supported with thumbnails."
   :type 'list
   :safe #'listp
@@ -1294,7 +1294,8 @@ $ pip install ffmpeg-python")
   :safe #'stringp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-audio-preview-list '("mp3" "wav" "flac" "ogg" "m4a" "opus" "dat")
+(defcustom org-link-beautify-audio-preview-list
+  '("mp3" "wav" "flac" "ogg" "m4a" "opus" "dat")
   "A list of audio file types be supported generating audio wave form image."
   :type 'list
   :safe #'listp
@@ -1752,13 +1753,13 @@ This is for link image previewing to get around function `org-link-preview'
 \(original named `org-toggle-inline-images'\) parameter `include-linked'."
   (let ((link-type (when (string-match org-link-types-re link-raw) (match-string 1 link-raw)))
         (extension (file-name-extension link-raw)))
-    (when (or (member extension image-file-name-extensions) ; image files
+    (when (or (member extension org-link-beautify-image-preview-list) ; image files
               (member extension '("pdf" "epub" "mobi" "azw3" "lit" "fb2" "fb2.zip")) ; ebook files
-              (member extension '("avi" "rmvb" "ogg" "ogv" "mp4" "mkv" "mov" "mpeg" "webm" "flv" "ts" "mpg")) ; video files
-              (member extension '("mp3" "wav" "flac" "ogg" "m4a" "opus" "dat")) ; audio files
-              (member extension '("cbr" "cbz" "cb7" "cba" "cbt")) ; comic files
-              (member extension '("zip" "rar" "7z" "gz" "tar" "tar.gz" "tar.bz2" "xz" "zst")) ; archive files
-              (member extension '("ass" "srt" "sub" "vtt" "ssf")) ; subtitle files
+              (member extension org-link-beautify-video-preview-list) ; video files
+              (member extension org-link-beautify-audio-preview-list) ; audio files
+              (member extension org-link-beautify-comic-preview-list) ; comic files
+              (member extension org-link-beautify-archive-preview-list) ; archive files
+              (member extension org-link-beautify-subtitle-preview-list) ; subtitle files
               (member extension org-link-beautify-offline-webpage-preview-list) ; offline webpage archive file
               (member link-type '("info" "help" "shortdoc" "man" "woman" "id" "custom-id" "coderef"))
               (member link-type '("elisp" "shell" "js" "javascript" "grep" "occur" "git"))
