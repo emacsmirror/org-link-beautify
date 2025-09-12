@@ -743,7 +743,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
 You can set this option to nil to disable EPUB preview.
 
 This script require Python package 'Pillow' installed.
-$ pip3 install Pillow"
+$ pip install Pillow"
   :type 'string
   :safe #'stringp
   :group 'org-link-beautify)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # Installation requirements:
-# $ pip3 install Pillow
+# $ pip install Pillow
 
 # This script is from "epub-thumbnailer" project command script.
 
