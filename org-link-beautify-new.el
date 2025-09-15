@@ -1623,6 +1623,12 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
 
 ;;; org-contact: link type
 
+(defcustom org-link-beautify-org-contact-avatar-preview-size 64
+  "The org-contacts avatar image size :height."
+  :type 'number
+  :safe #'numberp
+  :group 'org-link-beautify)
+
 (defun org-link-beautify--generate-preview-for-org-contacts (name)
   "Get the avatar of org-contact in NAME."
   (let* ((epom (org-contacts-search-contact name)))
@@ -1635,13 +1641,17 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
   "Preview org-contct: link of PATH over OV overlay position for LINK element."
   (if-let* ((name path)
             ( (display-graphic-p))
-            (image (org-link-beautify--generate-preview-for-org-contacts name)))
+            (image (org-link-beautify--generate-preview-for-org-contacts name))
+            (display-height org-link-beautify-org-contact-avatar-preview-size))
+      ;; display org-contacts avatar image
       (prog1 ov
+        (setf (image-property image :height) display-height)
         (overlay-put ov 'display image)
         (overlay-put ov 'after-string (concat
                                        (propertize "{" 'face '(:foreground "purple2"))
                                        (propertize name 'face 'org-verbatim)
                                        (propertize "}" 'face '(:foreground "purple2")))))
+    ;; display text-properties with icon
     (if-let* ((text (org-element-property :title (org-contacts-search-contact name))))
         (overlay-put ov 'after-string (concat
                                        (propertize "{" 'face '(:foreground "purple2"))
