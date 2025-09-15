@@ -1628,7 +1628,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
   (let* ((epom (org-contacts-search-contact name)))
     (org-contacts-get-avatar-icon epom)))
 
-;;; TEST:
+;; TEST:
 ;; (org-link-beautify--generate-preview-for-org-contacts "stardiviner")
 
 (defun org-link-beautify-preview-org-contact (ov path link)
