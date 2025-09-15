@@ -1763,7 +1763,8 @@ This is for link image previewing to get around function `org-link-preview'
               (member extension org-link-beautify-comic-preview-list) ; comic files
               (member extension org-link-beautify-archive-preview-list) ; archive files
               (member extension org-link-beautify-subtitle-preview-list) ; subtitle files
-              (member extension org-link-beautify-offline-webpage-preview-list) ; offline webpage archive file
+              (and (member link-type '("file" "attachment"))
+                   (member extension org-link-beautify-offline-webpage-preview-list)) ; offline webpage archive file
               (member link-type '("info" "help" "shortdoc" "man" "woman" "id" "custom-id" "coderef"))
               (member link-type '("elisp" "shell" "js" "javascript" "grep" "occur" "git"))
               (member link-type '("mailto" "rss" "news" "wikipedia" "irc" "magnet" "wechat" "web-browser" "eww" "chrome" "edge"))
