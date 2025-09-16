@@ -1854,166 +1854,110 @@ This is for link image previewing to get around function `org-link-preview'
       ("file" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-file)) ; `org-link-preview-file',
       ("attachment"
        (require 'org-attach)
-       (with-eval-after-load "org-attach" ; `org-attach-preview-file'
-         (org-link-set-parameters link-type :preview #'org-link-beautify-preview-attachment)))
-      ("docview" (with-eval-after-load "ol-docview"
-                   (org-link-set-parameters link-type :preview #'org-link-beautify-preview-pdf)))
-      ("pdfview" (with-eval-after-load "org-pdftools"
-                   (org-link-set-parameters link-type :preview #'org-link-beautify-preview-pdf)))
-      ("pdf" (with-eval-after-load "org-pdftools"
-               (org-link-set-parameters link-type :preview #'org-link-beautify-preview-pdf)))
-      ("epub" (with-eval-after-load "nov"
-                (org-link-set-parameters link-type :preview #'org-link-beautify-preview-epub)))
-      ("nov" (with-eval-after-load "nov"
-               (org-link-set-parameters link-type :preview #'org-link-beautify-preview-nov)))
-      ("geo" (with-eval-after-load "org-extra-link-types"
-               (org-link-set-parameters link-type :preview #'org-link-beautify-preview-geography)))
+       (org-link-set-parameters link-type :preview #'org-link-beautify-preview-attachment)) ; `org-attach' -> `org-attach-preview-file'
+      ("docview" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-pdf)) ; `ol-docview'
+      ("pdfview" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-pdf)) ; `org-pdftools'
+      ("pdf" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-pdf)) ; `org-pdftools'
+      ("epub" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-epub)) ; `nov'
+      ("nov" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-nov)) ; `nov'
+      ("geo" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-geography)) ; `org-extra-link-types'
       ("http" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
       ("https" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
       ("ftp" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-
+      
       ;; Org mode internal link types
       ("custom-id" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("id" (with-eval-after-load "org-id"
-              (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
+      ("id" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `org-id'
       ("coderef" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("elisp" (with-eval-after-load "ol"
-                 (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("eshell" (with-eval-after-load "ol-eshell"
-                  (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("shell" (with-eval-after-load "ol"
-                 (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("man" (with-eval-after-load "ol-man"
-               (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("woman" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("info" (with-eval-after-load "ol-info"
-                (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("help" (with-eval-after-load "helpful"
-                (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("shortdoc" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("elisp" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `ol'
+      ("eshell" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `ol-eshell'
+      ("shell" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `ol'
+      ("man" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `ol-man'
+      ("woman" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `woman'
+      ("info" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `ol-info'
+      ("help" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `helpful'
+      ("shortdoc" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `shortdoc'
       
       ;; Org mode external link types
       ("grep" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
       ("occur" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
       ("mailto" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
       ("news" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("rss" (with-eval-after-load "org-extra-link-types"
-               (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("elfeed" (with-eval-after-load "elfeed-link"
-                  (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("wikipedia" (with-eval-after-load "org-kiwix"
-                     (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("irc" (with-eval-after-load "ol-irc"
-               (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("wechat" (with-eval-after-load "org-extra-link-types"
-                  (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("magnet" (with-eval-after-load "org-extra-link-types"
-                  (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("git" (with-eval-after-load "ol-git-link"
-               (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git)))
-      ("eww" (with-eval-after-load "ol-eww"
-               (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
+      ("rss" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `org-extra-link-types'
+      ("elfeed" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `elfeed-link'
+      ("wikipedia" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `org-kiwix'
+      ("irc" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `ol-irc'
+      ("wechat" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `org-extra-link-types'
+      ("magnet" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `org-extra-link-types'
+      ("git" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git)) ; `ol-git-link'
+      ("eww" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `ol-eww'
       ("chrome" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
       ("edge" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("mu4e" (with-eval-after-load "mu4e-org"
-                (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("web-browser" (with-eval-after-load "org-extra-link-types"
-                       (org-link-set-parameters link-type :preview #'org-link-beautify-preview-file-offline-webpage)))
+      ("mu4e" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `mu4e-org'
+      ("web-browser" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-file-offline-webpage)) ; `org-extra-link-types'
       
-      ;; org-ref link types
-      ("ref" (with-eval-after-load "org-ref"
-               (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("cite" (with-eval-after-load "org-ref"
-                (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("cite*" (with-eval-after-load "org-ref"
-                 (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("cites" (with-eval-after-load "org-ref"
-                 (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("citeurl" (with-eval-after-load "org-ref"
-                   (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("citetitle" (with-eval-after-load "org-ref"
-                     (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("citetitle*" (with-eval-after-load "org-ref"
-                      (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("citeauthor" (with-eval-after-load "org-ref"
-                      (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("citeauthor*" (with-eval-after-load "org-ref"
-                       (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("citetext" (with-eval-after-load "org-ref"
-                    (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("citenum" (with-eval-after-load "org-ref"
-                   (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("citedate" (with-eval-after-load "org-ref"
-                    (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("citedate*" (with-eval-after-load "org-ref"
-                     (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("citeyear" (with-eval-after-load "org-ref"
-                    (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("citeyear*" (with-eval-after-load "org-ref"
-                     (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("citealp" (with-eval-after-load "org-ref"
-                   (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("citealp*" (with-eval-after-load "org-ref"
-                    (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("citealt" (with-eval-after-load "org-ref"
-                   (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("citealt*" (with-eval-after-load "org-ref"
-                    (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("citep" (with-eval-after-load "org-ref"
-                 (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("citep*" (with-eval-after-load "org-ref"
-                  (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("citet" (with-eval-after-load "org-ref"
-                 (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("citet*" (with-eval-after-load "org-ref"
-                  (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
+      ;; `org-ref' link types
+      ("ref" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("cite" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("cite*" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("cites" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("citeurl" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("citetitle" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("citetitle*" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("citeauthor" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("citeauthor*" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("citetext" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("citenum" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("citedate" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("citedate*" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("citeyear" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("citeyear*" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("citealp" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("citealp*" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("citealt" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("citealt*" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("citep" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("citep*" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("citet" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("citet*" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      
       ;; bibliography
-      ("doi" (with-eval-after-load "ol-doi"
-               (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("bibtex" (with-eval-after-load "ol-bibtex"
-                  (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("bibliography" (with-eval-after-load "org-ref"
-                        (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
+      ("doi" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `ol-doi'
+      ("bibtex" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `ol-bibtex'
+      ("bibliography" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `org-ref'
       
-      ;; org-mode extensions link types
-      ("org-ql-search" (with-eval-after-load "org-ql"
-                         (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("org-contact" (with-eval-after-load "org-contacts"
-                       (org-link-set-parameters link-type :preview #'org-link-beautify-preview-org-contact)))
-      ("org-bookmark" (with-eval-after-load "org-bookmarks"
-                        (org-link-set-parameters link-type :preview #'org-link-beautify-preview-org-bookmark)))
-      ("orgit" (with-eval-after-load "orgit"
-                 (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git)))
-      ("orgit-rev" (with-eval-after-load "orgit"
-                     (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git)))
-      ("orgit-log" (with-eval-after-load "orgit"
-                     (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git)))
-      ("excalidraw" (with-eval-after-load "org-excalidraw"
-                      (org-link-set-parameters link-type :preview #'org-link-beautify-preview-excalidraw)))
+      ;; Org mode extensions link types
+      ("org-ql-search" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("org-contact" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-org-contact))
+      ("org-bookmark" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-org-bookmark))
+      ("orgit" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git))
+      ("orgit-rev" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git))
+      ("orgit-log" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git))
+      ("excalidraw" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-excalidraw))
       
       ;; org-media-note link types
-      ("video" (with-eval-after-load "org-media-note"
-                 (org-link-set-parameters link-type :preview #'org-link-beautify-preview-video)))
-      ("audio" (with-eval-after-load "org-media-note"
-                 (org-link-set-parameters link-type :preview #'org-link-beautify-preview-audio)))
-      ("videocite" (with-eval-after-load "org-media-note"
-                     (org-link-set-parameters link-type :preview #'org-link-beautify-preview-video)))
-      ("audiocite" (with-eval-after-load "org-media-note"
-                     (org-link-set-parameters link-type :preview #'org-link-beautify-preview-audio)))
+      ("video"
+       (require 'org-media-note)
+       (org-link-set-parameters link-type :preview #'org-link-beautify-preview-video))
+      ("audio"
+       (require 'org-media-note)
+       (org-link-set-parameters link-type :preview #'org-link-beautify-preview-audio))
+      ("videocite"
+       (require 'org-media-note)
+       (org-link-set-parameters link-type :preview #'org-link-beautify-preview-video))
+      ("audiocite"
+       (require 'org-media-note)
+       (org-link-set-parameters link-type :preview #'org-link-beautify-preview-audio))
       
       ;; other link types
-      ("eaf" (with-eval-after-load "eaf" ; extension `emacs-application-framework'
-               (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("javascript" (with-eval-after-load "org-extra-link-types" ; Org mode inline source code link
-                      (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("js" (with-eval-after-load "org-extra-link-types" ; Org mode inline source code link
-              (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("vscode" (with-eval-after-load "org-extra-link-types" ; Visual Studio Code
-                  (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
-      ("macappstore" (with-eval-after-load "org-extra-link-types" ; Mac App Store
-                       (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)))
+      ("eaf" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; extension `emacs-application-framework'
+      ("javascript" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; Org mode inline source code link
+      ("js" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; Org mode inline source code link
+      ("vscode" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; Visual Studio Code
+      ("macappstore" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; Mac App Store
       ("fuzzy" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; org-mode internal raw link type
       (_ (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))))
+  
   ;; remove link description
   (advice-add 'org-link-make-string :around #'org-link-beautify-remove-description))
 
