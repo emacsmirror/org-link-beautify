@@ -751,7 +751,7 @@ $ pip install Pillow"
   :safe #'stringp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-ebook-preview-size 300
+(defcustom org-link-beautify-ebook-preview-size 600
   "The EPUB cover preview image size."
   :type 'number
   :safe #'numberp
@@ -770,7 +770,7 @@ $ pip install Pillow"
                             (if (or (null epub-page-number) (= epub-page-number 1)) ; if have page number ::N specified.
                                 (format "%s%s.png" thumbnails-dir (file-name-base epub-file))
                               (format "%s%s-P%s.png" thumbnails-dir (file-name-base epub-file) epub-page-number))))
-           (thumbnail-size (or org-link-beautify-ebook-preview-size 300))
+           (thumbnail-size (or org-link-beautify-ebook-preview-size 600))
            (proc-name (format "org-link-beautify epub preview - %s" epub-file))
            (proc-buffer (format " *org-link-beautify epub preview - %s*" epub-file)))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
@@ -1101,7 +1101,7 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
   :safe #'listp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-comic-preview-size 500
+(defcustom org-link-beautify-comic-preview-size 600
   "The CDisplay Archived Comic Book Formats cover preview image size."
   :type 'number
   :safe #'numberp
@@ -1410,7 +1410,7 @@ $ pip install ffmpeg-python")
   :safe #'listp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-subtitle-preview-size 300
+(defcustom org-link-beautify-subtitle-preview-size 600
   "The subtitle preview image size."
   :type 'number
   :safe #'numberp
