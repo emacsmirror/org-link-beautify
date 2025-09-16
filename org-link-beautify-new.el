@@ -1303,8 +1303,10 @@ $ pip install ffmpeg-python")
             (image (create-image thumbnail-file))
             (image-width (car (image-size image)))
             (image-height (cdr (image-size image)))
-            (display-width (or (org-display-inline-image--width link)
-                               (if (> image-height image-width) 200 org-link-beautify-video-preview-size))))
+            (display-width (or (if (< (abs (- image-height image-width)) 10)
+                                   200
+                                 (or (org-display-inline-image--width link)
+                                     org-link-beautify-video-preview-size)))))
       (prog1 ov
         (setf (image-property image :width) display-width)
         (org-link-beautify-overlay-display-image ov image))
