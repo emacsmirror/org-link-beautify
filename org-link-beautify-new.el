@@ -1309,12 +1309,13 @@ $ pip install ffmpeg-python")
 ;;; file: [audio]
 
 (defcustom org-link-beautify-audio-preview-command
-  (cl-case system-type
-    (darwin (or (executable-find "ffmpeg") (executable-find "qlmanage")))
-    (gnu/linux (or (executable-find "ffmpeg") (executable-find "audiowaveform"))))
+  (cond
+   ((executable-find "qlmanage") 'qlmanage)
+   ((executable-find "audiowaveform") 'audiowaveform)
+   ((executable-find "ffmpeg") 'ffmpeg))
   "Find available audio preview command."
-  :type 'string
-  :safe #'stringp
+  :type 'symbol
+  :safe #'symbolp
   :group 'org-link-beautify)
 
 (defcustom org-link-beautify-audio-preview-list
@@ -1346,15 +1347,15 @@ $ pip install ffmpeg-python")
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
         (unless proc
-          (pcase (file-name-nondirectory org-link-beautify-audio-preview-command)
-            ("ffmpeg"
+          (cl-case org-link-beautify-audio-preview-command
+            ('ffmpeg
              (start-process
               proc-name proc-buffer
               "ffmpeg" "-i" audio-file
               "-filter_complex" "[0:a]aformat=channel_layouts=mono,compand=gain=-6,showwavespic=s=600x120:colors=#9cf42f[fg];color=s=600x120:color=#44582c,drawgrid=width=iw/10:height=ih/5:color=#9cf42f@0.1[bg];[bg][fg]overlay=format=auto,drawbox=x=(iw-w)/2:y=(ih-h)/2:w=iw:h=1:color=#9cf42f"
               "-frames:v" "1"
               thumbnail-file))
-            ("qlmanage"
+            ('qlmanage
              (let ((qlmanage-thumbnail-file (concat thumbnails-dir (file-name-nondirectory audio-file) ".png")))
                (unless (file-exists-p qlmanage-thumbnail-file)
                  (start-process
@@ -1363,7 +1364,7 @@ $ pip install ffmpeg-python")
                ;; then rename [file.extension.png] to [file.png]
                (when (file-exists-p qlmanage-thumbnail-file)
                  (rename-file qlmanage-thumbnail-file thumbnail-file))))
-            ("audiowaveform"
+            ('audiowaveform
              (start-process
               proc-name proc-buffer
               "audiowaveform" "-i" audio-file "-o" thumbnail-file)))))
