@@ -1724,19 +1724,18 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
     (darwin
      (cond
       ;; Google Chrome headless screenshot
-      ((file-exists-p "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
-       "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
+      ((file-exists-p "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome") 'google-chrome)
       ;; monolith
-      ((executable-find "monolith") "monolith")))
+      ((executable-find "monolith") 'monolith)))
     (gnu/linux
      (cond
       ;; Google Chrome headless screenshot
-      ((executable-find "chrome") (executable-find "google-chrome"))
+      ((executable-find "chrome") 'google-chrome)
       ;; monolith
-      ((executable-find "monolith") "monolith"))))
+      ((executable-find "monolith") 'monolith))))
   "Find available URL web page screenshot archive command."
-  :type 'string
-  :safe #'stringp
+  :type 'symbol
+  :safe #'symbolp
   :group 'org-link-beautify)
 
 (defcustom org-link-beautify-url-preview-size 800
@@ -1763,7 +1762,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
         (when org-link-beautify-url-preview-command
           (unless proc
             (pcase org-link-beautify-url-preview-command
-              ((or "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" "google-chrome" "chrome")
+              ('google-chrome
                ;; $ google-chrome --headless --screenshot=screenshot.png "https://www.chromestatus.com/"
                (start-process
                 proc-name proc-buffer
@@ -1771,7 +1770,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
                 "--headless"
                 (format "--screenshot=%s" thumbnail-file)
                 url))
-              ("monolith"
+              ('monolith
                (let* ((html-archive-file (concat (file-name-sans-extension thumbnail-file) ".html")))
                  (make-process
                   :name proc-name
