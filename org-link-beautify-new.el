@@ -1312,7 +1312,10 @@ $ pip install ffmpeg-python")
   (cond
    ((executable-find "qlmanage") 'qlmanage)
    ((executable-find "audiowaveform") 'audiowaveform)
-   ((executable-find "ffmpeg") 'ffmpeg))
+   ((executable-find "ffmpeg") 'ffmpeg)
+   ((executable-find "whisper") 'whisper-transcribe)
+   ((executable-find "whisper-cli") 'whisper-cpp-transcribe)
+   ((executable-find "whisper-server") 'whisper-cpp-server-transcribe))
   "Find available audio preview command."
   :type 'symbol
   :safe #'symbolp
@@ -1367,7 +1370,15 @@ $ pip install ffmpeg-python")
             ('audiowaveform
              (start-process
               proc-name proc-buffer
-              "audiowaveform" "-i" audio-file "-o" thumbnail-file)))))
+              "audiowaveform" "-i" audio-file "-o" thumbnail-file))
+            ('whisper-transcribe
+             (start-process
+              proc-name proc-buffer
+              "whisper" "--model" "turbo" "--output_format" "vtt" "--task" "transcribe" audio-file) )
+            ('whisper-cpp-transcribe
+             (start-process
+              proc-name proc-buffer
+              "whisper-cli" "--model" "~/.config/whisper-cpp/models/ggml-large-v3-turbo.bin" "-f" audio-file "--output-file" output-file)))))
       (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
         (org-link-beautify--notify-generate-thumbnail-failed audio-file thumbnail-file))
       ;; return the thumbnail file as result.
