@@ -50,13 +50,6 @@
 (declare-function org-attach-expand "org-attach" (file))
 (declare-function org-attach-reveal "org-attach" ())
 
-;; (require 'fb2-reader)
-(declare-function fb2-reader--create-image "fb2-reader" (data type &rest props))
-(declare-function fb2-reader--extract-image-data "fb2-reader" (book attributes &optional tags))
-(declare-function fb2-reader--get-cover "fb2-reader" (book))
-(declare-function fb2-reader-parse-file-as-html "fb2-reader" (file))
-(declare-function fb2-reader-parse-file-as-xml "fb2-reader" (file))
-
 ;;; Customization
 (defgroup org-link-beautify nil
   "Customize group of `org-link-beautify-mode'."
@@ -899,6 +892,13 @@ You can install software `libmobi' to get command `mobitool'."
   :type 'number
   :safe #'numberp
   :group 'org-link-beautify)
+
+;; (require 'fb2-reader)
+(declare-function fb2-reader--create-image "fb2-reader" (data type &rest props))
+(declare-function fb2-reader--extract-image-data "fb2-reader" (book attributes &optional tags))
+(declare-function fb2-reader--get-cover "fb2-reader" (book))
+(declare-function fb2-reader-parse-file-as-html "fb2-reader" (file))
+(declare-function fb2-reader-parse-file-as-xml "fb2-reader" (file))
 
 (defun org-link-beautify-fictionbook2--extract-cover (file-path)
   "Extract cover image data for FictionBook2 at FILE-PATH."
