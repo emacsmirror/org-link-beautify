@@ -43,13 +43,6 @@
 (require 'nerd-icons)
 (require 'qrencode)
 
-(declare-function org-attach-preview-file "org-attach" (ov path link))
-(declare-function vc-git-symbolic-commit "vc-git" (commit &optional force))
-(declare-function org-contacts-get-avatar-icon "org-contacts" (&optional pom))
-(declare-function org-contacts-search-contact "org-contacts" (name))
-(declare-function org-attach-expand "org-attach" (file))
-(declare-function org-attach-reveal "org-attach" ())
-
 ;;; Customization
 (defgroup org-link-beautify nil
   "Customize group of `org-link-beautify-mode'."
@@ -80,6 +73,8 @@ set this option to 'user-home which represent to ~/.cache/thumbnails/."
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map image-map) ; inherit `image-map' keybindings on preview thumbnail image.
     map))
+
+(declare-function org-attach-reveal "org-attach" ())
 
 (defun org-link-beautify-action-goto-file-in-dired ()
   "Action of opening Dired and goto the link file position."
@@ -589,6 +584,8 @@ This function will apply file type function based on file extension."
               (org-link-beautify-iconify ov path link))))))
 
 ;;; Preview attachment: link type
+
+(declare-function org-attach-expand "org-attach" (file))
 
 (defun org-link-beautify-preview-attachment (ov path link)
   "Preview attachment file of PATH over OV overlay position for LINK element.
@@ -1634,6 +1631,9 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
   :safe #'numberp
   :group 'org-link-beautify)
 
+(declare-function org-contacts-get-avatar-icon "org-contacts" (&optional pom))
+(declare-function org-contacts-search-contact "org-contacts" (name))
+
 (defun org-link-beautify--generate-preview-for-org-contacts (name)
   "Get the avatar of org-contact in NAME."
   (let* ((epom (org-contacts-search-contact name)))
@@ -1710,6 +1710,8 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
   :type 'boolean
   :safe #'booleanp
   :group 'org-link-beautify)
+
+(declare-function vc-git-symbolic-commit "vc-git" (commit &optional force))
 
 (defun org-link-beautify--generate-preview-for-git (ov path link)
   "Get the content on OV overlay of PATH at LINK element."
@@ -1961,6 +1963,8 @@ This is for link image previewing to get around function `org-link-preview'
   
   ;; remove link description
   (advice-add 'org-link-make-string :around #'org-link-beautify-remove-description))
+
+(declare-function org-attach-preview-file "org-attach" (ov path link))
 
 ;;;###autoload
 (defun org-link-beautify-disable ()
