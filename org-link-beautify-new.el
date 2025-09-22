@@ -595,8 +595,7 @@ This function will apply file type function based on file extension."
 
 ;;; file: [image]
 
-(defcustom org-link-beautify-image-preview-list
-  image-file-name-extensions
+(defcustom org-link-beautify-image-preview-list image-file-name-extensions
   "A list of image file types be supported with thumbnails."
   :type 'list
   :safe #'listp
