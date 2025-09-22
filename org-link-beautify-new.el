@@ -1347,14 +1347,14 @@ $ pip install ffmpeg-python")
       (unless (file-exists-p thumbnail-file)
         (unless proc
           (cl-case org-link-beautify-audio-preview-command
-            ('ffmpeg
+            (ffmpeg
              (start-process
               proc-name proc-buffer
               "ffmpeg" "-i" audio-file
               "-filter_complex" "[0:a]aformat=channel_layouts=mono,compand=gain=-6,showwavespic=s=600x120:colors=#9cf42f[fg];color=s=600x120:color=#44582c,drawgrid=width=iw/10:height=ih/5:color=#9cf42f@0.1[bg];[bg][fg]overlay=format=auto,drawbox=x=(iw-w)/2:y=(ih-h)/2:w=iw:h=1:color=#9cf42f"
               "-frames:v" "1"
               thumbnail-file))
-            ('qlmanage
+            (qlmanage
              (let ((qlmanage-thumbnail-file (concat thumbnails-dir (file-name-nondirectory audio-file) ".png")))
                (unless (file-exists-p qlmanage-thumbnail-file)
                  (start-process
@@ -1363,15 +1363,15 @@ $ pip install ffmpeg-python")
                ;; then rename [file.extension.png] to [file.png]
                (when (file-exists-p qlmanage-thumbnail-file)
                  (rename-file qlmanage-thumbnail-file thumbnail-file))))
-            ('audiowaveform
+            (audiowaveform
              (start-process
               proc-name proc-buffer
               "audiowaveform" "-i" audio-file "-o" thumbnail-file))
-            ('whisper-transcribe
+            (whisper-transcribe
              (start-process
               proc-name proc-buffer
               "whisper" "--model" "turbo" "--output_format" "vtt" "--task" "transcribe" audio-file) )
-            ('whisper-cpp-transcribe
+            (whisper-cpp-transcribe
              (start-process
               proc-name proc-buffer
               "whisper-cli" "--model" "~/.config/whisper-cpp/models/ggml-large-v3-turbo.bin" "-f" audio-file "--output-file" output-file)))))
