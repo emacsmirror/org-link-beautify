@@ -1049,7 +1049,7 @@ You can install software `libmobi' to get command `mobitool'."
   :group 'org-link-beautify)
 
 (defcustom org-link-beautify-source-code-preview-list
-  '("txt" "org" "markdown" "md"
+  '(; "txt" "org" "markdown" "md"
     "lisp" "scm" "clj" "cljs"
     "py" "rb" "pl"
     "c" "cpp" "h" "hpp" "cs" "java"
