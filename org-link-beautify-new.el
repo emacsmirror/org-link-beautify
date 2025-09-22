@@ -1804,23 +1804,15 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
 
 ;;; http[s]: url link type
 
-(defcustom org-link-beautify-url-preview-command
-  (cl-case system-type
-    (darwin
-     (cond
-      ;; Google Chrome headless screenshot
-      ((file-exists-p "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome") 'google-chrome)
-      ;; monolith
-      ((executable-find "monolith") 'monolith)))
-    (gnu/linux
-     (cond
-      ;; Google Chrome headless screenshot
-      ((executable-find "chrome") 'google-chrome)
-      ;; monolith
-      ((executable-find "monolith") 'monolith))))
+(defcustom org-link-beautify-url-preview-command nil
   "Find available URL web page screenshot archive command."
-  :type 'symbol
-  :safe #'symbolp
+  :type `(choice
+          :tag "An option to set the command for previewing URL."
+          ,(when (or (file-exists-p "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
+                     (executable-find "chrome"))
+             '(const :tag "Google Chrome --headless --screenshot" 'google-chrome))
+          ,(when (executable-find "monolith")
+             '(const :tag "CLI tool for saving complete web pages as a single HTML file" 'monolith)))
   :group 'org-link-beautify)
 
 (defcustom org-link-beautify-url-preview-size 800
