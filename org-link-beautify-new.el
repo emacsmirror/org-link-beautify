@@ -559,6 +559,9 @@ This function will apply file type function based on file extension."
        ;; .fb2(.zip)
        ((string-match-p "\\.fb2\\(\\.zip\\)?" path)
         (org-link-beautify-preview-file-fictionbook2 ov path link))
+       ;; .djvu
+       ((string-match-p "\\.djvu" path)
+        (org-link-beautify-preview-file-djvu ov path link))
        ;; Comic
        ((member extension org-link-beautify-comic-preview-list)
         (org-link-beautify-preview-file-comic ov path link))
@@ -955,6 +958,75 @@ You can install software `libmobi' to get command `mobitool'."
   (if-let* ((org-link-beautify-fictionbook2-preview)
             ( (display-graphic-p))
             (thumbnail-file (org-link-beautify--generate-preview-for-file-fictionbook2 path))
+            ((file-exists-p thumbnail-file))
+            (image (create-image thumbnail-file))
+            (image-width (car (image-size image)))
+            (image-height (cdr (image-size image)))
+            (display-width (or (let ((org-image-actual-width nil)) (org-display-inline-image--width link)) 300)))
+      (prog1 ov
+        (setf (image-property image :width) display-width)
+        (org-link-beautify-overlay-display-image ov image))
+    (org-link-beautify-iconify ov path link)))
+
+;;; DjVu (.djvu) file cover preview
+
+(defcustom org-link-beautify-djvu-preview nil
+  "Whether enable DjVu ebook files covert preview?"
+  :type 'boolean
+  :safe #'booleanp
+  :group 'org-link-beautify)
+
+(autoload 'djvu-view-page "djvu")
+(declare-function djvu-view-page "djvu" (page &optional doc new))
+
+(defun org-link-beautify-djvu--extract-cover  (file-path)
+  "Extract cover image data for DjVu file at FILE-PATH."
+  ;; TODO: generate thumbnail for .djvu file.
+  ;; (if-let* (; reference `djvu' library
+  ;;           ;; (cover-image (djvu-view-page ))
+  ;;           )
+  ;;     )
+  )
+
+(defun org-link-beautify-djvu--save-cover (image thumbnail-file)
+  "Save DjVu cover IMAGE to THUMBNAIL-FILE."
+  ;; `image-save': This writes the original image data to a file.
+  (with-temp-buffer
+    (insert (plist-get (cdr image) :data))
+    (write-region (point-min) (point-max) thumbnail-file)))
+
+(defun org-link-beautify--generate-preview-for-file-djvu (path)
+  "Generate THUMBNAIL-FILE with THUMBNAIL-SIZE for .djvu file of PATH."
+  (when (string-match "\\(.*?\\)\\(?:::\\(.*\\)\\)?\\'" path)
+    (let* ((file-path (match-string 1 path))
+           (search-option (match-string 2 path))
+           (djvu-file (expand-file-name (org-link-unescape file-path)))
+           (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path djvu-file))
+           (thumbnail-file (cond
+                            ((string-match-p "\\.fb2.zip$" path)
+                             (expand-file-name
+                              (format "%s%s.png" thumbnails-dir (string-replace ".fb2" "" (file-name-base djvu-file)))))
+                            ((string-match-p "\\.fb2$" path)
+                             (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base djvu-file))))))
+           (thumbnail-size 600)
+           (proc-name (format "org-link-beautify djvu preview - %s" djvu-file))
+           (proc-buffer (format " *org-link-beautify djvu preview - %s*" djvu-file)))
+      (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
+      (unless (file-exists-p thumbnail-file)
+        (let ((cover-image (org-link-beautify-djvu--extract-cover djvu-file)))
+          (if (eq cover-image 'no-cover)
+              (message "[org-link-beautify] DjVu preview failed to extract cover image")
+            (org-link-beautify-djvu--save-cover cover-image thumbnail-file))))
+      (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+        (org-link-beautify--notify-generate-thumbnail-failed djvu-file thumbnail-file))
+      ;; return the thumbnail file as result.
+      thumbnail-file)))
+
+(defun org-link-beautify-preview-file-djvu (ov path link)
+  "Preview DjVu .djvu file of PATH over OV overlay position for LINK element."
+  (if-let* ((org-link-beautify-djvu-preview)
+            ( (display-graphic-p))
+            (thumbnail-file (org-link-beautify--generate-preview-for-file-djvu path))
             ((file-exists-p thumbnail-file))
             (image (create-image thumbnail-file))
             (image-width (car (image-size image)))
