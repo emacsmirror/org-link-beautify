@@ -1603,16 +1603,10 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
   :safe #'listp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-offline-webpage-viewport-width 1920
+(defcustom org-link-beautify-offline-webpage-viewport-size "1920x928"
   "The webpage offline saved archive file preview screenshot image viewport width."
-  :type 'number
-  :safe #'numberp
-  :group 'org-link-beautify)
-
-(defcustom org-link-beautify-offline-webpage-viewport-height 928
-  "The webpage offline saved archive file preview screenshot image viewport height."
-  :type 'number
-  :safe #'numberp
+  :type 'string
+  :safe #'stringp
   :group 'org-link-beautify)
 
 (defun org-link-beautify--generate-preview-for-file-offline-webpage (path)
@@ -1623,7 +1617,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
            (offline-webpage-file (expand-file-name (org-link-unescape file-path)))
            (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path offline-webpage-file))
            (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base offline-webpage-file))))
-           (thumbnail-size (or org-link-beautify-offline-webpage-viewport-width 600))
+           (thumbnail-size (or (string-to-number (car (string-split org-link-beautify-offline-webpage-viewport-size "x"))) 600))
            (proc-name (format "org-link-beautify offline webpage preview - %s" offline-webpage-file))
            (proc-buffer (format " *org-link-beautify offline webpage preview - %s*" offline-webpage-file))
            (proc (get-process proc-name)))
@@ -1634,14 +1628,14 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
             (pcase org-link-beautify-offline-webpage-preview-command
               ;; Google Chrome headless screenshot
               ((or "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" "chrome" "google-chrome")
-               ;; $ google-chrome --headless --screenshot=screenshot.png /path/to/file.html
+               ;; $ google-chrome --headless --screenshot=screenshot.png /path/to/file.html --window-size=width,height --hide-scrollbars
                (start-process
                 proc-name proc-buffer
                 org-link-beautify-offline-webpage-preview-command
                 "--headless"
                 (format "--screenshot=%s" thumbnail-file)
                 ;; web browser viewport: width,height: "1920,928"
-                (format "--window-size=%s,%s" org-link-beautify-offline-webpage-viewport-width org-link-beautify-offline-webpage-viewport-height)
+                (format "--window-size=%s" org-link-beautify-offline-webpage-viewport-size)
                 "--hide-scrollbars"
                 offline-webpage-file)))))
         (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
