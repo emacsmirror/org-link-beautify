@@ -1204,7 +1204,7 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
              ;; $ qlmanage -t "ラセン恐怖閣-マリコとニジロー1-DL版.cbz" - 2.0 -s 1080 -o ".thumbnails"
              (pcase (file-name-nondirectory org-link-beautify-comic-preview-command)
                ("qlmanage"
-                (let ((qlmanage-thumbnail-file (concat thumbnails-dir (file-name-nondirectory comic-file) ".png")))
+                (let ((qlmanage-thumbnail-file (concat thumbnails-dir (file-name-base comic-file) ".png")))
                   (make-process
                    :name proc-name
                    :command (list org-link-beautify-comic-preview-command
