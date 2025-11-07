@@ -486,8 +486,7 @@ $ pip install thumbnail")
            :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
            :sentinel (lambda (proc event)
                        (when org-link-beautify-enable-debug-p
-                         ;; DEBUG:
-                         (message (format "> proc: %s\n> event: %s" proc event)))
+                         (message (format "[org-link-beautify] > proc: %s\n> event: %s" proc event)))
                        ;; (when (string= event "finished\n")
                        ;;   (kill-buffer (process-buffer proc))
                        ;;   (kill-process proc))
@@ -783,12 +782,8 @@ $ pip install Pillow"
             :buffer proc-buffer
             :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
             :sentinel (lambda (proc event)
-                        (if org-link-beautify-enable-debug-p
-                            (message (format "> proc: %s\n> event: %s" proc event))
-                          ;; (when (string= event "finished\n")
-                          ;;   (kill-buffer (process-buffer proc))
-                          ;;   (kill-process proc))
-                          ))))
+                        (when org-link-beautify-enable-debug-p
+                          (message "[org-link-beautify] > proc: %s\n> event: %s" proc event)))))
           ("thumbnailer.py" (org-link-beautify-thumbnailer file-path proc-name proc-buffer))
           (_ (user-error "This system platform currently not supported by org-link-beautify.\n Please contribute code to support")))
         (with-timeout (20 (kill-process proc))
@@ -1227,12 +1222,8 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
                    :buffer proc-buffer
                    :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
                    :sentinel (lambda (proc event)
-                               (if org-link-beautify-enable-debug-p
-                                   (message (format "> proc: %s\n> event: %s" proc event))
-                                 ;; (when (string= event "finished\n")
-                                 ;;   (kill-buffer (process-buffer proc))
-                                 ;;   (kill-process proc))
-                                 )))
+                               (when org-link-beautify-enable-debug-p
+                                 (message "[org-link-beautify] proc: %s \n> event: %s" proc event))))
                   ;; then rename [file.extension.png] to [file.png]
                   (when (file-exists-p qlmanage-thumbnail-file)
                     (rename-file qlmanage-thumbnail-file thumbnail-file))))
@@ -1362,11 +1353,7 @@ $ pip install ffmpeg-python")
               :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
               :sentinel (lambda (proc event)
                           (when org-link-beautify-enable-debug-p
-                            (message (format "> proc: %s\n> event: %s" proc event)))
-                          ;; (when (string= event "finished\n")
-                          ;;   (kill-buffer (process-buffer proc))
-                          ;;   (kill-process proc))
-                          )))))
+                            (message "[org-link-beautify] > proc: %s\n> event: %s" proc event)))))))
         (with-timeout (20 (kill-process proc))
           (while (process-live-p proc) (sit-for .5))
           (message "[org-link-beautify] Timeout auto killed process %s" proc-name)))
