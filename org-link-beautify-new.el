@@ -1255,8 +1255,7 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
             (image (create-image thumbnail-file))
             (image-width (car (image-size image)))
             (image-height (cdr (image-size image)))
-            (display-width (or (let ((org-image-actual-width nil)) (org-display-inline-image--width link))
-                               (if (> image-height image-width) 300 600))))
+            (display-width (or (let ((org-image-actual-width nil)) (org-display-inline-image--width link)) 300)))
       (prog1 ov
         (setf (image-property image :width) display-width)
         (org-link-beautify-overlay-display-image ov image))
