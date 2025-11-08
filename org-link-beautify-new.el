@@ -685,7 +685,7 @@ This function will apply file type function based on file extension."
            (thumbnail-size 600)
            (proc-name (format "org-link-beautify pdf preview - %s" pdf-file))
            (proc-buffer (format " *org-link-beautify pdf preview - %s*" pdf-file))
-           (proc (get-process proc-name)))
+           (proc (get-buffer-process (get-buffer proc-buffer))))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
         (pcase (file-name-nondirectory org-link-beautify-pdf-preview-command)
@@ -766,7 +766,7 @@ $ pip install Pillow"
            (thumbnail-size (or org-link-beautify-ebook-preview-size 600))
            (proc-name (format "org-link-beautify epub preview - %s" epub-file))
            (proc-buffer (format " *org-link-beautify epub preview - %s*" epub-file))
-           (proc (get-process proc-name)))
+           (proc (get-buffer-process (get-buffer proc-buffer))))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
         (pcase (file-name-nondirectory org-link-beautify-epub-preview-command)
@@ -844,7 +844,7 @@ You can install software `libmobi' to get command `mobitool'."
            (thumbnail-size (or org-link-beautify-ebook-preview-size 600))
            (proc-name (format "org-link-beautify kindle preview - %s" kindle-file))
            (proc-buffer (format " *org-link-beautify kindle preview - %s*" kindle-file))
-           (proc (get-process proc-name)))
+           (proc (get-buffer-process (get-buffer proc-buffer))))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
         (pcase (file-name-nondirectory org-link-beautify-kindle-preview-command)
@@ -1014,7 +1014,7 @@ You can install software `libmobi' to get command `mobitool'."
            (thumbnail-size 600)
            (proc-name (format "org-link-beautify djvu preview - %s" djvu-file))
            (proc-buffer (format " *org-link-beautify djvu preview - %s*" djvu-file))
-           (proc (get-process proc-name)))
+           (proc (get-buffer-process (get-buffer proc-buffer))))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
         (let ((cover-image (org-link-beautify-djvu--extract-cover djvu-file)))
@@ -1105,13 +1105,13 @@ You can install software `libmobi' to get command `mobitool'."
            (thumbnail-size 600)
            (proc-name (format "org-link-beautify code preview - %s" source-code-file))
            (proc-buffer (format " *org-link-beautify code preview - %s*" source-code-file))
-           (proc (get-process proc-name)))
+           (proc (get-buffer-process (get-buffer proc-buffer))))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (and (file-exists-p thumbnail-file)
                    ;; limit to maximum 30 lines of file.
                    (> (string-to-number (shell-command-to-string (format "cat %s | wc -l" source-code-file)))
                       org-link-beautify-source-code-preview-max-lines))
-        (unless proc
+        (unless (or proc (get-buffer proc-buffer))
           (pcase (file-name-nondirectory org-link-beautify-source-code-preview-command)
             ("silicon"
              (start-process
@@ -1185,10 +1185,10 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
            (thumbnail-size (or org-link-beautify-comic-preview-size 1080))
            (proc-name (format "org-link-beautify comic preview - %s" (file-name-base file-path)))
            (proc-buffer (format " *org-link-beautify comic preview - %s*" (file-name-base file-path)))
-           (proc (get-process proc-name)))
+           (proc (get-buffer-process (get-buffer proc-buffer))))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
-        (unless proc
+        (unless (or proc (get-buffer proc-buffer))
           (cl-case system-type
             (gnu/linux
              (pcase (file-name-nondirectory org-link-beautify-comic-preview-command)
@@ -1299,11 +1299,11 @@ $ pip install ffmpeg-python")
            (thumbnail-size (or org-link-beautify-video-preview-size 600))
            (proc-name (format "org-link-beautify video preview - %s" video-filename))
            (proc-buffer (format " *org-link-beautify video preview - %s*" video-filename))
-           (proc (get-process proc-name)))
+           (proc (get-buffer-process (get-buffer proc-buffer))))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
         ;; detect process already running?
-        (unless proc
+        (unless (or proc (get-buffer proc-buffer))
           (pcase (file-name-nondirectory org-link-beautify-video-preview-command)
             ("ffmpeg"
              ;; $ ffmpeg -i video.mp4 -ss 00:00:00.001 -vframes 1 -vcodec png -an -f rawvideo -s 119x64 out.png
@@ -1415,10 +1415,10 @@ $ pip install ffmpeg-python")
            (thumbnail-size (or org-link-beautify-audio-preview-size 300))
            (proc-name (format "org-link-beautify audio preview - %s" audio-filename))
            (proc-buffer (format " *org-link-beautify audio preview - %s*" audio-filename))
-           (proc (get-process proc-name)))
+           (proc (get-buffer-process (get-buffer proc-buffer))))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
-        (unless proc
+        (unless (or proc (get-buffer proc-buffer))
           (cl-case org-link-beautify-audio-preview-command
             (ffmpeg
              (start-process
@@ -1621,11 +1621,11 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
            (thumbnail-size (or (string-to-number (car (string-split org-link-beautify-offline-webpage-viewport-size "x"))) 600))
            (proc-name (format "org-link-beautify offline webpage preview - %s" offline-webpage-file))
            (proc-buffer (format " *org-link-beautify offline webpage preview - %s*" offline-webpage-file))
-           (proc (get-process proc-name)))
+           (proc (get-buffer-process (get-buffer proc-buffer))))
       (prog1 thumbnail-file ; return the thumbnail file as result.
         (unless (file-exists-p thumbnail-file)
           (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
-          (unless proc
+          (unless (or proc (get-buffer proc-buffer))
             (pcase org-link-beautify-offline-webpage-preview-command
               ;; Google Chrome headless screenshot
               ((or "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" "chrome" "google-chrome")
@@ -1836,12 +1836,12 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
          (thumbnail-size (or org-link-beautify-url-preview-size 1000))
          (proc-name (format "org-link-beautify url screenshot - %s" url))
          (proc-buffer (format " *org-link-beautify url screenshot - %s*" url))
-         (proc (get-process proc-name)))
+         (proc (get-buffer-process (get-buffer proc-buffer))))
     (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
     (if (or (file-exists-p thumbnail-file)
             (file-exists-p html-archive-file))
         (when org-link-beautify-url-preview-command
-          (unless proc
+          (unless (or proc (get-buffer proc-buffer))
             (pcase org-link-beautify-url-preview-command
               ('google-chrome
                ;; $ google-chrome --headless --screenshot=screenshot.png "https://www.chromestatus.com/"
