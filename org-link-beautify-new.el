@@ -244,13 +244,18 @@ The argument FILE must be the absolute path."
 
 (defun org-link-beautify--python-script-run (python-script-file)
   "Run PYTHON-SCRIPT-FILE through shell command."
+  (cl-assert (executable-find org-link-beautify-python-interpreter) nil
+             "[org-link-beautify] Install \"python\" environment")
   (shell-command-to-string
    (format "%s %s" org-link-beautify-python-interpreter python-script-file)))
 
 (defun org-link-beautify--python-command-to-string (&rest code-lines)
   "Run Python CODE-LINES through shell command."
+  (cl-assert (executable-find org-link-beautify-python-interpreter) nil
+             "[org-link-beautify] Install \"python\" environment")
   (shell-command-to-string
-   (concat "python -c "
+   (concat org-link-beautify-python-interpreter
+           " -c "
            ;; solve double quote character issue.
            "\"" (string-replace "\"" "\\\"" (string-join code-lines "\n")) "\"")))
 
@@ -270,11 +275,15 @@ The argument FILE must be the absolute path."
 
 (defun org-link-beautify--javascript-script-run (javascript-script-file)
   "Run JAVASCRIPT-SCRIPT-FILE through shell command."
+  (cl-assert (executable-find org-link-beautify-javascript-interpreter) nil
+             "[org-link-beautify] Install \"JavaScript\" environment")
   (shell-command-to-string
    (format "%s %s" org-link-beautify-javascript-interpreter javascript-script-file)))
 
 (defun org-link-beautify--javascript-command-to-string (&rest code-lines)
   "Run JavaScript CODE-LINES through shell command."
+  (cl-assert (executable-find org-link-beautify-javascript-interpreter) nil
+             "[org-link-beautify] Install \"JavaScript\" environment")
   (shell-command-to-string
    (concat org-link-beautify-javascript-interpreter
            " --eval "
@@ -295,13 +304,18 @@ The argument FILE must be the absolute path."
 
 (defun org-link-beautify--ruby-script-run (ruby-script-file)
   "Run RUBY-SCRIPT-FILE through shell command."
+  (cl-assert (executable-find org-link-beautify-javascript-interpreter) nil
+             "[org-link-beautify] Install \"Ruby\" environment")
   (shell-command-to-string
    (format "%s %s" org-link-beautify-ruby-interpreter ruby-script-file)))
 
 (defun org-link-beautify--ruby-command-to-string (&rest code-lines)
   "Run Ruby CODE-LINES through shell command."
+  (cl-assert (executable-find org-link-beautify-javascript-interpreter) nil
+             "[org-link-beautify] Install \"Ruby\" environment")
   (shell-command-to-string
-   (concat "ruby -e "
+   (concat org-link-beautify-ruby-interpreter
+           " -e "
            ;; solve double quote character issue.
            "\"" (string-replace "\"" "\\\"" (string-join code-lines "\n")) "\"")))
 
@@ -474,6 +488,9 @@ $ pip install thumbnail")
       (unless (file-exists-p thumbnail-file)
         (let* ((proc-name (or proc-name (format "org-link-beautify thumbnailer - %s" (file-name-base input-file))))
                (proc-buffer (or proc-buffer (format " *org-link-beautify thumbnailer - %s*" (file-name-base input-file)))))
+          (cl-assert (file-exists-p org-link-beautify-thumbnailer-script) nil
+                     "[org-link-beautify] The thumbnailer script file does not exist.\n%s"
+                     org-link-beautify-thumbnailer-script)
           (make-process
            :name proc-name
            :command (list org-link-beautify-python-interpreter
@@ -690,6 +707,8 @@ This function will apply file type function based on file extension."
       (unless (file-exists-p thumbnail-file)
         (pcase (file-name-nondirectory org-link-beautify-pdf-preview-command)
           ("pdftocairo"
+           (cl-assert (executable-find "pdftocairo") nil
+                      "[org-link-beautify] Please install the PDF preview command `pdftocairo'")
            (start-process
             proc-name proc-buffer
             "pdftocairo"
@@ -701,6 +720,8 @@ This function will apply file type function based on file extension."
             "-f" (number-to-string pdf-page-number)
             pdf-file (file-name-sans-extension thumbnail-file)))
           ("pdf2svg"
+           (cl-assert (executable-find "pdf2svg") nil
+                      "[org-link-beautify] Please install the PDF preview command `pdf2svg'")
            (unless (eq org-link-beautify-pdf-preview-image-format 'svg)
              (warn "The pdf2svg only supports convert PDF to SVG format.
 Please adjust `org-link-beautify-pdf-preview-command' to `pdftocairo' or
@@ -771,6 +792,8 @@ $ pip install Pillow"
       (unless (file-exists-p thumbnail-file)
         (pcase (file-name-nondirectory org-link-beautify-epub-preview-command)
           ("thumbnailer-epub.py"           ; for script "scripts/epub-thumbnailer.py"
+           (cl-assert (file-exists-p org-link-beautify-epub-preview-command) nil
+                      "[org-link-beautify] EPUB preview command not available.\nCheck package installed scripts.")
            (make-process
             :name proc-name
             :command (list org-link-beautify-python-interpreter
@@ -783,7 +806,10 @@ $ pip install Pillow"
             :sentinel (lambda (proc event)
                         (when org-link-beautify-enable-debug-p
                           (message "[org-link-beautify] > proc: %s\n> event: %s" proc event)))))
-          ("thumbnailer.py" (org-link-beautify-thumbnailer file-path proc-name proc-buffer))
+          ("thumbnailer.py"
+           (cl-assert (file-exists-p org-link-beautify-epub-preview-command) nil
+                      "[org-link-beautify] EPUB preview command not available.\nCheck package installed scripts.")
+           (org-link-beautify-thumbnailer file-path proc-name proc-buffer))
           (_ (user-error "This system platform currently not supported by org-link-beautify.\n Please contribute code to support")))
         ;; (with-timeout (10 (kill-process proc))
         ;;   (while (process-live-p proc) (sleep-for 0.5)))
@@ -850,6 +876,7 @@ You can install software `libmobi' to get command `mobitool'."
       (unless (file-exists-p thumbnail-file)
         (pcase (file-name-nondirectory org-link-beautify-kindle-preview-command)
           ("mobitool"
+           (cl-assert (executable-find "mobitool") nil "[org-link-beautify] Please install `mobitool' command tool")
            ;; mobitool dumped cover image thumbnail filename can't be specified in command-line argument.
            (let ((mobitool-cover-file (concat thumbnails-dir (file-name-base kindle-file) "_cover.jpg")))
              (unless (file-exists-p mobitool-cover-file)
@@ -926,6 +953,7 @@ You can install software `libmobi' to get command `mobitool'."
 (defun org-link-beautify-fictionbook2--save-cover (image thumbnail-file)
   "Save FictionBook2 cover IMAGE to THUMBNAIL-FILE."
   ;; `image-save': This writes the original image data to a file.
+  (cl-assert (featurep 'fb-reader) nil "[org-link-beautify] Please install Emacs package `fb-reader'")
   (with-temp-buffer
     (insert (plist-get (cdr image) :data))
     (write-region (point-min) (point-max) thumbnail-file)))
@@ -1115,6 +1143,7 @@ You can install software `libmobi' to get command `mobitool'."
         (unless (or proc (get-buffer proc-buffer))
           (pcase (file-name-nondirectory org-link-beautify-source-code-preview-command)
             ("silicon"
+             (cl-assert (executable-find "silicon") nil "[org-link-beautify] Please install command tool `silicon'")
              (start-process
               proc-name proc-buffer
               "silicon" source-code-file "-o" thumbnail-file
@@ -1122,6 +1151,7 @@ You can install software `libmobi' to get command `mobitool'."
               "--no-window-controls" "--shadow-blur-radius" "30" "--shadow-color" "#555"
               "--window-title" (file-name-nondirectory file-path)))
             ("germanium"
+             (cl-assert (executable-find "germanium") nil "[org-link-beautify] Please install command tool `germanium'")
              (start-process
               proc-name proc-buffer
               "germanium" source-code-file "-o" thumbnail-file
@@ -1194,6 +1224,7 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
             (gnu/linux
              (pcase (file-name-nondirectory org-link-beautify-comic-preview-command)
                ("cbconvert"              ; https://github.com/gen2brain/cbconvert
+                (cl-assert (executable-find "cbconvert") nil "[org-link-beautify] Please install command tool `cbconvert'")
                 (start-process
                  proc-name
                  proc-buffer
@@ -1209,6 +1240,7 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
              ;; $ qlmanage -t "ラセン恐怖閣-マリコとニジロー1-DL版.cbz" - 2.0 -s 1080 -o ".thumbnails"
              (pcase (file-name-nondirectory org-link-beautify-comic-preview-command)
                ("qlmanage"
+                (cl-assert (executable-find "qlmanage") nil "[org-link-beautify] Please ensure command tool `qlmanage' on macOS")
                 (let ((qlmanage-thumbnail-file (concat thumbnails-dir (file-name-base comic-file) ".png")))
                   (make-process
                    :name proc-name
@@ -1225,7 +1257,11 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
                   ;; then rename [file.extension.png] to [file.png]
                   (when (file-exists-p qlmanage-thumbnail-file)
                     (rename-file qlmanage-thumbnail-file thumbnail-file))))
-               ("thumbnailer.py" (org-link-beautify-thumbnailer file-path proc-name proc-buffer))))
+               ("thumbnailer.py"
+                (cl-assert (file-exists-p org-link-beautify-comic-preview-command) nil
+                           "[org-link-beautify] Please ensure package installed script %s"
+                           org-link-beautify-comic-preview-command)
+                (org-link-beautify-thumbnailer file-path proc-name proc-buffer))))
             (t (user-error "This system platform currently not supported by org-link-beautify.\n Please contribute code to support"))))
         ;; (with-timeout (10 (kill-process proc))
         ;;   (while (process-live-p proc) (sleep-for 0.5)))
@@ -1308,6 +1344,7 @@ $ pip install ffmpeg-python")
         (unless (or proc (get-buffer proc-buffer))
           (pcase (file-name-nondirectory org-link-beautify-video-preview-command)
             ("ffmpeg"
+             (cl-assert (executable-find "ffmpeg") nil "[org-link-beautify] Please install command tool `ffmpeg'")
              ;; $ ffmpeg -i video.mp4 -ss 00:00:00.001 -vframes 1 -vcodec png -an -f rawvideo -s 119x64 out.png
              (let ((thumbnail-width thumbnail-size)
                    (thumbnail-height 300))
@@ -1323,6 +1360,7 @@ $ pip install ffmpeg-python")
                 "-s" (format "%sx%s" thumbnail-width thumbnail-height)
                 thumbnail-file)))
             ("qlmanage"
+             (cl-assert (executable-find "qlmanage") nil "[org-link-beautify] Please ensure command tool `qlmanage' on macOS")
              (let ((qlmanage-thumbnail-file (concat thumbnails-dir (file-name-nondirectory video-file) ".png")))
                (unless (file-exists-p qlmanage-thumbnail-file)
                  (let ((proc (start-process
@@ -1337,10 +1375,14 @@ $ pip install ffmpeg-python")
                (when (file-exists-p qlmanage-thumbnail-file)
                  (rename-file qlmanage-thumbnail-file thumbnail-file))))
             ("ffmpegthumbnailer"
+             (cl-assert (executable-find "ffmpegthumbnailer") nil "[org-link-beautify] Please install command tool `ffmpegthumbnailer'")
              (start-process
               proc-name proc-buffer
               "ffmpegthumbnailer" "-f" "-i" video-file "-s" (number-to-string thumbnail-size) "-o" thumbnail-file))
             ("thumbnailer-video.py"
+             (cl-assert (file-exists-p org-link-beautify-video-preview-command) nil
+                        "[org-link-beautify] Please ensure package installed script %s"
+                        org-link-beautify-video-preview-command)
              (make-process
               :name proc-name
               :command (list org-link-beautify-video-thumbnailer-script
@@ -1424,6 +1466,7 @@ $ pip install ffmpeg-python")
         (unless (or proc (get-buffer proc-buffer))
           (cl-case org-link-beautify-audio-preview-command
             (ffmpeg
+             (cl-assert (executable-find "ffmpeg") nil "[org-link-beautify] Please install command tool `ffmpeg'")
              (start-process
               proc-name proc-buffer
               "ffmpeg" "-i" audio-file
@@ -1431,6 +1474,7 @@ $ pip install ffmpeg-python")
               "-frames:v" "1"
               thumbnail-file))
             (qlmanage
+             (cl-assert (executable-find "qlmanage") nil "[org-link-beautify] Please ensure command tool `qlmanage' on macOS")
              (let ((qlmanage-thumbnail-file (concat thumbnails-dir (file-name-nondirectory audio-file) ".png")))
                (unless (file-exists-p qlmanage-thumbnail-file)
                  (start-process
@@ -1440,14 +1484,17 @@ $ pip install ffmpeg-python")
                (when (file-exists-p qlmanage-thumbnail-file)
                  (rename-file qlmanage-thumbnail-file thumbnail-file))))
             (audiowaveform
+             (cl-assert (executable-find "audiowaveform") nil "[org-link-beautify] Please install command tool `audiowaveform'")
              (start-process
               proc-name proc-buffer
               "audiowaveform" "-i" audio-file "-o" thumbnail-file))
             (whisper-transcribe
+             (cl-assert (executable-find "whisper") nil "[org-link-beautify] Please install command tool `whisper'")
              (start-process
               proc-name proc-buffer
               "whisper" "--model" "turbo" "--output_format" "vtt" "--task" "transcribe" audio-file) )
             (whisper-cpp-transcribe
+             (cl-assert (executable-find "whisper-cli") nil "[org-link-beautify] Please install command tool `whisper-cli'")
              (start-process
               proc-name proc-buffer
               "whisper-cli" "--model" "~/.config/whisper-cpp/models/ggml-large-v3-turbo.bin" "-f" audio-file "--output-file" output-file)))))
@@ -1510,7 +1557,11 @@ $ pip install ffmpeg-python")
             (unless (file-exists-p thumbnail-file)
               (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
               (pcase (file-name-nondirectory org-link-beautify-subtitle-preview-command)
-                ("thumbnailer.py" (org-link-beautify-thumbnailer file-path proc-name proc-buffer)))))
+                ("thumbnailer.py"
+                 (cl-assert (file-exists-p org-link-beautify-subtitle-preview-command) nil
+                            "[org-link-beautify] Please ensure package installed script %s"
+                            org-link-beautify-subtitle-preview-command)
+                 (org-link-beautify-thumbnailer file-path proc-name proc-buffer)))))
         (let* ((subtitle-file-context (split-string (shell-command-to-string (format "head -n 20 '%s'" subtitle-file)) "\n"))
                (text (concat "\n" (org-link-beautify--display-content-block subtitle-file-context))))
           ;; return the subtitle file context as result.
@@ -1567,9 +1618,13 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
            (search-option (match-string 2 path))
            (archive-file (expand-file-name (org-link-unescape file-path)))
            (archive-extension (file-name-extension archive-file))
-           (command (cdr (assoc archive-extension org-link-beautify-archive-preview-command-alist)))
-           (execute-command (format "%s '%s'" command archive-file))
-           (archive-files-list (split-string (shell-command-to-string execute-command) "\n"))
+           (extract-command (cdr (assoc archive-extension org-link-beautify-archive-preview-command-alist)))
+           (command-name (car (string-split extract-command " ")))
+           (execute-command (format "%s '%s'" extract-command archive-file))
+           (archive-files-list (progn
+                                 (cl-assert (executable-find command-name) nil
+                                            "[org-link-beautify] Please install command tool %s" command-name)
+                                 (split-string (shell-command-to-string execute-command) "\n")))
            (text (concat "\n" (org-link-beautify--display-content-block archive-files-list))))
       ;; return the files list in archive file as result.
       text)))
@@ -1632,6 +1687,8 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
             (pcase org-link-beautify-offline-webpage-preview-command
               ;; Google Chrome headless screenshot
               ((or "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" "chrome" "google-chrome")
+               (cl-assert (executable-find org-link-beautify-offline-webpage-preview-command) nil
+                          "[org-link-beautify] Please install Google Chrome")
                ;; $ google-chrome --headless --screenshot=screenshot.png /path/to/file.html --window-size=width,height --hide-scrollbars
                (start-process
                 proc-name proc-buffer
@@ -1848,6 +1905,8 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
           (unless (or proc (get-buffer proc-buffer))
             (pcase org-link-beautify-url-preview-command
               ('google-chrome
+               (cl-assert (executable-find org-link-beautify-offline-webpage-preview-command) nil
+                          "[org-link-beautify] Please install Google Chrome")
                ;; $ google-chrome --headless --screenshot=screenshot.png "https://www.chromestatus.com/"
                (start-process
                 proc-name proc-buffer
@@ -1856,6 +1915,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
                 (format "--screenshot=%s" thumbnail-file)
                 url))
               ('monolith
+               (cl-assert (executable-find "monolith") nil "[org-link-beautify] Please install `monolith'")
                (let* ((html-archive-file (concat (file-name-sans-extension thumbnail-file) ".html")))
                  (make-process
                   :name proc-name
