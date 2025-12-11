@@ -1876,6 +1876,8 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
           ,(when (or (file-exists-p "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
                      (executable-find "chrome"))
              '(const :tag "Google Chrome --headless --screenshot" 'google-chrome))
+          ,(when (executable-find "rinku")
+             '(const :tag "Rinku" 'rinku))
           ,(when (executable-find "monolith")
              '(const :tag "CLI tool for saving complete web pages as a single HTML file" 'monolith)))
   :group 'org-link-beautify)
@@ -1914,6 +1916,16 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
                 "--headless"
                 (format "--screenshot=%s" thumbnail-file)
                 url))
+              ('rinku
+               (cl-assert (executable-find "rinku") nil "[org-link-beautify] Please install `rinku'")
+               (let* ((json-response-hash (json-parse-string
+                                           (shell-command-to-string
+                                            ;; $ rinku --preview --width 600 --height 300 https://soundcloud.com/shehackedyou
+                                            (format "%s --preview %s" org-link-beautify-url-preview-command url))))
+                      (image-path (gethash "image" json-response-hash))
+                      (title (gethash "title" json-response-hash)))
+                 (when (derived-mode-p 'org-mode)
+                   (org-insert-link nil image-path title))))
               ('monolith
                (cl-assert (executable-find "monolith") nil "[org-link-beautify] Please install `monolith'")
                (let* ((html-archive-file (concat (file-name-sans-extension thumbnail-file) ".html")))
