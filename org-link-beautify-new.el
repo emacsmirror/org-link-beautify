@@ -372,7 +372,7 @@ The argument FILE must be the absolute path."
       ("eshell" (nerd-icons-icon-for-mode 'eshell-mode :face '(:inherit nerd-icons-cyan :slant normal)))
       ("shell" (nerd-icons-icon-for-mode 'shell-mode :face '(:inherit nerd-icons-cyan :slant normal)))
       ("man" (nerd-icons-mdicon "nf-md-file_document_outline" :face '(:inherit nerd-icons-lblue :slant normal)))
-      ("woman" (nerd-icons-mdicon "nf-md-file_document_outline" :face '(:inherit nerd-icons-blue-alt :slant normal)))
+      ("woman" (nerd-icons-mdicon "nf-md-file_document_outline" :face '(:inherit nerd-icons-blue :slant normal)))
       ("info" (nerd-icons-icon-for-mode 'Info-mode))
       ("help" (nerd-icons-icon-for-mode 'help-mode))
       ("shortdoc" (nerd-icons-mdicon "nf-md-file_link" :face '(:inherit nerd-icons-blue :slant normal)))
@@ -398,22 +398,22 @@ The argument FILE must be the absolute path."
       ("elfeed" (nerd-icons-mdicon "nf-md-rss" :face '(:inherit nerd-icons-green :slant normal)))
       ("wikipedia" (nerd-icons-mdicon "nf-md-wikipedia" :face '(:inherit nerd-icons-dsilver :slant normal)))
       ("mailto" (nerd-icons-mdicon "nf-md-email_send_outline" :face '(:inherit nerd-icons-lblue :slant normal)))
-      ("irc" (nerd-icons-mdicon "nf-md-chat" :face '(:inherit nerd-icons-blue-alt :slant normal)))
+      ("irc" (nerd-icons-mdicon "nf-md-chat" :face '(:inherit nerd-icons-blue :slant normal)))
       ("wechat" (nerd-icons-mdicon "nf-md-wechat" :face '(:inherit nerd-icons-green :slant normal)))
-      ("magnet" (nerd-icons-mdicon "nf-md-magnet" :face '(:inherit nerd-icons-blue-alt :slant normal)))
+      ("magnet" (nerd-icons-mdicon "nf-md-magnet" :face '(:inherit nerd-icons-blue :slant normal)))
       ("ref" (nerd-icons-codicon "nf-cod-references" :face '(:inherit nerd-icons-blue :slant normal)))
       ("doi" (nerd-icons-mdicon "nf-md-file_document_plus_outline" :face '(:inherit nerd-icons-green :slant normal)))
-      ("org-contact" (nerd-icons-mdicon "nf-md-contacts_outline" :face '(:inherit nerd-icons-purple-alt :slant normal)))
-      ("org-bookmark" (nerd-icons-mdicon "nf-md-bookmark_check_outline" :face '(:inherit nerd-icons-blue-alt :slant normal)))
-      ("org-ql-search" (nerd-icons-mdicon "nf-md-text_box_search_outline" :face '(:inherit nerd-icons-blue-alt :slant normal)))
+      ("org-contact" (nerd-icons-mdicon "nf-md-contacts_outline" :face '(:inherit nerd-icons-purple :slant normal)))
+      ("org-bookmark" (nerd-icons-mdicon "nf-md-bookmark_check_outline" :face '(:inherit nerd-icons-blue :slant normal)))
+      ("org-ql-search" (nerd-icons-mdicon "nf-md-text_box_search_outline" :face '(:inherit nerd-icons-blue :slant normal)))
       ;; org-media-note link types
       ("video" (nerd-icons-faicon "nf-fa-file_video_o" :face '(:inherit nerd-icons-blue :slant normal)))
       ("audio" (nerd-icons-faicon "nf-fa-file_audio_o" :face '(:inherit nerd-icons-blue :slant normal)))
-      ("videocite" (nerd-icons-faicon "nf-fa-file_video_o" :face '(:inherit nerd-icons-blue-alt :slant normal)))
-      ("audiocite" (nerd-icons-faicon "nf-fa-file_audio_o" :face '(:inherit nerd-icons-blue-alt :slant normal)))
+      ("videocite" (nerd-icons-faicon "nf-fa-file_video_o" :face '(:inherit nerd-icons-blue :slant normal)))
+      ("audiocite" (nerd-icons-faicon "nf-fa-file_audio_o" :face '(:inherit nerd-icons-blue :slant normal)))
       ("javascript" (nerd-icons-mdicon "nf-md-language_javascript" :face '(:inherit nerd-icons-yellow :slant normal)))
       ("js" (nerd-icons-mdicon "nf-md-language_javascript" :face '(:inherit nerd-icons-yellow :slant normal)))
-      ("vscode" (nerd-icons-mdicon "nf-md-microsoft_visual_studio_code" :face '(:inherit nerd-icons-blue-alt :slant normal))) ; Visual Studio Code
+      ("vscode" (nerd-icons-mdicon "nf-md-microsoft_visual_studio_code" :face '(:inherit nerd-icons-blue :slant normal))) ; Visual Studio Code
       ("macappstore" (nerd-icons-mdicon "nf-md-apple" :face '(:inherit nerd-icons-blue :slant normal))) ; Mac App Store
       
       ("fuzzy"
