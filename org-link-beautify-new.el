@@ -1204,7 +1204,7 @@ You can install software `libmobi' to get command `mobitool'."
     (if-let* ((source-code (org-link-beautify--preview-source-code-file path)))
         (prog1 ov
           (overlay-put ov 'after-string source-code)
-	      (overlay-put ov 'face    'org-block))
+	        (overlay-put ov 'face    'org-block))
       (org-link-beautify-iconify ov path link))))
 
 ;;; file: [comic]
@@ -1610,7 +1610,7 @@ $ pip install ffmpeg-python")
     (if-let* ((text (org-link-beautify--generate-preview-for-file-subtitle path)))
         (prog1 ov
           (overlay-put ov 'after-string text)
-	      (overlay-put ov 'face         'default))
+	        (overlay-put ov 'face         'default))
       (org-link-beautify-iconify ov path link))))
 
 ;;; file: [archive file]
