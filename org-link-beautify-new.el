@@ -574,7 +574,7 @@ This function will apply file type function based on file extension."
        ;; no file extension, it's directory.
        ((null extension)
         (org-link-beautify-iconify ov path link))
-       ;; images in `org-link-beautify-image-preview-list'
+       ;; Images in `org-link-beautify-image-preview-list'
        ((string-match-p (image-file-name-regexp) path)
         (org-link-beautify-preview-file-image ov path link))
        ;; PDF
@@ -656,7 +656,7 @@ This function will apply file type function based on file extension."
              (width (org-display-inline-image--width link))
              (image (create-image file nil nil :width width :ascent 100)))
         (if image                     ; Add image to overlay
-	        ;; See bug#59902. We cannot rely on Emacs to update image if the file has changed.
+	          ;; See bug#59902. We cannot rely on Emacs to update image if the file has changed.
             (org-link-beautify-overlay-display-image ov image align)
           nil))))
 
