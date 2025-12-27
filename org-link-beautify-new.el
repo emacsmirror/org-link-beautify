@@ -443,6 +443,12 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
               (icon (org-link-beautify--return-icon ov path link)))
     (unless (overlay-get ov 'org-image-overlay)
       (overlay-put ov
+                   'before-string (concat
+                                   (propertize "[" 'face '(:inherit default :foreground "orange"))
+                                   ;; (propertize icon 'face '(:inherit nil :slant normal :weight normal))
+                                   icon
+                                   (propertize "]" 'face '(:inherit default :foreground "orange"))))
+      (overlay-put ov
                    'display (concat
                              (propertize "["
                                          'face `( :inherit default
@@ -459,11 +465,6 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
                                                   :foreground ,(if (face-foreground 'shadow)
                                                                    (color-lighten-name (face-foreground 'shadow) 2)
                                                                  "gray40")))))
-      (overlay-put ov
-                   'after-string (concat
-                                  (propertize "[" 'face '(:inherit default :foreground "orange"))
-                                  icon
-                                  (propertize "]" 'face '(:inherit default :foreground "orange"))))
       (overlay-put ov 'keymap  org-link-beautify-keymap))
     t))
 
@@ -550,6 +551,19 @@ The IMAGE object is created by `create-image' from `org--create-inline-image'."
               (org-link-beautify-overlay-display-image ov image align)
             nil)))))
 
+;;; display file attributes bellow link element.
+
+(defun org-link-beautify-file-attributes (ov path link)
+  "Display file attributes on overlay OV from PATH bellow element LINK."
+  (let* ((link-type (org-element-property :type link))
+         (file-attributes (file-attributes (if (equal link-type "attachment") (org-attach-expand path) path)))
+         (file-size (file-size-human-readable (file-attribute-size file-attributes))))
+    (overlay-put ov 'after-string (concat
+                                   (propertize "(" 'face '(:foreground "SlateGray3" :height 0.7))
+                                   (propertize file-size 'face '(:foreground "gray" :height 0.7))
+                                   (propertize ")" 'face '(:foreground "SlateGray3" :height 0.7))))
+    (overlay-put ov 'face 'font-lock-comment-face)))
+
 ;;; Preview file: link type
 
 (defun org-link-beautify-preview-file (ov path link)
@@ -565,42 +579,53 @@ This function will apply file type function based on file extension."
         (org-link-beautify-preview-file-image ov path link))
        ;; PDF
        ((string-equal extension "pdf")
-        (org-link-beautify-preview-file-pdf ov path link))
+        (and (org-link-beautify-preview-file-pdf ov path link)
+             (org-link-beautify-file-attributes ov path link)))
        ;; EPUB
        ((string-equal extension "epub")
-        (org-link-beautify-preview-file-epub ov path link))
+        (and (org-link-beautify-preview-file-epub ov path link)
+             (org-link-beautify-file-attributes ov path link)))
        ;; Kindle .mobi or .azw3
        ((string-match-p "\\(mobi\\|azw3\\|azw\\)" extension)
-        (org-link-beautify-preview-file-kindle ov path link))
+        (and (org-link-beautify-preview-file-kindle ov path link)
+             (org-link-beautify-file-attributes ov path link)))
        ;; .fb2(.zip)
        ((string-match-p "\\.fb2\\(\\.zip\\)?" path)
-        (org-link-beautify-preview-file-fictionbook2 ov path link))
+        (and (org-link-beautify-preview-file-fictionbook2 ov path link)
+             (org-link-beautify-file-attributes ov path link)))
        ;; .djvu
        ((string-match-p "\\.djvu" path)
-        (org-link-beautify-preview-file-djvu ov path link))
+        (and (org-link-beautify-preview-file-djvu ov path link)
+             (org-link-beautify-file-attributes ov path link)))
        ;; Comic
        ((member extension org-link-beautify-comic-preview-list)
-        (org-link-beautify-preview-file-comic ov path link))
+        (and (org-link-beautify-preview-file-comic ov path link)
+             (org-link-beautify-file-attributes ov path link)))
        ;; Video
        ((member extension org-link-beautify-video-preview-list)
-        (org-link-beautify-preview-file-video ov path link))
+        (and (org-link-beautify-preview-file-video ov path link)
+             (org-link-beautify-file-attributes ov path link)))
        ;; Audio
        ((member extension org-link-beautify-audio-preview-list)
-        (org-link-beautify-preview-file-audio ov path link))
+        (and (org-link-beautify-preview-file-audio ov path link)
+             (org-link-beautify-file-attributes ov path link)))
        ;; Subtitle
        ((member extension org-link-beautify-subtitle-preview-list)
         (org-link-beautify-preview-file-subtitle ov path link))
        ;; Archive
        ((member extension org-link-beautify-archive-preview-list)
-        (org-link-beautify-preview-file-archive ov path link))
+        (and (org-link-beautify-preview-file-archive ov path link)
+             (org-link-beautify-file-attributes ov path link)))
        ;; Source Code
        ((member extension org-link-beautify-source-code-preview-list)
         (org-link-beautify-preview-file-source-code ov path link))
        ;; file:/path/to/file.html (single HTML file for offline archived webpage)
        ((member extension org-link-beautify-offline-webpage-preview-list)
-        (org-link-beautify-preview-file-offline-webpage ov path link))
+        (and (org-link-beautify-preview-file-offline-webpage ov path link)
+             (org-link-beautify-file-attributes ov path link)))
        (t (or (org-link-beautify-preview-thumbnail ov path link)
-              (org-link-beautify-iconify ov path link))))))
+              (and (org-link-beautify-iconify ov path link)
+                   (org-link-beautify-file-attributes ov path link)))))))
 
 ;;; Preview attachment: link type
 
@@ -610,7 +635,8 @@ This function will apply file type function based on file extension."
   "Preview attachment file of PATH over OV overlay position for LINK element.
 This function will apply file type function based on file extension."
   (org-with-point-at (org-element-begin link)
-    (org-link-beautify-preview-file ov (org-attach-expand path) link)))
+    (and (org-link-beautify-preview-file ov (org-attach-expand path) link)
+         (org-link-beautify-file-attributes ov path link))))
 
 ;;; file: [image]
 
