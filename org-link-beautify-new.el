@@ -458,7 +458,7 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
                                                                  "gray40")))
                              (propertize description
                                          'face (org-link-beautify--return-warning-face ov path link)
-                                         'read-only t 'inhibit-isearch t 'intangible t)
+                                         'read-only t 'intangible t 'inhibit-isearch nil)
                              (propertize "]"
                                          'face `( :inherit default
                                                   :underline t
