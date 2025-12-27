@@ -546,7 +546,7 @@ The IMAGE object is created by `create-image' from `org--create-inline-image'."
               ( (file-exists-p thumbnail-file)))
         (let* ((width (or (org-display-inline-image--width link) 300))
                (align (org-image--align link))
-               (image (org--create-inline-image thumbnail-file width)))
+               (image (create-image thumbnail-file nil nil :width width :ascent 100)))
           (if image                        ; Add image to overlay
               (org-link-beautify-overlay-display-image ov image align)
             nil)))))
@@ -654,7 +654,7 @@ This function will apply file type function based on file extension."
             ( (file-exists-p file)))
       (let* ((align (org-image--align link))
              (width (org-display-inline-image--width link))
-             (image (org--create-inline-image file width)))
+             (image (create-image file nil nil :width width :ascent 100)))
         (if image                     ; Add image to overlay
 	        ;; See bug#59902. We cannot rely on Emacs to update image if the file has changed.
             (org-link-beautify-overlay-display-image ov image align)
