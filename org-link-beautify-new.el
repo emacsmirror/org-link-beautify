@@ -1383,7 +1383,8 @@ $ pip install ffmpeg-python")
                 "-vcodec" "png"
                 "-an"
                 "-f" "rawvideo"
-                "-s" (format "%sx%s" thumbnail-width thumbnail-height)
+                ;; "-s" (format "%sx%s" thumbnail-width thumbnail-height)
+                "-vf" "scale=600:-1" ; use ":-1" to maintain aspect ratio.
                 thumbnail-file)))
             ("qlmanage"
              (cl-assert (executable-find "qlmanage") nil "[org-link-beautify] Please ensure command tool `qlmanage' on macOS")
