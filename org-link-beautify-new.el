@@ -164,6 +164,47 @@ The argument FILE must be the absolute path."
 
 (define-key org-link-beautify-keymap (kbd "M-q") 'org-link-beautify-action-qrcode-for-url)
 
+(defun org-link-beautify--convert-video-to-audio (video-file audio-file)
+  "Convert the VIDEO-FILE on path to AUDIO-FILE.
+The argument VIDEO-FILE should be the absolute path."
+  (if (and (executable-find "ffmpeg")
+           (file-name-absolute-p video-file)
+           (file-name-absolute-p audio-file))
+      (let* ()
+        (make-process
+         :name (format "org-link-beautify - convert video to audio - %s" (file-name-nondirectory video-file))
+         :buffer (format " *org-link-beautify - convert video to audio - %s*" (file-name-nondirectory video-file))
+         :command (list "ffmpeg" "-i" video-file audio-file)
+         :sentinel (lambda (proc event)
+                     (when (string-equal event "finished\n")
+                       (message "[org-link-beautify] converted video to audio file [%s]\nPlease update your link path to result audio file."
+                                (string-truncate-left audio-file (/ (window-width) 2)))))))))
+
+(defun org-link-beautify-action-convert-video-to-audio (&optional args)
+  "Action of converting video file to audio file (.mp3 by default) in ARGS."
+  (interactive)
+  (when (derived-mode-p 'org-mode)
+    (let* ((element (org-element-context)))
+      (if (and (eq (car element) 'link)
+               (string-equal (org-element-property :type element) "file"))
+          (let* ((video-file-path (expand-file-name (org-element-property :path element)))
+                 (audio-file (file-name-with-extension (file-name-sans-extension (file-name-nondirectory video-file-path)) "mp3"))
+                 (audio-file-path (expand-file-name
+                                   (read-file-name
+                                    (format "[org-link-beautify] convert video file %s to: " (file-name-nondirectory video-file-path))
+                                    (file-name-directory video-file-path)
+                                    audio-file
+                                    nil
+                                    audio-file)
+                                   (file-name-directory video-file-path))))
+            (org-link-beautify--convert-video-to-audio video-file-path audio-file-path)
+            ;; TODO: modify link file path
+            ;; (org-insert-link nil audio-file-path audio-file-path)
+            )
+        (user-error "[org-link-beautify] not video file link at point")))))
+
+;; (define-key org-link-beautify-keymap (kbd "M-a") 'org-link-beautify-action-convert-video-to-audio)
+
 ;;; helper functions
 
 (defun org-link-beautify--get-thumbnails-dir-path (file)
