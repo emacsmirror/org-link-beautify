@@ -214,7 +214,7 @@ The argument VIDEO-FILE should be the absolute path."
                (string-equal (org-element-property :type element) "file"))
           (let* ((music-file-path (expand-file-name (org-element-property :path element)))
                  (music-extension (file-name-extension music-file-path))
-                 (repeat-times 1))
+                 (repeat-times 50))
             (if (member music-extension org-link-beautify-audio-preview-list)
                 (cond
                  ((executable-find "mpg123")
