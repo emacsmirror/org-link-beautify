@@ -235,6 +235,35 @@ The argument FILE must be the absolute path."
       ;;   (org-link-preview-region t t (point-min) (point-max)))
       (buffer-substring (point-min) (point-max)))))
 
+;;; Previewing process logic
+
+(defun org-link-beautify--preview-process-setup-async-timeout (thumbnail-file proc-buffer timeout)
+  "Asynchronous timeout mechanism for previewing process which implemented with `run-with-timer'.
+
+Detect previewing process generated THUMBNAIL-FILE existing, auto kill process associated with PROC-BUFFER in TIMEOUT seconds."
+  (let* ((start-time (current-time))
+         (check-interval 2)
+         (timer nil))
+    (setq timer
+          (run-with-timer
+           check-interval check-interval
+           (lambda ()
+             (let ((elapsed (float-time (time-subtract (current-time) start-time)))
+                   (proc (get-buffer-process (get-buffer proc-buffer))))
+               (cond
+                ;; previewing thumbnail process successed
+                ((file-exists-p thumbnail-file)
+                 (cancel-timer timer))
+                ;; process timeouted
+                ((>= elapsed (or timeout 20))
+                 (when proc (delete-process proc))
+                 (when (get-buffer proc-buffer) (kill-buffer proc-buffer))
+                 (cancel-timer timer))
+                ;; process dead
+                ((and proc (not (process-live-p proc)))
+                 (when (get-buffer proc-buffer) (kill-buffer proc-buffer))
+                 (cancel-timer timer)))))))))
+
 ;;; Invoke external Python script file or code.
 
 (defcustom org-link-beautify-python-interpreter (executable-find "python3")
@@ -755,8 +784,7 @@ Set `org-link-beautify-pdf-preview-image-format' to `svg'."))
            (start-process
             proc-name proc-buffer
             "pdf2svg" pdf-file thumbnail-file (number-to-string pdf-page-number))))
-        (with-timeout (10 (kill-process proc))
-          (while (process-live-p proc) (sleep-for 0.5))))
+        (org-link-beautify--preview-process-setup-async-timeout thumbnail-file proc-buffer 15))
       (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
         (org-link-beautify--notify-generate-thumbnail-failed path thumbnail-file))
       ;; return the thumbnail file as result.
@@ -837,9 +865,7 @@ $ pip install Pillow"
                       "[org-link-beautify] EPUB preview command not available.\nCheck package installed scripts.")
            (org-link-beautify-thumbnailer file-path proc-name proc-buffer))
           (_ (user-error "This system platform currently not supported by org-link-beautify.\n Please contribute code to support")))
-        ;; (with-timeout (10 (kill-process proc))
-        ;;   (while (process-live-p proc) (sleep-for 0.5)))
-        )
+        (org-link-beautify--preview-process-setup-async-timeout thumbnail-file proc-buffer 20))
       (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
         (org-link-beautify--notify-generate-thumbnail-failed epub-file thumbnail-file))
       ;; return the thumbnail file as result.
@@ -913,8 +939,7 @@ You can install software `libmobi' to get command `mobitool'."
              (when (file-exists-p mobitool-cover-file)
                (rename-file mobitool-cover-file thumbnail-file))))
           (_ (user-error "[org-link-beautify] Error: Can't find command tool to dump kindle ebook file cover")))
-        (with-timeout (10 (kill-process proc))
-          (while (process-live-p proc) (sleep-for 0.5))))
+        (org-link-beautify--preview-process-setup-async-timeout thumbnail-file proc-buffer 20))
       (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
         (org-link-beautify--notify-generate-thumbnail-failed kindle-file thumbnail-file))
       ;; return the thumbnail file as result.
@@ -1242,8 +1267,7 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
            (thumbnail-size (or org-link-beautify-comic-preview-size 1080))
            (proc-name (format "org-link-beautify comic preview - %s" (file-name-base file-path)))
            (proc-buffer (format " *org-link-beautify comic preview - %s*" (file-name-base file-path)))
-           (proc (get-buffer-process (get-buffer proc-buffer)))
-           (proc-timeout 20))
+           (proc (get-buffer-process (get-buffer proc-buffer))))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
       (unless (file-exists-p thumbnail-file)
         (unless (or proc (get-buffer proc-buffer))
@@ -1290,16 +1314,7 @@ File extensions like (.cbr, .cbz, .cb7, .cba, .cbt etc)."
                            org-link-beautify-comic-preview-command)
                 (org-link-beautify-thumbnailer file-path proc-name proc-buffer))))
             (t (user-error "This system platform currently not supported by org-link-beautify.\n Please contribute code to support"))))
-        (with-timeout (proc-timeout (progn
-                                      (when-let* ((process (get-buffer-process (get-buffer proc-buffer))))
-                                        (when (process-live-p process)
-                                          (kill-process process)
-                                          (message "[org-link-beautify] killed comic preview process for %s (timeout)"
-                                                   (file-name-base comic-file))))
-                                      (when (get-buffer proc-buffer)
-                                        (kill-buffer proc-buffer))))
-          (while (not (file-exists-p thumbnail-file))
-            (sleep-for 0.5))))
+        (org-link-beautify--preview-process-setup-async-timeout thumbnail-file proc-buffer 20))
       (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
         (org-link-beautify--notify-generate-thumbnail-failed comic-file thumbnail-file))
       ;; return the thumbnail file as result.
@@ -1429,9 +1444,7 @@ $ pip install ffmpeg-python")
               :sentinel (lambda (proc event)
                           (when org-link-beautify-enable-debug-p
                             (message "[org-link-beautify] > proc: %s\n> event: %s" proc event)))))))
-        ;; (with-timeout (10 (kill-process proc))
-        ;;   (while (process-live-p proc) (sleep-for 0.5)))
-        )
+        (org-link-beautify--preview-process-setup-async-timeout thumbnail-file proc-buffer 20))
       (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
         (org-link-beautify--notify-generate-thumbnail-failed video-file thumbnail-file))
       ;; return the thumbnail file as result.
@@ -1734,9 +1747,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
                 (format "--window-size=%s" org-link-beautify-offline-webpage-viewport-size)
                 "--hide-scrollbars"
                 offline-webpage-file))))
-          ;; (with-timeout (10 (kill-process proc))
-          ;;   (while (process-live-p proc) (sleep-for 0.5)))
-          )
+          (org-link-beautify--preview-process-setup-async-timeout thumbnail-file proc-buffer 20))
         (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
           (org-link-beautify--notify-generate-thumbnail-failed offline-webpage-file thumbnail-file))))))
 
