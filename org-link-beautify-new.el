@@ -205,6 +205,33 @@ The argument VIDEO-FILE should be the absolute path."
 
 ;; (define-key org-link-beautify-keymap (kbd "M-a") 'org-link-beautify-action-convert-video-to-audio)
 
+(defun org-link-beautify-action-play-music-repeat (&optional args)
+  "Action of playing music audio file in repeated mode with ARGS."
+  (interactive)
+  (when (derived-mode-p 'org-mode)
+    (let* ((element (org-element-context)))
+      (if (and (eq (car element) 'link)
+               (string-equal (org-element-property :type element) "file"))
+          (let* ((music-file-path (expand-file-name (org-element-property :path element)))
+                 (music-extension (file-name-extension music-file-path))
+                 (repeat-times 1))
+            (if (member music-extension org-link-beautify-audio-preview-list)
+                (cond
+                 ((executable-find "mpg123")
+                  (async-shell-command (format "mpg123 --loop %s %S" repeat-times music-file-path)))
+                 ((executable-find "ffplay")
+                  (async-shell-command (format "ffplay -loop %s %S" repeat-times music-file-path))))
+              (cond
+               ((executable-find "mpv")
+                (async-shell-command (format "mpv --loop-file %s %S" repeat-times music-file-path)))
+               ((executable-find "mplayer")
+                (async-shell-command (format "mplayer -loop %s %S" repeat-times music-file-path)))
+               ((executable-find "ffplay")
+                (async-shell-command (format "ffplay -loop %s %S" repeat-times music-file-path))))))
+        (user-error "[org-link-beautify] not music audio file link at point")))))
+
+(define-key org-link-beautify-keymap (kbd "M-p") 'org-link-beautify-action-play-music-repeat)
+
 ;;; helper functions
 
 (defun org-link-beautify--get-thumbnails-dir-path (file)
