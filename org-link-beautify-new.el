@@ -313,29 +313,24 @@ Detect previewing process generated THUMBNAIL-FILE existing, auto kill process a
          (check-interval 2)
          (timer nil))
     (setq timer
-          (let ((proc (get-buffer-process (get-buffer proc-buffer))))
-            (unwind-protect
-                (run-with-timer
-                 check-interval check-interval
-                 (lambda ()
-                   (let ((elapsed (float-time (time-subtract (current-time) start-time))))
-                     (cond
-                      ;; previewing thumbnail process successed
-                      ((file-exists-p thumbnail-file)
-                       (cancel-timer timer))
-                      ;; process timeouted
-                      ((>= elapsed (or timeout 20))
-                       (when proc (delete-process proc))
-                       (when (get-buffer proc-buffer) (kill-buffer proc-buffer))
-                       (cancel-timer timer))
-                      ;; process dead
-                      ((and proc (not (process-live-p proc)))
-                       (when (get-buffer proc-buffer) (kill-buffer proc-buffer))
-                       (cancel-timer timer))))))
-              ;; ensure do process buffer cleanup in `unwind-protect'
-              (when (process-live-p proc)
-                (kill-process proc)
-                (message "[org-link-beautify] cleanup: force killed process %s" (process-name proc))))))))
+          (run-with-timer
+           check-interval check-interval
+           (lambda ()
+             (let ((elapsed (float-time (time-subtract (current-time) start-time)))
+                   (proc (get-buffer-process (get-buffer proc-buffer))))
+               (cond
+                ;; previewing thumbnail process successed
+                ((file-exists-p thumbnail-file)
+                 (cancel-timer timer))
+                ;; process timeouted
+                ((>= elapsed (or timeout 20))
+                 (when proc (delete-process proc))
+                 (when (get-buffer proc-buffer) (kill-buffer proc-buffer))
+                 (cancel-timer timer))
+                ;; process dead
+                ((and proc (not (process-live-p proc)))
+                 (when (get-buffer proc-buffer) (kill-buffer proc-buffer))
+                 (cancel-timer timer)))))))))
 
 ;;; Invoke external Python script file or code.
 
