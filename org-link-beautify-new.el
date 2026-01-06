@@ -750,7 +750,11 @@ This function will apply file type function based on file extension."
             ;; ((string-match-p (image-file-name-regexp) file))
             ( (file-exists-p file)))
       (let* ((align (org-image--align link))
-             (width (org-display-inline-image--width link))
+             (width (or (org-display-inline-image--width link)
+                        (if (listp org-image-actual-width)
+                            (car org-image-actual-width)
+                          org-image-actual-width)
+                        600))
              (image (create-image file nil nil :width width :ascent 100)))
         (if image                     ; Add image to overlay
 	          ;; See bug#59902. We cannot rely on Emacs to update image if the file has changed.
