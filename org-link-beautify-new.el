@@ -1790,7 +1790,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
   :safe #'listp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-offline-webpage-viewport-size "1920x928"
+(defcustom org-link-beautify-offline-webpage-viewport-size "1920,928"
   "The webpage offline saved archive file preview screenshot image viewport width."
   :type 'string
   :safe #'stringp
@@ -1805,7 +1805,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
            (offline-webpage-file-name (file-name-nondirectory offline-webpage-file))
            (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path offline-webpage-file))
            (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base offline-webpage-file))))
-           (thumbnail-size (or (string-to-number (car (string-split org-link-beautify-offline-webpage-viewport-size "x"))) 600))
+           (thumbnail-size (or (string-to-number (car (string-split org-link-beautify-offline-webpage-viewport-size ","))) 600))
            (proc-name (format "org-link-beautify offline webpage preview - %s" offline-webpage-file-name))
            (proc-buffer (format " *org-link-beautify offline webpage preview - %s*" offline-webpage-file-name))
            (proc (get-buffer-process (get-buffer proc-buffer))))
