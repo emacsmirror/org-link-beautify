@@ -75,6 +75,8 @@ set this option to 'user-home which represent to ~/.cache/thumbnails/."
     (set-keymap-parent map image-map) ; inherit `image-map' keybindings on preview thumbnail image.
     map))
 
+;;;; goto file in Dired
+
 (declare-function org-attach-reveal "org-attach" ())
 
 (defun org-link-beautify-action-goto-file-in-dired ()
@@ -95,6 +97,8 @@ Package `dwim-shell-command' is missing, please install it")))))
 
 (define-key org-link-beautify-keymap (kbd "M-o") #'org-link-beautify-action-goto-file-in-dired)
 
+;;;; browse URL
+
 ;; ;; NOTE: It will override all link type handlers.
 ;; (defun org-link-beautify-action-browse-url (&optional link-str)
 ;;   "Visit the URL in LINK-STR with `browse-url'."
@@ -107,6 +111,8 @@ Package `dwim-shell-command' is missing, please install it")))))
 ;;       (org-link-open link-raw))))
 ;;
 ;; (define-key org-link-beautify-keymap (kbd "C-o") #'org-link-beautify-action-browse-url)
+
+;;;; copy file to clipboard
 
 (defun org-link-beautify--copy-file-to-clipboard (file)
   "Copy the FILE on path to clipboard.
@@ -149,6 +155,8 @@ The argument FILE must be the absolute path."
 
 (define-key org-link-beautify-keymap (kbd "M-w") #'org-link-beautify-action-copy-file)
 
+;;;; display QR Code for URL
+
 (defun org-link-beautify-action-qrcode-for-url (&optional args)
   "Action of displaying QR code for Org link at point in new buffer in ARGS."
   (interactive)
@@ -163,6 +171,8 @@ The argument FILE must be the absolute path."
         (org-fill-paragraph)))))
 
 (define-key org-link-beautify-keymap (kbd "M-q") 'org-link-beautify-action-qrcode-for-url)
+
+;;;; convert video to audio
 
 (defun org-link-beautify--convert-video-to-audio (video-file audio-file)
   "Convert the VIDEO-FILE on path to AUDIO-FILE.
@@ -204,6 +214,8 @@ The argument VIDEO-FILE should be the absolute path."
         (user-error "[org-link-beautify] not video file link at point")))))
 
 ;; (define-key org-link-beautify-keymap (kbd "M-a") 'org-link-beautify-action-convert-video-to-audio)
+
+;;;; play music file in repeat mode
 
 (defun org-link-beautify-action-play-music-repeat (&optional args)
   "Action of playing music audio file in repeated mode with ARGS."
