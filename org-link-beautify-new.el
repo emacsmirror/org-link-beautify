@@ -215,6 +215,50 @@ The argument VIDEO-FILE should be the absolute path."
 
 ;; (define-key org-link-beautify-keymap (kbd "M-a") 'org-link-beautify-action-convert-video-to-audio)
 
+;;;; convert video to gif
+
+(defun org-link-beautify--convert-video-to-gif (video-file gif-file)
+  "Convert the VIDEO-FILE on path to GIF-FILE.
+The argument VIDEO-FILE should be the absolute path."
+  (if (and (executable-find "ffmpeg")
+           (file-name-absolute-p video-file)
+           (file-name-absolute-p gif-file))
+      (let* ()
+        (make-process
+         :name (format "org-link-beautify - convert video to gif - %s" (file-name-nondirectory video-file))
+         :buffer (format " *org-link-beautify - convert video to gif - %s*" (file-name-nondirectory video-file))
+         :command (list "ffmpeg" "-i" video-file gif-file)
+         :sentinel (lambda (proc event)
+                     (when (string-equal event "finished\n")
+                       (message "[org-link-beautify] converted video to gif file [%s]\nPlease update your link path to result gif file."
+                                (string-truncate-left gif-file (/ (window-width) 2)))))))))
+
+(defun org-link-beautify-action-convert-video-to-gif (&optional args)
+  "Action of converting video file to gif file (.gif) in ARGS."
+  (interactive)
+  (when (derived-mode-p 'org-mode)
+    (let* ((element (org-element-context)))
+      (if (and (eq (car element) 'link)
+               (string-equal (org-element-property :type element) "file"))
+          (let* ((video-file-path (expand-file-name (org-element-property :path element)))
+                 (gif-file (file-name-with-extension (file-name-sans-extension (file-name-nondirectory video-file-path)) "gif"))
+                 (gif-file-path (expand-file-name
+                                 (read-file-name
+                                  (format "[org-link-beautify] convert video file %s to: " (file-name-nondirectory video-file-path))
+                                  (file-name-directory video-file-path)
+                                  gif-file
+                                  nil
+                                  gif-file)
+                                 (file-name-directory video-file-path))))
+            (org-link-beautify--convert-video-to-gif video-file-path gif-file-path)
+            (push (list (concat "file:" gif-file-path) "") org-stored-links)
+            ;; TODO: modify link file path
+            ;; (org-insert-link nil gif-file-path gif-file-path)
+            )
+        (user-error "[org-link-beautify] not video file link at point")))))
+
+;; (define-key org-link-beautify-keymap (kbd "M-g") 'org-link-beautify-action-convert-video-to-gif)
+
 ;;;; play music file in repeat mode
 
 (defun org-link-beautify-action-play-music-repeat (&optional args)
