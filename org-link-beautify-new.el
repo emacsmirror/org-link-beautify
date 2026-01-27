@@ -534,8 +534,9 @@ Detect previewing process generated THUMBNAIL-FILE existing, auto kill process a
       ;; Org mode external link types
       ("eaf" (nerd-icons-mdicon "nf-md-apps" :face '(:inherit nerd-icons-blue :slant normal))) ; emacs-application-framework (eaf)
       ("eww" (nerd-icons-icon-for-mode 'eww-mode :face '(:inherit nerd-icons-lgreen :slant normal))) ; EWW
-      ("chrome" (nerd-icons-mdicon "nf-md-google_chrome" :face '(:inherit nerd-icons-lorange :slant normal)))
-      ("edge" (nerd-icons-mdicon "nf-md-microsoft_edge" :face '(:inherit nerd-icons-green :slant normal)))
+      ("chrome" (nerd-icons-mdicon "nf-md-google_chrome" :face '(:inherit nerd-icons-lorange :slant normal))) ; Google Chrome / Chromium
+      ("about" (nerd-icons-mdicon "nf-md-firefox" :face '(:inherit nerd-icons-lorange :slant normal))) ; Firefox
+      ("edge" (nerd-icons-mdicon "nf-md-microsoft_edge" :face '(:inherit nerd-icons-green :slant normal))) ; Microsoft Edge
       ("mu4e" (nerd-icons-mdicon "nf-md-email_search_outline" :face '(:inherit nerd-icons-blue :slant normal)))
       ("news" (nerd-icons-mdicon "nf-md-newspaper_variant_outline" :face '(:inherit nerd-icons-dgreen :slant normal)))
       ("git" (nerd-icons-mdicon "nf-md-git" :face '(:inherit nerd-icons-lred :slant normal)))
@@ -2156,7 +2157,7 @@ This is for link image previewing to get around function `org-link-preview'
                    (member extension org-link-beautify-offline-webpage-preview-list)) ; offline webpage archive file
               (member link-type '("info" "help" "shortdoc" "man" "woman" "id" "custom-id" "coderef"))
               (member link-type '("elisp" "shell" "js" "javascript" "grep" "occur" "git"))
-              (member link-type '("mailto" "rss" "news" "wikipedia" "irc" "magnet" "wechat" "web-browser" "eww" "chrome" "edge"))
+              (member link-type '("mailto" "rss" "news" "wikipedia" "irc" "magnet" "wechat" "web-browser" "eww" "chrome" "about" "edge"))
               (member link-type '("org-ql-search" "org-contact" "org-bookmark"))
               ;; Emacs package special link types
               ;; NOTE: "epub" "nov" page-number thumbnail generating not supported.
@@ -2218,6 +2219,7 @@ This is for link image previewing to get around function `org-link-preview'
       ("git" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git)) ; `ol-git-link'
       ("eww" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `ol-eww'
       ("chrome" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("about" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
       ("edge" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
       ("mu4e" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `mu4e-org'
       ("web-browser" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-file-offline-webpage)) ; `org-extra-link-types'
