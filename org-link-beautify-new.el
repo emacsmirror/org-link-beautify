@@ -1971,7 +1971,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
         (overlay-put ov 'display image)
         (overlay-put ov 'after-string (concat
                                        (propertize "{" 'face '(:foreground "purple2"))
-                                       (propertize name 'face 'org-verbatim)
+                                       (propertize (format "@%s" name) 'face 'org-verbatim)
                                        (propertize "}" 'face '(:foreground "purple2")))))
     ;; display text-properties with icon
     (if-let* ((text (org-element-property :title (org-contacts-search-contact name))))
