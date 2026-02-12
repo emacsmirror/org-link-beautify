@@ -345,11 +345,14 @@ The argument INPUT-FILE should be the absolute path."
                            output-file)))
          :sentinel (lambda (proc event)
                      (when (string-equal event "finished\n")
-                       (message "[org-link-beautify] Finished transcribe [%s]\nPlease press [C-y] to paste output in buffer."
-                                (string-truncate-left input-file (/ (window-width) 2))))))
-        (with-temp-buffer
-          (insert-file-contents-literally output-file)
-          (buffer-substring (point-min) (point-max))))))
+                       (with-temp-buffer
+                         (insert-file-contents output-file)
+                         (kill-new (buffer-substring (point-min) (point-max))))
+                       (message "[org-link-beautify] Finished transcribe [%s]
+Output to file %s
+Please press [C-y] to paste output in buffer."
+                                (string-truncate-left input-file (/ (window-width) 2))
+                                output-file)))))))
 
 (defun org-link-beautify-action-transcribe (&optional args)
   "Transcribe the input file to text output in ARGS."
