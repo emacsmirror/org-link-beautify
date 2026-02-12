@@ -309,6 +309,66 @@ The argument VIDEO-FILE should be the absolute path."
 
 (define-key org-link-beautify-keymap (kbd "M-p") 'org-link-beautify-action-play-music-repeat)
 
+;;;; transcribe audio/video into text output
+
+(defcustom org-link-beautify-transcribe-command
+  (cond
+   ((executable-find "yap") "yap")
+   ((executable-find "hns") "hns")
+   ((executable-find "whisper-cli") "whisper-cli") ; whisper.cpp
+   )
+  "The command for transcribe video/audio input file."
+  :type 'string
+  :safe #'stringp
+  :group 'org-link-beautify)
+
+(defun org-link-beautify--transcribe (input-file)
+  "Transcribe the INPUT-FILE on path.
+The argument INPUT-FILE should be the absolute path."
+  (cl-assert (executable-find org-link-beautify-transcribe-command) nil
+             (pcase org-link-beautify-transcribe-command
+               ("yap"
+                (format "[org-link-beautify] Install %S with command: $ brew install yap"
+                        org-link-beautify-transcribe-command))))
+  (if (file-name-absolute-p input-file)
+      (let* ((output-file (make-temp-file "org-link-beautify-transcribe--")))
+        (make-process
+         :name (format "org-link-beautify - transcribe - %s" (file-name-nondirectory input-file))
+         :buffer (format " *org-link-beautify - transcribe - %s*" (file-name-nondirectory input-file))
+         :command (pcase org-link-beautify-transcribe-command
+                    ("yap"
+                     (list "yap"
+                           "transcribe"  ; subcommand
+                           "--locale" (completing-read "--locale: " '("fr_CA" "fr_CH" "fr_FR" "fr_BE" "ko_KR" "pt_PT" "pt_BR" "de_AT" "de_CH" "de_DE" "it_CH" "it_IT" "zh_CN" "zh_TW" "es_CL" "es_MX" "es_ES" "es_US" "en_CA" "en_SG" "en_GB" "en_ZA" "en_AU" "en_US" "en_IE" "en_NZ" "en_IN" "yue_CN" "zh_HK" "ja_JP") nil t "zh_CN")
+                           input-file
+                           "--output-file"
+                           output-file)))
+         :sentinel (lambda (proc event)
+                     (when (string-equal event "finished\n")
+                       (message "[org-link-beautify] Finished transcribe [%s]\nPlease press [C-y] to paste output in buffer."
+                                (string-truncate-left input-file (/ (window-width) 2))))))
+        (with-temp-buffer
+          (insert-file-contents-literally output-file)
+          (buffer-substring (point-min) (point-max))))))
+
+(defun org-link-beautify-action-transcribe (&optional args)
+  "Transcribe the input file to text output in ARGS."
+  (interactive)
+  (when (derived-mode-p 'org-mode)
+    (let* ((element (org-element-context))
+           (element-type (car element))
+           (link-type (org-element-property :type element))
+           (link-path (org-element-property :path element)))
+      (if (and (eq element-type 'link)
+               (member link-type '("file" "attachment")))
+          (let* ((input-file-path (pcase link-type
+                                    ("file" (expand-file-name link-path))
+                                    ("attachment" (org-attach-expand link-path)))))
+            (org-link-beautify--transcribe input-file-path))
+        (user-error "[org-link-beautify] not audio/video file link at point")))))
+
+;; (define-key org-link-beautify-keymap (kbd "M-t") 'org-link-beautify-action-transcribe)
+
 ;;; helper functions
 
 (defun org-link-beautify--get-thumbnails-dir-path (file)
