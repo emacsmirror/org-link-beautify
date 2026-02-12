@@ -68,7 +68,7 @@ set this option to 'user-home which represent to ~/.cache/thumbnails/."
   :group 'org-link-beautify)
 
 
-;;; overlay keymap keybindings
+;;; overlay actions keymap keybindings
 
 (defvar org-link-beautify-keymap
   (let ((map (make-sparse-keymap)))
@@ -83,12 +83,15 @@ set this option to 'user-home which represent to ~/.cache/thumbnails/."
   "Action of opening Dired and goto the link file position."
   (interactive)
   (when (derived-mode-p 'org-mode)
-    (let* ((file-path (org-element-property :path (org-element-context)))
+    (let* ((element (org-element-context))
+           (element-type (org-element-property :type element))
+           (file-path (org-element-property :path element))
            (file-name (file-name-nondirectory file-path)))
       (org-attach-reveal)
       (search-forward file-name)
       (dired-move-to-filename) ; move point to beginning of filename.
-      (if (and (featurep 'dwim-shell-command) (featurep 'dwim-shell-commands))
+      (if (and (featurep 'dwim-shell-command) (featurep 'dwim-shell-commands)
+               (eq element-type 'link))
           (progn
             (message "Jumped to position of link file, now you can execute `dwim-shell-command' commands")
             (command-execute nil (read-extended-command-1 nil "dwim-shell-commands")))
@@ -146,10 +149,15 @@ The argument FILE must be the absolute path."
         (let* ((region-text (buffer-substring-no-properties (region-beginning) (region-end))))
           (kill-new region-text)
           (deactivate-mark))
-      (let ((element (org-element-context)))
-        (if (and (eq (car element) 'link)
-                 (string-equal (org-element-property :type element) "file"))
-            (let ((file-path (expand-file-name (org-element-property :path element))))
+      (let ((element (org-element-context))
+            (element-type (car element))
+            (link-type (org-element-property :type element))
+            (link-path (org-element-property :path element)))
+        (if (and (eq element-type 'link)
+                 (member link-type '("file" "attachment")))
+            (let ((file-path (pcase link-type
+                               ("file" (expand-file-name link-path))
+                               ("attachment" (org-attach-expand link-path)))))
               (org-link-beautify--copy-file-to-clipboard file-path))
           (message "[org-link-beautify] No action executed on link"))))))
 
@@ -180,24 +188,28 @@ The argument VIDEO-FILE should be the absolute path."
   (if (and (executable-find "ffmpeg")
            (file-name-absolute-p video-file)
            (file-name-absolute-p audio-file))
-      (let* ()
-        (make-process
-         :name (format "org-link-beautify - convert video to audio - %s" (file-name-nondirectory video-file))
-         :buffer (format " *org-link-beautify - convert video to audio - %s*" (file-name-nondirectory video-file))
-         :command (list "ffmpeg" "-i" video-file audio-file)
-         :sentinel (lambda (proc event)
-                     (when (string-equal event "finished\n")
-                       (message "[org-link-beautify] converted video to audio file [%s]\nPlease update your link path to result audio file."
-                                (string-truncate-left audio-file (/ (window-width) 2)))))))))
+      (make-process
+       :name (format "org-link-beautify - convert video to audio - %s" (file-name-nondirectory video-file))
+       :buffer (format " *org-link-beautify - convert video to audio - %s*" (file-name-nondirectory video-file))
+       :command (list "ffmpeg" "-i" video-file audio-file)
+       :sentinel (lambda (proc event)
+                   (when (string-equal event "finished\n")
+                     (message "[org-link-beautify] converted video to audio file [%s]\nPlease update your link path to result audio file."
+                              (string-truncate-left audio-file (/ (window-width) 2))))))))
 
 (defun org-link-beautify-action-convert-video-to-audio (&optional args)
   "Action of converting video file to audio file (.mp3 by default) in ARGS."
   (interactive)
   (when (derived-mode-p 'org-mode)
-    (let* ((element (org-element-context)))
-      (if (and (eq (car element) 'link)
-               (string-equal (org-element-property :type element) "file"))
-          (let* ((video-file-path (expand-file-name (org-element-property :path element)))
+    (let* ((element (org-element-context))
+           (element-type (car element))
+           (link-type (org-element-property :type element))
+           (link-path (org-element-property :path element)))
+      (if (and (eq element-type 'link)
+               (member link-type '("file" "attachment")))
+          (let* ((video-file-path (pcase link-type
+                                    ("file" (expand-file-name link-path))
+                                    ("attachment" (org-attach-expand link-path))))
                  (audio-file (file-name-with-extension (file-name-sans-extension (file-name-nondirectory video-file-path)) "mp3"))
                  (audio-file-path (expand-file-name
                                    (read-file-name
@@ -223,24 +235,28 @@ The argument VIDEO-FILE should be the absolute path."
   (if (and (executable-find "ffmpeg")
            (file-name-absolute-p video-file)
            (file-name-absolute-p gif-file))
-      (let* ()
-        (make-process
-         :name (format "org-link-beautify - convert video to gif - %s" (file-name-nondirectory video-file))
-         :buffer (format " *org-link-beautify - convert video to gif - %s*" (file-name-nondirectory video-file))
-         :command (list "ffmpeg" "-i" video-file gif-file)
-         :sentinel (lambda (proc event)
-                     (when (string-equal event "finished\n")
-                       (message "[org-link-beautify] converted video to gif file [%s]\nPlease update your link path to result gif file."
-                                (string-truncate-left gif-file (/ (window-width) 2)))))))))
+      (make-process
+       :name (format "org-link-beautify - convert video to gif - %s" (file-name-nondirectory video-file))
+       :buffer (format " *org-link-beautify - convert video to gif - %s*" (file-name-nondirectory video-file))
+       :command (list "ffmpeg" "-i" video-file gif-file)
+       :sentinel (lambda (proc event)
+                   (when (string-equal event "finished\n")
+                     (message "[org-link-beautify] converted video to gif file [%s]\nPlease update your link path to result gif file."
+                              (string-truncate-left gif-file (/ (window-width) 2))))))))
 
 (defun org-link-beautify-action-convert-video-to-gif (&optional args)
   "Action of converting video file to gif file (.gif) in ARGS."
   (interactive)
   (when (derived-mode-p 'org-mode)
-    (let* ((element (org-element-context)))
-      (if (and (eq (car element) 'link)
-               (string-equal (org-element-property :type element) "file"))
-          (let* ((video-file-path (expand-file-name (org-element-property :path element)))
+    (let* ((element (org-element-context))
+           (element-type (car element))
+           (link-type (org-element-property :type element))
+           (link-path (org-element-property :path element)))
+      (if (and (eq element-type 'link)
+               (member link-type '("file" "attachment")))
+          (let* ((video-file-path (pcase link-type
+                                    ("file" (expand-file-name link-path))
+                                    ("attachment" (org-attach-expand link-path))))
                  (gif-file (file-name-with-extension (file-name-sans-extension (file-name-nondirectory video-file-path)) "gif"))
                  (gif-file-path (expand-file-name
                                  (read-file-name
@@ -265,10 +281,15 @@ The argument VIDEO-FILE should be the absolute path."
   "Action of playing music audio file in repeated mode with ARGS."
   (interactive)
   (when (derived-mode-p 'org-mode)
-    (let* ((element (org-element-context)))
-      (if (and (eq (car element) 'link)
-               (string-equal (org-element-property :type element) "file"))
-          (let* ((music-file-path (expand-file-name (org-element-property :path element)))
+    (let* ((element (org-element-context))
+           (element-type (car element))
+           (link-type (org-element-property :type element))
+           (link-path (org-element-property :path element)))
+      (if (and (eq element-type 'link)
+               (member link-type '("file" "attachment")))
+          (let* ((music-file-path (pcase link-type
+                                    ("file" (expand-file-name link-path))
+                                    ("attachment" (org-attach-expand link-path))))
                  (music-extension (file-name-extension music-file-path))
                  (repeat-times 50))
             (if (member music-extension org-link-beautify-audio-preview-list)
