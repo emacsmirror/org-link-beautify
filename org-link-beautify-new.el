@@ -347,12 +347,16 @@ The argument INPUT-FILE should be the absolute path."
                      (when (string-equal event "finished\n")
                        (with-temp-buffer
                          (insert-file-contents output-file)
-                         (kill-new (buffer-substring (point-min) (point-max))))
-                       (message "[org-link-beautify] Finished transcribe [%s]
+                         (let* ((output (buffer-substring (point-min) (point-max)))
+                                ;; insert transcribe output into Org block
+                                ;; (add-to-list 'org-structure-template-alist '("t" . "transcribe"))
+                                (output-formatted-block (format "#+begin_src transcribe\n%s\n#+end_src" output)))
+                           (kill-new output-formatted-block)
+                           (message "[org-link-beautify] Finished transcribe [%s]
 Output to file %s
-Please press [C-y] to paste output in buffer."
-                                (string-truncate-left input-file (/ (window-width) 2))
-                                output-file)))))))
+Please press [C-y] to paste formatted output transcribe block in buffer."
+                                    (string-truncate-left input-file (/ (window-width) 2))
+                                    output-file)))))))))
 
 (defun org-link-beautify-action-transcribe (&optional args)
   "Transcribe the input file to text output in ARGS."
