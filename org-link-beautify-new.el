@@ -347,7 +347,7 @@ The argument INPUT-FILE should be the absolute path."
                      (when (string-equal event "finished\n")
                        (with-temp-buffer
                          (insert-file-contents output-file)
-                         (let* ((output (buffer-substring (point-min) (point-max)))
+                         (let* ((output (buffer-string))
                                 (output-formatted (string-fill
                                                    (unless (string-suffix-p "。" output) (concat output "。"))))
                                 ;; insert transcribe output into Org block
@@ -447,7 +447,7 @@ Please press [C-y] to paste formatted output transcribe block in buffer."
       ;; reference `org-attach-dir'
       ;; (when (org-entry-get nil "DIR" org-attach-use-inheritance)
       ;;   (org-link-preview-region t t (point-min) (point-max)))
-      (buffer-substring (point-min) (point-max)))))
+      (buffer-string))))
 
 ;;; Previewing process logic
 
