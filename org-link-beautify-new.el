@@ -348,6 +348,8 @@ The argument INPUT-FILE should be the absolute path."
                        (with-temp-buffer
                          (insert-file-contents output-file)
                          (let* ((output (buffer-substring (point-min) (point-max)))
+                                (output-formatted (string-fill
+                                                   (unless (string-suffix-p "。" output) (concat output "。"))))
                                 ;; insert transcribe output into Org block
                                 ;; (add-to-list 'org-structure-template-alist '("t" . "transcribe"))
                                 (output-formatted-block (format "#+begin_src transcribe\n%s\n#+end_src" output)))
