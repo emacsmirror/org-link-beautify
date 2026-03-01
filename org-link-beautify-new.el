@@ -351,10 +351,7 @@ The argument INPUT-FILE should be the absolute path."
                        (with-temp-buffer
                          (insert-file-contents output-file)
                          (when-let* ((output (buffer-string))
-                                     (output-formatted (string-fill
-                                                        (unless (string-suffix-p "。" output)
-                                                          (concat output "。"))
-                                                        fill-column))
+                                     (output-formatted (string-fill output fill-column))
                                      ;; insert transcribe output into Org block
                                      ;; (add-to-list 'org-structure-template-alist '("t" . "transcribe"))
                                      (output-formatted-block (format "
