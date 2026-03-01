@@ -417,15 +417,6 @@ Please press [C-y] to paste formatted output transcribe block in buffer."
     (let* ((ellipsis (truncate-string-ellipsis)))
       (truncate-string-to-width str (- width (string-width ellipsis)) nil ?  ellipsis))))
 
-;; TEST:
-;; (truncate-string-to-width
-;;  "不同观点于是导致很多不必要的经济损失我深感有责任与大家分享我的简单但是实用的经济分析模式这个模式虽然不符合常规传统经济学"
-;;  (- fill-column (string-width (truncate-string-ellipsis))) nil " " (truncate-string-ellipsis))
-;;
-;; (truncate-string-to-width
-;;  "不同观点于是导致很多不必要的经济损失"
-;;  (- fill-column (string-width (truncate-string-ellipsis))) nil ?  (truncate-string-ellipsis))
-
 (defun org-link-beautify--display-content-block (lines-list)
   "Display LINES-LIST string as a block with beautified frame border."
   (format
@@ -434,17 +425,18 @@ Please press [C-y] to paste formatted output transcribe block in buffer."
 %s
 └%s┘
 \n"
-   (make-string (- fill-column 2) ?─)
+   (make-string (- fill-column (* (string-width "┌") 2)) ?─)
    (mapconcat
     (lambda (line)
       (concat "│ "
-              (let* ((line-width-max (- fill-column (string-width "│ ")))
-                     (line-text (org-link-beautify--pad-to-width line line-width-max)))
+              (let* ((width (string-width (make-string (- fill-column (* (string-width "┌") 2)) ?─)))
+                     (text-width (- width (string-width "│  │")))
+                     (line-text (org-link-beautify--pad-to-width line text-width)))
                 line-text)
               " │"))
     lines-list
     "\n")
-   (make-string (- fill-column 2) ?─)))
+   (make-string (- fill-column (string-width "└")) ?─)))
 
 ;; TEST:
 ;; (org-link-beautify--display-content-block '("hello world" "hello, name" "hello"))
