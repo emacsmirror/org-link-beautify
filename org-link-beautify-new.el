@@ -413,9 +413,13 @@ Please press [C-y] to paste formatted output transcribe block in buffer."
 
 (defun org-link-beautify--pad-to-width (str width)
   "Padding STR with spaces to make its display width reach WIDTH."
-  (let* ((current-width (string-width str)))
-    (let* ((ellipsis (truncate-string-ellipsis)))
-      (truncate-string-to-width str (- width (string-width ellipsis)) nil ?  ellipsis))))
+  (let* ((ellipsis (truncate-string-ellipsis)))
+    (truncate-string-to-width
+     str
+     (- width (string-width ellipsis)) nil ? 
+     ellipsis
+     '( face (:inherit org-ellipsis :foreground "orange")
+        help-echo "text ellipsed, click to check more"))))
 
 (defun org-link-beautify--display-content-block (lines-list)
   "Display LINES-LIST string as a block with beautified frame border."
@@ -429,10 +433,8 @@ Please press [C-y] to paste formatted output transcribe block in buffer."
    (mapconcat
     (lambda (line)
       (concat "│ "
-              (let* ((width (string-width (make-string (- fill-column (* (string-width "┌") 2)) ?─)))
-                     (text-width (- width (string-width "│  │")))
-                     (line-text (org-link-beautify--pad-to-width line text-width)))
-                line-text)
+              (let* ((width (string-width (make-string (- fill-column (string-width "│  │")) ?─))))
+                (org-link-beautify--pad-to-width line width))
               " │"))
     lines-list
     "\n")
