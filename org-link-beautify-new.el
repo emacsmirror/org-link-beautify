@@ -411,37 +411,64 @@ Please press [C-y] to paste formatted output transcribe block in buffer."
   "Notify that generating THUMBNAIL-FILE for SOURCE-FILE failed."
   (message "[org-link-beautify] Failed to generate thumbnail for file %s" source-file))
 
+;; 引入一个固定的目标宽度常量，确保边框一致性
+(defconst org-link-beautify-target-width fill-column
+  "The fixed target width for the display block.")
+
 (defun org-link-beautify--pad-to-width (str width)
-  "Padding STR with spaces to make its display width reach WIDTH."
-  (let* ((ellipsis (truncate-string-ellipsis)))
-    (truncate-string-to-width
-     str
-     (- width (string-width ellipsis)) nil ? 
-     ellipsis
-     '( face (:inherit org-ellipsis :foreground "orange")
-        help-echo "text ellipsed, click to check more"))))
+  "Pad STR with spaces to make its display width reach WIDTH.
+If STR needs truncation, apply ellipsis and its properties."
+  (let* ((ellipsis (truncate-string-ellipsis)) ;; 获取默认省略号
+         ;; 计算截断后的字符串，预留出省略号的空间
+         (truncated-str (truncate-string-to-width
+                         str
+                         ;; 目标宽度 - 省略号宽度。如果不需要截断，则此值大于字符串实际宽度。
+                         (- width (string-width ellipsis))
+                         0 ;; start-column
+                         nil ;; padding (不需要，因为我们会自己填充)
+                         ellipsis
+                         ;; 应用省略号的文本属性
+                         '(face (:inherit org-ellipsis :foreground "orange")
+                                help-echo "text ellipsed, click to check more")))
+         ;; 计算截断后的字符串的实际显示宽度
+         (actual-width (string-width truncated-str)))
+    ;; 如果实际宽度小于目标宽度，则填充空格
+    (if (< actual-width width)
+        (concat truncated-str (make-string (- width actual-width) ? ))
+      ;; 否则直接返回截断后的字符串
+      truncated-str)))
 
 (defun org-link-beautify--display-content-block (lines-list)
   "Display LINES-LIST string as a block with beautified frame border."
-  (format
-   "
+  (let* (
+         ;; 使用固定的 target-width
+         (target-width org-link-beautify-target-width)
+         ;; 计算顶部和底部横线的长度 (总宽度 - 2 个角字符)
+         (top-bottom-width (- target-width 2))
+         ;; 计算内容行的可用宽度 (总宽度 - 4 个字符: │ + 空格 + 空格 + │)
+         (content-width (- target-width 4))
+         )
+    (format
+     "
 ┌%s┐
 %s
 └%s┘
 \n"
-   (make-string (- fill-column (* (string-width "┌") 2)) ?─)
-   (mapconcat
-    (lambda (line)
-      (concat "│ "
-              (let* ((width (string-width (make-string (- fill-column (string-width "│  │")) ?─))))
-                (org-link-beautify--pad-to-width line width))
-              " │"))
-    lines-list
-    "\n")
-   (make-string (- fill-column (string-width "└")) ?─)))
+     ;; 顶部横线
+     (make-string top-bottom-width ?─)
+     ;; 内容行
+     (mapconcat
+      (lambda (line)
+        ;; 使用计算好的 content-width 调用 pad-to-width
+        (let ((padded-line (org-link-beautify--pad-to-width line content-width)))
+          (concat "│ " padded-line " │")))
+      lines-list
+      "\n")
+     ;; 底部横线
+     (make-string top-bottom-width ?─))))
 
 ;; TEST:
-;; (org-link-beautify--display-content-block '("hello world" "hello, name" "hello"))
+;; (org-link-beautify--display-content-block '("这是第一行中文" "This is English Line" "又是一行中文 Again"))
 
 (defun org-link-beautify--display-org-content (org-content)
   "Display ORG-CONTENT in `org-mode'."
