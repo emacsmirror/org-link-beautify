@@ -1808,7 +1808,7 @@ $ pip install ffmpeg-python")
 
 ;;; file: [subtitle]
 
-(defcustom org-link-beautify-subtitle-preview-command org-link-beautify-thumbnailer-script
+(defcustom org-link-beautify-subtitle-preview-command nil
   "The command to preview subtitle file."
   :type 'string
   :safe #'stringp
