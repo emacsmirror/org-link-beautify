@@ -411,6 +411,15 @@ Please press [C-y] to paste formatted output transcribe block in buffer."
   "Notify that generating THUMBNAIL-FILE for SOURCE-FILE failed."
   (message "[org-link-beautify] Failed to generate thumbnail for file %s" source-file))
 
+(defun org-link-beautify--pad-to-width (str width)
+  "Padding STR with spaces to make its display width reach WIDTH."
+  (let* ((current-width (string-width str)))
+    (if (>= current-width width)
+        (let* ((ellipsis (truncate-string-ellipsis)))
+          (truncate-string-to-width str (- width (string-width ellipsis)) nil ?  ellipsis))
+      (let ((padding (- width current-width)))
+        (concat str (make-string padding ? ))))))
+
 (defun org-link-beautify--display-content-block (lines-list)
   "Display LINES-LIST string as a block with beautified frame border."
   (format
@@ -423,18 +432,9 @@ Please press [C-y] to paste formatted output transcribe block in buffer."
    (mapconcat
     (lambda (line)
       (concat "│ "
-              (let* ((line-length-max (- fill-column 4))
-                     (line-length (string-width line))
-                     (line-text (if (< line-length line-length-max)
-                                    line
-                                  (let ((ellipsis (truncate-string-ellipsis)))
-                                    (concat (truncate-string-to-width line (- line-length-max (string-width ellipsis))) ellipsis))))
-                     (spaces (make-string
-                              (if (< (string-width line-text) line-length-max)
-                                  (- line-length-max (string-width line-text))
-                                0)
-                              ?\ )))
-                (concat line-text spaces))
+              (let* ((line-width-max (- fill-column (string-width "│ ")))
+                     (line-text (org-link-beautify--pad-to-width line line-width-max)))
+                line-text)
               " │"))
     lines-list
     "\n")
