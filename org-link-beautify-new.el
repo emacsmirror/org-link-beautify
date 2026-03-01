@@ -331,7 +331,8 @@ The argument INPUT-FILE should be the absolute path."
                 (format "[org-link-beautify] Install %S with command: $ brew install yap"
                         org-link-beautify-transcribe-command))))
   (if (file-name-absolute-p input-file)
-      (let* ((output-file (make-temp-file "org-link-beautify-transcribe--")))
+      (let* ((output-file (make-temp-file "org-link-beautify-transcribe--"))
+             (dir (when (derived-mode-p 'org-mode) (if (org-attach-dir) (org-attach-dir) (org-attach-dir-get-create)))))
         (make-process
          :name (format "org-link-beautify - transcribe - %s" (file-name-nondirectory input-file))
          :buffer (format " *org-link-beautify - transcribe - %s*" (file-name-nondirectory input-file))
@@ -341,6 +342,8 @@ The argument INPUT-FILE should be the absolute path."
                            "transcribe"  ; subcommand
                            "--locale" (completing-read "--locale: " '("fr_CA" "fr_CH" "fr_FR" "fr_BE" "ko_KR" "pt_PT" "pt_BR" "de_AT" "de_CH" "de_DE" "it_CH" "it_IT" "zh_CN" "zh_TW" "es_CL" "es_MX" "es_ES" "es_US" "en_CA" "en_SG" "en_GB" "en_ZA" "en_AU" "en_US" "en_IE" "en_NZ" "en_IN" "yue_CN" "zh_HK" "ja_JP") nil t "zh_CN")
                            input-file
+                           "--srt" ; output srt subtitle format
+                           "--max-length" (number-to-string (* fill-column 2)) ; sentence length control for better readability
                            "--output-file"
                            output-file)))
          :sentinel (lambda (proc event)
@@ -354,7 +357,13 @@ The argument INPUT-FILE should be the absolute path."
                                                         fill-column))
                                      ;; insert transcribe output into Org block
                                      ;; (add-to-list 'org-structure-template-alist '("t" . "transcribe"))
-                                     (output-formatted-block (format "#+begin_src transcribe\n%s\n#+end_src" output)))
+                                     (output-formatted-block (format "
+#+begin_src transcribe :tangle \"%s/%s.srt\"
+%s
+#+end_src"
+                                                                     dir
+                                                                     (file-name-base input-file)
+                                                                     output)))
                            (kill-new output-formatted-block)
                            (message "[org-link-beautify] Finished transcribe [%s]
 Output to file %s
