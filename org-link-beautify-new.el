@@ -424,14 +424,14 @@ Please press [C-y] to paste formatted output transcribe block in buffer."
     (lambda (line)
       (concat "│ "
               (let* ((line-length-max (- fill-column 4))
-                     (line-length (length line))
+                     (line-length (string-width line))
                      (line-text (if (< line-length line-length-max)
                                     line
                                   (let ((ellipsis (truncate-string-ellipsis)))
-                                    (concat (truncate-string-to-width line (- line-length-max (length ellipsis))) ellipsis))))
+                                    (concat (truncate-string-to-width line (- line-length-max (string-width ellipsis))) ellipsis))))
                      (spaces (make-string
-                              (if (< (length line-text) line-length-max)
-                                  (- line-length-max (length line-text))
+                              (if (< (string-width line-text) line-length-max)
+                                  (- line-length-max (string-width line-text))
                                 0)
                               ?\ )))
                 (concat line-text spaces))
