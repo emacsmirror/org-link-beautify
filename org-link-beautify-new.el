@@ -414,11 +414,17 @@ Please press [C-y] to paste formatted output transcribe block in buffer."
 (defun org-link-beautify--pad-to-width (str width)
   "Padding STR with spaces to make its display width reach WIDTH."
   (let* ((current-width (string-width str)))
-    (if (>= current-width width)
-        (let* ((ellipsis (truncate-string-ellipsis)))
-          (truncate-string-to-width str (- width (string-width ellipsis)) nil ?  ellipsis))
-      (let ((padding (- width current-width)))
-        (concat str (make-string padding ? ))))))
+    (let* ((ellipsis (truncate-string-ellipsis)))
+      (truncate-string-to-width str (- width (string-width ellipsis)) nil ?  ellipsis))))
+
+;; TEST:
+;; (truncate-string-to-width
+;;  "不同观点于是导致很多不必要的经济损失我深感有责任与大家分享我的简单但是实用的经济分析模式这个模式虽然不符合常规传统经济学"
+;;  (- fill-column (string-width (truncate-string-ellipsis))) nil " " (truncate-string-ellipsis))
+;;
+;; (truncate-string-to-width
+;;  "不同观点于是导致很多不必要的经济损失"
+;;  (- fill-column (string-width (truncate-string-ellipsis))) nil ?  (truncate-string-ellipsis))
 
 (defun org-link-beautify--display-content-block (lines-list)
   "Display LINES-LIST string as a block with beautified frame border."
