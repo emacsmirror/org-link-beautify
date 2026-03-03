@@ -1894,8 +1894,8 @@ $ pip install ffmpeg-python")
         (org-link-beautify-overlay-display-image ov image))
     (if-let* ((text (org-link-beautify--generate-preview-for-file-subtitle path)))
         (prog1 ov
-          (overlay-put ov 'after-string text)
-	        (overlay-put ov 'face         'default))
+          (overlay-put ov 'after-string (propertize text 'face 'org-block))
+	        (overlay-put ov 'face         'org-link))
       (org-link-beautify-iconify ov path link))))
 
 ;;; file: [archive file]
