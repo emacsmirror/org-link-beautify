@@ -2318,8 +2318,8 @@ This is for link image previewing to get around function `org-link-preview'
       ("epub" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-epub)) ; `nov'
       ("nov" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-nov)) ; `nov'
       ("geo" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-geography)) ; `org-extra-link-types'
-      ("http" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("https" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("http" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-url))
+      ("https" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-url))
       ("ftp" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
       
       ;; Org mode internal link types
