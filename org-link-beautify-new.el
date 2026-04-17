@@ -2241,11 +2241,9 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
                                                          (json-parse-buffer)))
                                    (image-path (gethash "image" json-response-hash))
                                    (title (gethash "title" json-response-hash)))
-                              (when (derived-mode-p 'org-mode)
-                                ;; Insert thumbnail image path as link description for previewing.
-                                (org-insert-link nil url image-path)))
-                            (kill-buffer (process-buffer proc))
-                            (kill-process proc)))))
+                              (rename-file image-path thumbnail-file)
+                              (kill-process proc)
+                              (kill-buffer (process-buffer proc)))))))
             ('monolith
              (cl-assert (executable-find "monolith") nil "[org-link-beautify] Please install `monolith'")
              (let* ((html-archive-file (concat (file-name-sans-extension thumbnail-file) ".html")))
@@ -2256,10 +2254,12 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
                 :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
                 :sentinel (lambda (proc event)
                             (when (string= event "finished\n")
-                              (kill-buffer (process-buffer proc))
-                              (kill-process proc))))))))))
-    (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
-      (org-link-beautify--notify-generate-thumbnail-failed url thumbnail-file))))
+                              (kill-process proc)
+                              (kill-buffer (process-buffer proc)))))))))
+        (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
+          (org-link-beautify--notify-generate-thumbnail-failed url thumbnail-file))))
+    ;; return the thumbnail file as result.
+    thumbnail-file))
 
 (defun org-link-beautify-preview-url (ov path link)
   "Preview http[s]: URL link of PATH over OV overlay position for LINK element."
