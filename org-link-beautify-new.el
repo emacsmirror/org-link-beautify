@@ -2226,17 +2226,26 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
               url))
             ('rinku
              (cl-assert (executable-find "rinku") nil "[org-link-beautify] Please install `rinku'")
-             (let* ((json-response-hash (json-parse-string
-                                         (shell-command-to-string
-                                          ;; $ rinku --preview --width 600 --height 300 https://soundcloud.com/shehackedyou
-                                          (format "%s --preview --width %d --height %d %s"
-                                                  org-link-beautify-url-preview-command
-                                                  thumbnail-size (/ thumbnail-size 2)
-                                                  url))))
-                    (image-path (gethash "image" json-response-hash))
-                    (title (gethash "title" json-response-hash)))
-               (when (derived-mode-p 'org-mode)
-                 (org-insert-link nil image-path title))))
+             (make-process
+              :name proc-name
+              :command (list (symbol-name org-link-beautify-url-preview-command)
+                             "--preview"
+                             "--width" (number-to-string thumbnail-size) "--height" (number-to-string (/ thumbnail-size 2))
+                             url)
+              :buffer proc-buffer-name
+              :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
+              :sentinel (lambda (proc event)
+                          (when (string= event "finished\n")
+                            (let* ((json-response-hash (with-current-buffer proc-buffer-name
+                                                         (goto-char (point-min))
+                                                         (json-parse-buffer)))
+                                   (image-path (gethash "image" json-response-hash))
+                                   (title (gethash "title" json-response-hash)))
+                              (when (derived-mode-p 'org-mode)
+                                ;; Insert thumbnail image path as link description for previewing.
+                                (org-insert-link nil url image-path)))
+                            (kill-buffer (process-buffer proc))
+                            (kill-process proc)))))
             ('monolith
              (cl-assert (executable-find "monolith") nil "[org-link-beautify] Please install `monolith'")
              (let* ((html-archive-file (concat (file-name-sans-extension thumbnail-file) ".html")))
