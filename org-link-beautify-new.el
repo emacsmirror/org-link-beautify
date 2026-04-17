@@ -2206,20 +2206,20 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
          (html-archive-file (concat (file-name-sans-extension thumbnail-file) ".html"))
          (thumbnail-size (or org-link-beautify-url-preview-size 1000))
          (proc-name (format "org-link-beautify url screenshot - %s" url))
-         (proc-buffer (format " *org-link-beautify url screenshot - %s*" url))
-         (proc (get-buffer-process (get-buffer proc-buffer))))
+         (proc-buffer-name (format " *org-link-beautify url screenshot - %s*" url))
+         (proc (get-buffer-process (get-buffer proc-buffer-name))))
     (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
     (unless (or (file-exists-p thumbnail-file)
                 (file-exists-p html-archive-file))
       (when org-link-beautify-url-preview-command
-        (unless (or proc (get-buffer proc-buffer))
+        (unless (or proc (get-buffer proc-buffer-name))
           (pcase org-link-beautify-url-preview-command
             ('google-chrome
              (cl-assert (executable-find org-link-beautify-offline-webpage-preview-command) nil
                         "[org-link-beautify] Please install Google Chrome")
              ;; $ google-chrome --headless --screenshot=screenshot.png "https://www.chromestatus.com/"
              (start-process
-              proc-name proc-buffer
+              proc-name proc-buffer-name
               org-link-beautify-url-preview-command
               "--headless"
               (format "--screenshot=%s" thumbnail-file)
@@ -2243,7 +2243,7 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
                (make-process
                 :name proc-name
                 :command (list "monolith" "--no-audio" "--no-video" url "--output" html-archive-file)
-                :buffer proc-buffer
+                :buffer proc-buffer-name
                 :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
                 :sentinel (lambda (proc event)
                             (when (string= event "finished\n")
