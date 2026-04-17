@@ -2209,43 +2209,46 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
          (proc-buffer (format " *org-link-beautify url screenshot - %s*" url))
          (proc (get-buffer-process (get-buffer proc-buffer))))
     (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
-    (if (or (file-exists-p thumbnail-file)
-            (file-exists-p html-archive-file))
-        (when org-link-beautify-url-preview-command
-          (unless (or proc (get-buffer proc-buffer))
-            (pcase org-link-beautify-url-preview-command
-              ('google-chrome
-               (cl-assert (executable-find org-link-beautify-offline-webpage-preview-command) nil
-                          "[org-link-beautify] Please install Google Chrome")
-               ;; $ google-chrome --headless --screenshot=screenshot.png "https://www.chromestatus.com/"
-               (start-process
-                proc-name proc-buffer
-                org-link-beautify-url-preview-command
-                "--headless"
-                (format "--screenshot=%s" thumbnail-file)
-                url))
-              ('rinku
-               (cl-assert (executable-find "rinku") nil "[org-link-beautify] Please install `rinku'")
-               (let* ((json-response-hash (json-parse-string
-                                           (shell-command-to-string
-                                            ;; $ rinku --preview --width 600 --height 300 https://soundcloud.com/shehackedyou
-                                            (format "%s --preview %s" org-link-beautify-url-preview-command url))))
-                      (image-path (gethash "image" json-response-hash))
-                      (title (gethash "title" json-response-hash)))
-                 (when (derived-mode-p 'org-mode)
-                   (org-insert-link nil image-path title))))
-              ('monolith
-               (cl-assert (executable-find "monolith") nil "[org-link-beautify] Please install `monolith'")
-               (let* ((html-archive-file (concat (file-name-sans-extension thumbnail-file) ".html")))
-                 (make-process
-                  :name proc-name
-                  :command (list "monolith" "--no-audio" "--no-video" url "--output" html-archive-file)
-                  :buffer proc-buffer
-                  :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
-                  :sentinel (lambda (proc event)
-                              (when (string= event "finished\n")
-                                (kill-buffer (process-buffer proc))
-                                (kill-process proc))))))))))
+    (unless (or (file-exists-p thumbnail-file)
+                (file-exists-p html-archive-file))
+      (when org-link-beautify-url-preview-command
+        (unless (or proc (get-buffer proc-buffer))
+          (pcase org-link-beautify-url-preview-command
+            ('google-chrome
+             (cl-assert (executable-find org-link-beautify-offline-webpage-preview-command) nil
+                        "[org-link-beautify] Please install Google Chrome")
+             ;; $ google-chrome --headless --screenshot=screenshot.png "https://www.chromestatus.com/"
+             (start-process
+              proc-name proc-buffer
+              org-link-beautify-url-preview-command
+              "--headless"
+              (format "--screenshot=%s" thumbnail-file)
+              url))
+            ('rinku
+             (cl-assert (executable-find "rinku") nil "[org-link-beautify] Please install `rinku'")
+             (let* ((json-response-hash (json-parse-string
+                                         (shell-command-to-string
+                                          ;; $ rinku --preview --width 600 --height 300 https://soundcloud.com/shehackedyou
+                                          (format "%s --preview --width %d --height %d %s"
+                                                  org-link-beautify-url-preview-command
+                                                  thumbnail-size (/ thumbnail-size 2)
+                                                  url))))
+                    (image-path (gethash "image" json-response-hash))
+                    (title (gethash "title" json-response-hash)))
+               (when (derived-mode-p 'org-mode)
+                 (org-insert-link nil image-path title))))
+            ('monolith
+             (cl-assert (executable-find "monolith") nil "[org-link-beautify] Please install `monolith'")
+             (let* ((html-archive-file (concat (file-name-sans-extension thumbnail-file) ".html")))
+               (make-process
+                :name proc-name
+                :command (list "monolith" "--no-audio" "--no-video" url "--output" html-archive-file)
+                :buffer proc-buffer
+                :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
+                :sentinel (lambda (proc event)
+                            (when (string= event "finished\n")
+                              (kill-buffer (process-buffer proc))
+                              (kill-process proc))))))))))
     (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
       (org-link-beautify--notify-generate-thumbnail-failed url thumbnail-file))))
 
