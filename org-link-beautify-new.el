@@ -355,9 +355,9 @@ The argument INPUT-FILE should be the absolute path."
                                      ;; insert transcribe output into Org block
                                      ;; (add-to-list 'org-structure-template-alist '("t" . "transcribe"))
                                      (output-formatted-block (format "
-#+begin_src transcribe :tangle \"%s.srt\"
+#+begin_transcribe :tangle \"%s.srt\"
 %s
-#+end_src\n"
+#+end_transcribe\n"
                                                                      (file-name-concat dir (file-name-base input-file))
                                                                      output)))
                            (kill-new output-formatted-block)
@@ -385,6 +385,21 @@ Please press [C-y] to paste formatted output transcribe block in buffer."
         (user-error "[org-link-beautify] not audio/video file link at point")))))
 
 ;; (define-key org-link-beautify-keymap (kbd "M-t") 'org-link-beautify-action-transcribe)
+
+
+(add-to-list 'org-structure-template-alist '("T" . "transcribe"))
+(require 'tempo)
+(tempo-define-template "block transcribe"
+                       '("#+begin_transcribe" n
+                         r> p n
+                         "#+end_transcribe")
+                       "<transcribe"
+                       "Org mode user defined extra block type: #+begin_transcribe ... #+end_transcribe"
+                       'org-tempo-tags)
+(with-eval-after-load "org-modern"
+  (add-to-list 'org-modern-block-name
+               `("transcribe" . (,(nerd-icons-mdicon "nf-md-transcribe" :face 'nerd-icons-blue)
+                                 ,(nerd-icons-mdicon "nf-md-comma" :face 'org-block-end-line)))))
 
 ;;; helper functions
 
