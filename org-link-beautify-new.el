@@ -2298,8 +2298,8 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
 
 This is for link image previewing to get around function `org-link-preview'
 \(original named `org-toggle-inline-images'\) parameter `include-linked'."
-  (let ((link-type (when (string-match org-link-types-re link-raw) (match-string 1 link-raw)))
-        (extension (file-name-extension link-raw)))
+  (when-let* ((link-type (when (string-match org-link-types-re link-raw) (match-string 1 link-raw)))
+              (extension (file-name-extension link-raw)))
     (when (or (member extension org-link-beautify-image-preview-list) ; image files
               (member extension '("pdf" "epub" "mobi" "azw3" "lit" "fb2" "fb2.zip")) ; ebook files
               (member extension org-link-beautify-video-preview-list) ; video files
