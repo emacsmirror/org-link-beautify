@@ -346,6 +346,10 @@ The argument INPUT-FILE should be the absolute path."
                            "--max-length" (number-to-string (* fill-column 3)) ; sentence length control for better readability
                            "--output-file"
                            output-file)))
+         :filter (lambda (proc output)
+                   ;; Downloading required assets… ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒   0%
+                   (when (string-match-p "Downloading required assets.*" output)
+                     (message "[org-link-beautify] action 'transcribe' program 'yap' is downloading model files")))
          :sentinel (lambda (proc event)
                      (when (string-equal event "finished\n")
                        (with-temp-buffer
