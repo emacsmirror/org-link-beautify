@@ -2086,47 +2086,6 @@ Each element has form (ARCHIVE-FILE-EXTENSION COMMAND)."
 (defalias 'org-link-beautify-preview-audio 'org-link-beautify-preview-file-audio
   "Preview audio: link of PATH over OV overlay position for LINK element.")
 
-;;; org-contact: link type
-
-(defcustom org-link-beautify-org-contact-avatar-preview-size 64
-  "The org-contacts avatar image size :height."
-  :type 'number
-  :safe #'numberp
-  :group 'org-link-beautify)
-
-(declare-function org-contacts-get-avatar-icon "org-contacts" (&optional pom))
-(declare-function org-contacts-search-contact "org-contacts" (name))
-
-(defun org-link-beautify--generate-preview-for-org-contacts (name)
-  "Get the avatar of org-contact in NAME."
-  (let* ((epom (org-contacts-search-contact name)))
-    (org-contacts-get-avatar-icon epom)))
-
-;; TEST:
-;; (org-link-beautify--generate-preview-for-org-contacts "stardiviner")
-
-(defun org-link-beautify-preview-org-contact (ov path link)
-  "Preview org-contct: link of PATH over OV overlay position for LINK element."
-  (if-let* ((name path)
-            ( (display-graphic-p))
-            (image (org-link-beautify--generate-preview-for-org-contacts name))
-            (display-height org-link-beautify-org-contact-avatar-preview-size))
-      ;; display org-contacts avatar image
-      (prog1 ov
-        (setf (image-property image :height) display-height)
-        (overlay-put ov 'display image)
-        (overlay-put ov 'after-string (concat
-                                       (propertize "{" 'face '(:foreground "purple2"))
-                                       (propertize (format "@%s" name) 'face 'org-verbatim)
-                                       (propertize "}" 'face '(:foreground "purple2")))))
-    ;; display text-properties with icon
-    (if-let* ((text (org-element-property :title (org-contacts-search-contact name))))
-        (overlay-put ov 'after-string (concat
-                                       (propertize "{" 'face '(:foreground "purple2"))
-                                       (propertize text 'face 'org-verbatim)
-                                       (propertize "}" 'face '(:foreground "purple2"))))
-      (org-link-beautify-iconify ov path link))))
-
 ;;; org-bookmark: link type
 
 (require 'org-bookmarks nil t)
@@ -2414,7 +2373,6 @@ This is for link image previewing to get around function `org-link-preview'
       
       ;; Org mode extensions link types
       ("org-ql-search" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("org-contact" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-org-contact))
       ("org-bookmark" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-org-bookmark))
       ("orgit" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git))
       ("orgit-rev" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git))
