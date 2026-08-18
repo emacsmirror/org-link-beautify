@@ -194,7 +194,12 @@ The argument VIDEO-FILE should be the absolute path."
        :command (list "ffmpeg" "-i" video-file audio-file)
        :sentinel (lambda (proc event)
                    (when (string-equal event "finished\n")
-                     (message "[org-link-beautify] converted video to audio file [%s]\nPlease update your link path to result audio file."
+                     (let* ((element-context (org-element-context))
+                            (begin (org-element-begin element-context))
+                            (end (org-element-end element-context)))
+                       (save-excursion
+                         (replace-regexp-in-region ".mp4]]" ".mp3]]" begin end)))
+                     (message "[org-link-beautify] converted video to audio file [%s]\nUpdated link filename extension to .mp3"
                               (string-truncate-left audio-file (/ (window-width) 2))))))))
 
 (defun org-link-beautify-action-convert-video-to-audio (&optional args)
@@ -219,10 +224,7 @@ The argument VIDEO-FILE should be the absolute path."
                                     nil
                                     audio-file)
                                    (file-name-directory video-file-path))))
-            (org-link-beautify--convert-video-to-audio video-file-path audio-file-path)
-            ;; TODO: modify link file path
-            ;; (org-insert-link nil audio-file-path audio-file-path)
-            )
+            (org-link-beautify--convert-video-to-audio video-file-path audio-file-path))
         (user-error "[org-link-beautify] not video file link at point")))))
 
 ;; (define-key org-link-beautify-keymap (kbd "M-a") 'org-link-beautify-action-convert-video-to-audio)
