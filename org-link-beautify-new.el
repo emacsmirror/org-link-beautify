@@ -495,7 +495,8 @@ If STR needs truncation, apply ellipsis and its properties."
      (mapconcat
       (lambda (line)
         ;; If line string is Chinese, don't use padding width.
-        (if  (string-match-p (rx alpha) (string (car (string-to-list line))))
+        (if (and (not (null (car (string-to-list line))))
+                 (string-match-p (rx alpha) (string (car (string-to-list line)))))
             (concat "│ " line)
           ;; used computed content-width by invoking pad-to-width
           (let ((padded-line (org-link-beautify--pad-to-width line content-width)))
@@ -1453,29 +1454,44 @@ You can install software `libmobi' to get command `mobitool'."
   :safe #'numberp
   :group 'org-link-beautify)
 
-(defun org-link-beautify--preview-source-code-file (file)
-  "Return first 10 lines of FILE."
-  (with-temp-buffer
-    (condition-case nil
-        (progn
-          ;; I originally use `insert-file-contents-literally', so Emacs doesn't
-          ;; decode the non-ASCII characters it reads from the file, i.e. it
-          ;; doesn't interpret the byte sequences as Chinese characters. Use
-          ;; `insert-file-contents' instead. In addition, this function decodes
-          ;; the inserted text from known formats by calling format-decode,
-          ;; which see.
-          (insert-file-contents file)
-          (org-link-beautify--display-content-block
-           ;; This `cl-loop' extract a LIST of string lines from the file content.
-           (cl-loop repeat 10
-                    unless (eobp)
-                    collect (prog1 (buffer-substring-no-properties
-                                    (line-beginning-position)
-                                    (line-end-position))
-                              (forward-line 1)))))
-      (file-error
-       (message "Unable to read file %S" file)
-	   nil))))
+(defun org-link-beautify--preview-source-code-file (file &optional lines)
+  "Return first LINES (default is 40) of FILE."
+  (let* ((lines (or lines 40)))
+    (with-temp-buffer
+      (condition-case nil
+          (progn
+            ;; I originally use `insert-file-contents-literally', so Emacs doesn't
+            ;; decode the non-ASCII characters it reads from the file, i.e. it
+            ;; doesn't interpret the byte sequences as Chinese characters. Use
+            ;; `insert-file-contents' instead. In addition, this function decodes
+            ;; the inserted text from known formats by calling format-decode,
+            ;; which see.
+            (insert-file-contents file)
+            
+            ;; TODO: How to render source code text with major-mode syntax highlighting?
+            ;; setting `major-mode' for source code syntax highlight
+            ;; (set-auto-mode t)
+            ;; (buffer-substring (point-min) (save-excursion (goto-line lines) (point)))
+            
+            ;; use `org-link-beautify--display-content-block' box wrapper
+            ;; (org-link-beautify--display-content-block
+            ;;  (or (cl-loop repeat lines ; This `cl-loop' extract a LIST of string lines from the file content.
+            ;;               unless (eobp)
+            ;;               collect (prog1 (buffer-substring-no-properties
+            ;;                               (line-beginning-position)
+            ;;                               (line-end-position))
+            ;;                         (forward-line 1)))
+            ;;      (string-split
+            ;;       (buffer-substring-no-properties (point-min) (save-excursion (goto-line lines) (point)))
+            ;;       "\n" t)))
+            
+            ;; use `boxquote-region' box wrapper
+            (boxquote-region (point-min) (save-excursion (goto-line lines) (point)))
+            (buffer-substring-no-properties (point-min) (save-excursion (goto-line (+ lines 2)) (point)))
+            )
+        (file-error
+         (message "Unable to read file %S" file)
+         nil)))))
 
 (defun org-link-beautify--generate-preview-for-file-source-code (path)
   "Generate THUMBNAIL-FILE with THUMBNAIL-SIZE for source code file of PATH."
@@ -1532,8 +1548,8 @@ You can install software `libmobi' to get command `mobitool'."
         (org-link-beautify-overlay-display-image ov image))
     (if-let* ((source-code (org-link-beautify--preview-source-code-file path)))
         (prog1 ov
-          (overlay-put ov 'after-string source-code)
-	        (overlay-put ov 'face    'org-block))
+          (overlay-put ov 'display source-code)
+          (overlay-put ov 'face    '(:underline nil :box nil)))
       (org-link-beautify-iconify ov path link))))
 
 ;;; file: [comic]
