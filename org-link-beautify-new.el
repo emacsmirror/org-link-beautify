@@ -1880,6 +1880,7 @@ $ pip install ffmpeg-python")
    ((member org-link-beautify-audio-preview-command org-link-beautify-audio-preview-with-transcribe-list)
     (when-let* ((transcribe-result (org-link-beautify--generate-preview-for-file-audio path))
                 (lines (take 10 (seq-remove
+                                 ;; trim line numbers of transcribe
                                  (lambda (s) (not (zerop (string-to-number s))))
                                  (split-string transcribe-result
                                                "\n" t
@@ -1889,8 +1890,8 @@ $ pip install ffmpeg-python")
                                                    (repeat 2 digit) ":" (repeat 2 digit) ":" (repeat 2 digit) "," (repeat 3 digit)))))))
       (when-let* ((transcribe (org-link-beautify--display-content-block lines)))
         (prog1 ov
-          (overlay-put ov 'after-string (propertize transcribe 'face '(:inherit org-block :slant normal :weight normal :extend t)))
-          (overlay-put ov 'face '(:background "#FFFFE0" :foreground "dark gray" :box (:color "red")))))))
+          (overlay-put ov 'display (propertize transcribe 'face '(:underline nil :box nil)))
+          (overlay-put ov 'face '(:background "#FFFFE0" :foreground "dark gray" :box nil))))))
    ;; thumbnail image
    ((member org-link-beautify-audio-preview-command org-link-beautify-audio-preview-with-thumbnail-list)
     (when (and org-link-beautify-audio-preview-command (display-graphic-p))
