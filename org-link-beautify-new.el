@@ -1431,7 +1431,8 @@ You can install software `libmobi' to get command `mobitool'."
   (cond
    ((executable-find "silicon") "silicon")
    ((executable-find "germanium") "germanium"))
-  "The command used to preview source code file."
+  "The command used to preview source code file.
+If it is nil, it will display source code in overlay."
   :type 'string
   :safe #'stringp
   :group 'org-link-beautify)
@@ -1448,7 +1449,7 @@ You can install software `libmobi' to get command `mobitool'."
   :safe #'listp
   :group 'org-link-beautify)
 
-(defcustom org-link-beautify-source-code-preview-max-lines 30
+(defcustom org-link-beautify-source-code-preview-max-lines 40
   "The maximum lines number of file for previewing."
   :type 'number
   :safe #'numberp
@@ -1456,7 +1457,7 @@ You can install software `libmobi' to get command `mobitool'."
 
 (defun org-link-beautify--preview-source-code-file (file &optional lines)
   "Return first LINES (default is 40) of FILE."
-  (let* ((lines (or lines 40)))
+  (let* ((lines (or lines org-link-beautify-source-code-preview-max-lines 40)))
     (with-temp-buffer
       (condition-case nil
           (progn
@@ -1507,10 +1508,10 @@ You can install software `libmobi' to get command `mobitool'."
            (proc-buffer (format " *org-link-beautify code preview - %s*" source-code-file-name))
            (proc (get-buffer-process (get-buffer proc-buffer))))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
-      (unless (and (file-exists-p thumbnail-file)
-                   ;; limit to maximum 30 lines of file.
-                   (> (string-to-number (shell-command-to-string (format "cat %s | wc -l" source-code-file)))
-                      org-link-beautify-source-code-preview-max-lines))
+      (unless (or (file-exists-p thumbnail-file)
+                  ;; limit to maximum 30 lines of file.
+                  (> (string-to-number (shell-command-to-string (format "cat %s | wc -l" source-code-file)))
+                     org-link-beautify-source-code-preview-max-lines))
         (unless (or proc (get-buffer proc-buffer))
           (pcase (file-name-nondirectory org-link-beautify-source-code-preview-command)
             ("silicon"
@@ -1535,7 +1536,7 @@ You can install software `libmobi' to get command `mobitool'."
 (defun org-link-beautify-preview-file-source-code (ov path link)
   "Preview source code file of PATH over OV overlay position for LINK element."
   (if-let* (( (display-graphic-p))
-            (org-link-beautify-source-code-preview-command)
+            ( org-link-beautify-source-code-preview-command)
             (thumbnail-file (org-link-beautify--generate-preview-for-file-source-code path))
             ( (file-exists-p thumbnail-file))
             (image (create-image thumbnail-file nil nil :ascent 100))
