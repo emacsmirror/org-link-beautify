@@ -675,7 +675,8 @@ Detect previewing process generated THUMBNAIL-FILE existing, auto kill process a
   (let ((type (org-element-property :type link))
         (extension (file-name-extension path)))
     (pcase type
-      ;; FIXME: the icon is slant.
+      ;; FIXME: the icon is slant. Fix with `propertize' :face '(:slant normal :weight normal)
+      ;; NOTE: the icons color is not inherited, because overlay `'after-string' does not support propertized text.
       ("file" (nerd-icons-icon-for-file path))
       ("attachment" (nerd-icons-icon-for-file path))
       ("http" (nerd-icons-icon-for-url (concat type ":" path) :face '(:inherit nerd-icons-dsilver :slant normal :weight normal)))
@@ -984,7 +985,7 @@ This function will apply file type function based on file extension."
                         600))
              (image (create-image file nil nil :width width :ascent 100)))
         (if image                     ; Add image to overlay
-	          ;; See bug#59902. We cannot rely on Emacs to update image if the file has changed.
+            ;; See bug#59902. We cannot rely on Emacs to update image if the file has changed.
             (org-link-beautify-overlay-display-image ov image align)
           nil))))
 
