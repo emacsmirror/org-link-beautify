@@ -348,7 +348,8 @@ The argument INPUT-FILE should be the absolute path."
                            "--locale" (completing-read "--locale: " '("fr_CA" "fr_CH" "fr_FR" "fr_BE" "ko_KR" "pt_PT" "pt_BR" "de_AT" "de_CH" "de_DE" "it_CH" "it_IT" "zh_CN" "zh_TW" "es_CL" "es_MX" "es_ES" "es_US" "en_CA" "en_SG" "en_GB" "en_ZA" "en_AU" "en_US" "en_IE" "en_NZ" "en_IN" "yue_CN" "zh_HK" "ja_JP") nil t "zh_CN")
                            input-file
                            "--srt" ; output srt subtitle format
-                           "--max-length" (number-to-string (* fill-column 3)) ; sentence length control for better readability
+                           ;; line length limited to `fill-column' width for better readability
+                           "--max-length" (number-to-string (/ (* fill-column 2) 3))
                            "--output-file"
                            output-file))
                     ("whisper"
