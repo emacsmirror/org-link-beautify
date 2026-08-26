@@ -1839,6 +1839,12 @@ $ pip install ffmpeg-python")
   '("yap" "hns" "whisper" "whisper-cli" "whisper-server")
   "A list of commands from `org-link-beautify-audio-preview-command' for transcribe audio.")
 
+(defcustom org-link-beautify-transcribe-lines 50
+  "The lines of displaying transcribe text of audio file."
+  :type 'number
+  :safe #'numberp
+  :group 'org-link-beautify)
+
 (defvar org-link-beautify-audio-preview-with-thumbnail-list
   '("audiowaveform" "ffmpeg")
   "A list of commands from `org-link-beautify-audio-preview-command' for thumbnail audio.")
@@ -1923,15 +1929,17 @@ $ pip install ffmpeg-python")
    ;; transcribe
    ((member org-link-beautify-audio-preview-command org-link-beautify-audio-preview-with-transcribe-list)
     (when-let* ((transcribe-result (org-link-beautify--generate-preview-for-file-audio path))
-                (lines (take 10 (seq-remove
-                                 ;; trim line numbers of transcribe
-                                 (lambda (s) (not (zerop (string-to-number s))))
-                                 (split-string transcribe-result
-                                               "\n" t
-                                               ;; trim timestamps 00:00:20,039 --> 00:01:03,420
-                                               (rx (repeat 2 digit) ":" (repeat 2 digit) ":" (repeat 2 digit) "," (repeat 3 digit)
-                                                   " --> "
-                                                   (repeat 2 digit) ":" (repeat 2 digit) ":" (repeat 2 digit) "," (repeat 3 digit)))))))
+                (lines (take
+                        org-link-beautify-transcribe-lines
+                        (seq-remove
+                         ;; trim line numbers of transcribe
+                         (lambda (s) (not (zerop (string-to-number s))))
+                         (split-string transcribe-result
+                                       "\n" t
+                                       ;; trim timestamps 00:00:20,039 --> 00:01:03,420
+                                       (rx (repeat 2 digit) ":" (repeat 2 digit) ":" (repeat 2 digit) "," (repeat 3 digit)
+                                           " --> "
+                                           (repeat 2 digit) ":" (repeat 2 digit) ":" (repeat 2 digit) "," (repeat 3 digit)))))))
       (when-let* ((transcribe (org-link-beautify--display-content-block lines)))
         (prog1 ov
           (overlay-put ov 'display (propertize transcribe 'face '(:underline nil :box nil :extend nil)))
