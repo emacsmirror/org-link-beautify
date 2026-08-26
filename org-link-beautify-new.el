@@ -1907,8 +1907,8 @@ $ pip install ffmpeg-python")
                                                    (repeat 2 digit) ":" (repeat 2 digit) ":" (repeat 2 digit) "," (repeat 3 digit)))))))
       (when-let* ((transcribe (org-link-beautify--display-content-block lines)))
         (prog1 ov
-          (overlay-put ov 'display (propertize transcribe 'face '(:underline nil :box nil)))
-          (overlay-put ov 'face '(:background "#FFFFE0" :foreground "dark gray" :box nil))))))
+          (overlay-put ov 'display (propertize transcribe 'face '(:underline nil :box nil :extend nil)))
+          (overlay-put ov 'face '(:background "#FFFFE0" :foreground "dark gray" :underline nil :box nil :extend nil))))))
    ;; thumbnail image
    ((member org-link-beautify-audio-preview-command org-link-beautify-audio-preview-with-thumbnail-list)
     (when (and org-link-beautify-audio-preview-command (display-graphic-p))
