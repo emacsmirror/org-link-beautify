@@ -328,10 +328,7 @@ The argument VIDEO-FILE should be the absolute path."
   "Transcribe the INPUT-FILE on path.
 The argument INPUT-FILE should be the absolute path."
   (cl-assert (executable-find org-link-beautify-transcribe-command) nil
-             (pcase org-link-beautify-transcribe-command
-               ("yap"
-                (format "[org-link-beautify] Install %S with command: $ brew install yap"
-                        org-link-beautify-transcribe-command))))
+             (format "[org-link-beautify] Install the %S with command" org-link-beautify-transcribe-command))
   (if (file-name-absolute-p input-file)
       (let* ((transcribe-dir (org-link-beautify--get-thumbnails-dir-path input-file))
              (transcribe-file-name (format "%s.transcribe" (file-name-base input-file)))
@@ -342,7 +339,6 @@ The argument INPUT-FILE should be the absolute path."
          :buffer (format " *org-link-beautify - transcribe - %s*" (file-name-nondirectory input-file))
          :command (pcase org-link-beautify-transcribe-command
                     ("yap"
-                     (cl-assert (executable-find "yap") nil "[org-link-beautify] Please install command tool `yap'")
                      (list "yap"
                            "transcribe"  ; subcommand
                            "--locale"
@@ -374,12 +370,10 @@ The argument INPUT-FILE should be the absolute path."
                            "--output-file"
                            output-file))
                     ("whisper"
-                     (cl-assert (executable-find "whisper") nil "[org-link-beautify] Please install command tool `whisper'")
                      (start-process
                       proc-name proc-buffer
                       "whisper" "--model" "turbo" "--output_format" "vtt" "--task" "transcribe" audio-file) )
                     ("whisper-cli"
-                     (cl-assert (executable-find "whisper-cli") nil "[org-link-beautify] Please install command tool `whisper-cli'")
                      (start-process
                       proc-name proc-buffer
                       "whisper-cli" "--model" "~/.config/whisper-cpp/models/ggml-large-v3-turbo.bin" "-f" audio-file "--output-file" output-file)))
