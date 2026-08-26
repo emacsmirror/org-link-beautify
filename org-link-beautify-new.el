@@ -334,8 +334,8 @@ The argument INPUT-FILE should be the absolute path."
                         org-link-beautify-transcribe-command))))
   (if (file-name-absolute-p input-file)
       (let* ((transcribe-dir (org-link-beautify--get-thumbnails-dir-path input-file))
-             (transcribe-filename (format "%s.transcribe" (file-name-base input-file)))
-             (output-file (expand-file-name transcribe-filename transcribe-dir))
+             (transcribe-file-name (format "%s.transcribe" (file-name-base input-file)))
+             (output-file (expand-file-name transcribe-file-name transcribe-dir))
              (dir (when (derived-mode-p 'org-mode) (if (org-attach-dir) (org-attach-dir) (org-attach-dir-get-create)))))
         (make-process
          :name (format "org-link-beautify - transcribe - %s" (file-name-nondirectory input-file))
@@ -345,7 +345,28 @@ The argument INPUT-FILE should be the absolute path."
                      (cl-assert (executable-find "yap") nil "[org-link-beautify] Please install command tool `yap'")
                      (list "yap"
                            "transcribe"  ; subcommand
-                           "--locale" (completing-read "--locale: " '("fr_CA" "fr_CH" "fr_FR" "fr_BE" "ko_KR" "pt_PT" "pt_BR" "de_AT" "de_CH" "de_DE" "it_CH" "it_IT" "zh_CN" "zh_TW" "es_CL" "es_MX" "es_ES" "es_US" "en_CA" "en_SG" "en_GB" "en_ZA" "en_AU" "en_US" "en_IE" "en_NZ" "en_IN" "yue_CN" "zh_HK" "ja_JP") nil t "zh_CN")
+                           "--locale"
+                           (cond
+                            ((string-match-p (rx string-start (or (category chinese) (category chinese-two-byte))) transcribe-file-name)
+                             "zh_CN")
+                            ((string-match-p (rx string-start (or (category korean) (category korean-hangul-two-byte))) transcribe-file-name)
+                             "ko_KR")
+                            ((string-match-p (rx string-start (char ascii)) transcribe-file-name)
+                             "en_US")
+                            ((string-match-p (rx (or (category japanese) (category japanese-katakana) (category japanese-roman))) transcribe-file-name)
+                             "ja_JP")
+                            (t (completing-read "--locale: "
+                                                '("zh_CN" "yue_CN" "zh_TW" "zh_HK"
+                                                  "ko_KR"
+                                                  "ja_JP"
+                                                  ;; "pt_PT" "pt_BR"
+                                                  ;; "it_CH" "it_IT"
+                                                  ;; "de_AT" "de_CH" "de_DE"
+                                                  ;; "fr_CA" "fr_CH" "fr_FR" "fr_BE"
+                                                  ;; "es_CL" "es_MX" "es_ES" "es_US"
+                                                  ;; "en_CA" "en_SG" "en_GB" "en_ZA" "en_AU" "en_US" "en_IE" "en_NZ" "en_IN"
+                                                  )
+                                                nil t "zh_CN")))
                            input-file
                            "--srt" ; output srt subtitle format
                            ;; line length limited to `fill-column' width for better readability
