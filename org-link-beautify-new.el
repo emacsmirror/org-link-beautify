@@ -333,13 +333,16 @@ The argument INPUT-FILE should be the absolute path."
                 (format "[org-link-beautify] Install %S with command: $ brew install yap"
                         org-link-beautify-transcribe-command))))
   (if (file-name-absolute-p input-file)
-      (let* ((output-file (make-temp-file "org-link-beautify-transcribe--"))
+      (let* ((transcribe-dir (org-link-beautify--get-thumbnails-dir-path input-file))
+             (transcribe-filename (format "%s.transcribe" (file-name-base input-file)))
+             (output-file (expand-file-name transcribe-filename transcribe-dir))
              (dir (when (derived-mode-p 'org-mode) (if (org-attach-dir) (org-attach-dir) (org-attach-dir-get-create)))))
         (make-process
          :name (format "org-link-beautify - transcribe - %s" (file-name-nondirectory input-file))
          :buffer (format " *org-link-beautify - transcribe - %s*" (file-name-nondirectory input-file))
          :command (pcase org-link-beautify-transcribe-command
                     ("yap"
+                     (cl-assert (executable-find "yap") nil "[org-link-beautify] Please install command tool `yap'")
                      (list "yap"
                            "transcribe"  ; subcommand
                            "--locale" (completing-read "--locale: " '("fr_CA" "fr_CH" "fr_FR" "fr_BE" "ko_KR" "pt_PT" "pt_BR" "de_AT" "de_CH" "de_DE" "it_CH" "it_IT" "zh_CN" "zh_TW" "es_CL" "es_MX" "es_ES" "es_US" "en_CA" "en_SG" "en_GB" "en_ZA" "en_AU" "en_US" "en_IE" "en_NZ" "en_IN" "yue_CN" "zh_HK" "ja_JP") nil t "zh_CN")
@@ -347,9 +350,19 @@ The argument INPUT-FILE should be the absolute path."
                            "--srt" ; output srt subtitle format
                            "--max-length" (number-to-string (* fill-column 3)) ; sentence length control for better readability
                            "--output-file"
-                           output-file)))
+                           output-file))
+                    ("whisper"
+                     (cl-assert (executable-find "whisper") nil "[org-link-beautify] Please install command tool `whisper'")
+                     (start-process
+                      proc-name proc-buffer
+                      "whisper" "--model" "turbo" "--output_format" "vtt" "--task" "transcribe" audio-file) )
+                    ("whisper-cli"
+                     (cl-assert (executable-find "whisper-cli") nil "[org-link-beautify] Please install command tool `whisper-cli'")
+                     (start-process
+                      proc-name proc-buffer
+                      "whisper-cli" "--model" "~/.config/whisper-cpp/models/ggml-large-v3-turbo.bin" "-f" audio-file "--output-file" output-file)))
          :filter (lambda (proc output)
-                   ;; Downloading required assets… ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒   0%
+                   ;; Downloading required assets…  0%
                    (when (string-match-p "Downloading required assets.*" output)
                      (message "[org-link-beautify] action 'transcribe' program 'yap' is downloading model files")))
          :sentinel (lambda (proc event)
@@ -368,10 +381,10 @@ The argument INPUT-FILE should be the absolute path."
                                                                      output)))
                            (kill-new output-formatted-block)
                            (message "[org-link-beautify] Finished transcribe [%s]
-Output to file %s
-Please press [C-y] to paste formatted output transcribe block in buffer."
-                                    (string-truncate-left input-file (/ (window-width) 2))
-                                    output-file)))))))))
+Press [C-y] to paste the #+begin_transcribe block in Org buffer."
+                                    (string-truncate-left input-file (/ (window-width) 2)))
+                           ;; return the transcribe text as API function result
+                           output-formatted-block))))))))
 
 (defun org-link-beautify-action-transcribe (&optional args)
   "Transcribe the input file to text output in ARGS."
@@ -440,22 +453,23 @@ Please press [C-y] to paste formatted output transcribe block in buffer."
   "Pad STR with spaces to make its display width reach WIDTH.
 If STR needs truncation, apply ellipsis and its properties."
   (let* ((ellipsis (truncate-string-ellipsis)) ;; 获取默认省略号
+         (width-ellipsis (- width (string-width ellipsis)))
          ;; 计算截断后的字符串，预留出省略号的空间
          (truncated-str (truncate-string-to-width
                          str
                          ;; 目标宽度 - 省略号宽度。如果不需要截断，则此值大于字符串实际宽度。
-                         (- width (string-width ellipsis))
+                         width-ellipsis
                          0 ;; start-column
                          nil ;; padding (不需要，因为我们会自己填充)
                          ellipsis
                          ;; 应用省略号的文本属性
                          '(face (:inherit org-ellipsis :foreground "orange")
-                                help-echo "text ellipsed, click to check more")))
+                                help-echo "text omitted, click to check more")))
          ;; 计算截断后的字符串的实际显示宽度
-         (actual-width (string-width truncated-str)))
+         (width-left (string-width truncated-str)))
     ;; 如果实际宽度小于目标宽度，则填充空格
-    (if (< actual-width width)
-        (concat truncated-str (make-string (- width actual-width) ? ))
+    (if (< width-left width)
+        (concat truncated-str (make-string (- width width-left) ? ))
       ;; 否则直接返回截断后的字符串
       truncated-str)))
 
@@ -475,14 +489,17 @@ If STR needs truncation, apply ellipsis and its properties."
 %s
 └%s┘
 \n"
-     ;; 顶部横线
+     ;; top horizontal line
      (make-string top-bottom-width ?─)
-     ;; 内容行
+     ;; content line
      (mapconcat
       (lambda (line)
-        ;; 使用计算好的 content-width 调用 pad-to-width
-        (let ((padded-line (org-link-beautify--pad-to-width line content-width)))
-          (concat "│ " padded-line " │")))
+        ;; If line string is Chinese, don't use padding width.
+        (if  (string-match-p (rx alpha) (string (car (string-to-list line))))
+            (concat "│ " line)
+          ;; used computed content-width by invoking pad-to-width
+          (let ((padded-line (org-link-beautify--pad-to-width line content-width)))
+            (concat "│ " padded-line " │"))))
       lines-list
       "\n")
      ;; 底部横线
@@ -909,8 +926,12 @@ This function will apply file type function based on file extension."
              (org-link-beautify-file-attributes ov path link)))
        ;; Audio
        ((member extension org-link-beautify-audio-preview-list)
-        (and (org-link-beautify-preview-file-audio ov path link)
-             (org-link-beautify-file-attributes ov path link)))
+        (cond
+         ((member org-link-beautify-audio-preview-command org-link-beautify-audio-preview-with-transcribe-list)
+          (org-link-beautify-preview-file-audio ov path link))
+         ((member org-link-beautify-audio-preview-command org-link-beautify-audio-preview-with-thumbnail-list)
+          (and (org-link-beautify-preview-file-audio ov path link)
+               (org-link-beautify-file-attributes ov path link)))))
        ;; Subtitle
        ((member extension org-link-beautify-subtitle-preview-list)
         (org-link-beautify-preview-file-subtitle ov path link))
@@ -1754,16 +1775,29 @@ $ pip install ffmpeg-python")
 
 (defcustom org-link-beautify-audio-preview-command
   (cond
-   ((executable-find "qlmanage") 'qlmanage)
-   ((executable-find "audiowaveform") 'audiowaveform)
-   ((executable-find "ffmpeg") 'ffmpeg)
-   ((executable-find "whisper") 'whisper-transcribe)
-   ((executable-find "whisper-cli") 'whisper-cpp-transcribe)
-   ((executable-find "whisper-server") 'whisper-cpp-server-transcribe))
+   ;; transcribe
+   ((executable-find "yap") "yap")
+   ((executable-find "hns") "hns")
+   ((executable-find "whisper") "whisper")
+   ((executable-find "whisper-cli") "whisper-cli")
+   ((executable-find "whisper-server") "whisper-server")
+   ;; audio wave
+   ((executable-find "audiowaveform") "audiowaveform")
+   ((executable-find "ffmpeg") "ffmpeg")
+   ;; audio file preview
+   ((executable-find "qlmanage") "qlmanage"))
   "Find available audio preview command."
   :type 'symbol
   :safe #'symbolp
   :group 'org-link-beautify)
+
+(defvar org-link-beautify-audio-preview-with-transcribe-list
+  '("yap" "hns" "whisper" "whisper-cli" "whisper-server")
+  "A list of commands from `org-link-beautify-audio-preview-command' for transcribe audio.")
+
+(defvar org-link-beautify-audio-preview-with-thumbnail-list
+  '("audiowaveform" "ffmpeg")
+  "A list of commands from `org-link-beautify-audio-preview-command' for thumbnail audio.")
 
 (defcustom org-link-beautify-audio-preview-list
   '("mp3" "wav" "flac" "ogg" "m4a" "opus" "dat"
@@ -1790,66 +1824,88 @@ $ pip install ffmpeg-python")
            (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path audio-file))
            (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base audio-file))))
            (thumbnail-size (or org-link-beautify-audio-preview-size 300))
+           (transcribe-result nil)
+           (transcribe-file (expand-file-name (format "%s.transcribe" (file-name-base audio-file)) thumbnails-dir))
            (proc-name (format "org-link-beautify audio preview - %s" audio-file-name))
            (proc-buffer (format " *org-link-beautify audio preview - %s*" audio-file-name))
            (proc (get-buffer-process (get-buffer proc-buffer))))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
-      (unless (file-exists-p thumbnail-file)
-        (unless (or proc (get-buffer proc-buffer))
-          (cl-case org-link-beautify-audio-preview-command
-            (ffmpeg
-             (cl-assert (executable-find "ffmpeg") nil "[org-link-beautify] Please install command tool `ffmpeg'")
-             (start-process
-              proc-name proc-buffer
-              "ffmpeg" "-i" audio-file
-              "-filter_complex" "[0:a]aformat=channel_layouts=mono,compand=gain=-6,showwavespic=s=600x120:colors=#9cf42f[fg];color=s=600x120:color=#44582c,drawgrid=width=iw/10:height=ih/5:color=#9cf42f@0.1[bg];[bg][fg]overlay=format=auto,drawbox=x=(iw-w)/2:y=(ih-h)/2:w=iw:h=1:color=#9cf42f"
-              "-frames:v" "1"
-              thumbnail-file))
-            (qlmanage
-             (cl-assert (executable-find "qlmanage") nil "[org-link-beautify] Please ensure command tool `qlmanage' on macOS")
-             (let ((qlmanage-thumbnail-file (concat thumbnails-dir (file-name-nondirectory audio-file) ".png")))
-               (unless (file-exists-p qlmanage-thumbnail-file)
-                 (start-process
-                  proc-name proc-buffer
-                  "qlmanage" "-x" "-t" "-s" (number-to-string thumbnail-size) audio-file "-o" thumbnails-dir))
-               ;; then rename [file.extension.png] to [file.png]
-               (when (file-exists-p qlmanage-thumbnail-file)
-                 (rename-file qlmanage-thumbnail-file thumbnail-file))))
-            (audiowaveform
-             (cl-assert (executable-find "audiowaveform") nil "[org-link-beautify] Please install command tool `audiowaveform'")
-             (start-process
-              proc-name proc-buffer
-              "audiowaveform" "-i" audio-file "-o" thumbnail-file))
-            (whisper-transcribe
-             (cl-assert (executable-find "whisper") nil "[org-link-beautify] Please install command tool `whisper'")
-             (start-process
-              proc-name proc-buffer
-              "whisper" "--model" "turbo" "--output_format" "vtt" "--task" "transcribe" audio-file) )
-            (whisper-cpp-transcribe
-             (cl-assert (executable-find "whisper-cli") nil "[org-link-beautify] Please install command tool `whisper-cli'")
-             (start-process
-              proc-name proc-buffer
-              "whisper-cli" "--model" "~/.config/whisper-cpp/models/ggml-large-v3-turbo.bin" "-f" audio-file "--output-file" output-file)))))
+      (unless (or (file-exists-p transcribe-file) (file-exists-p thumbnail-file))
+        (cond
+         ;; transcribe
+         ((member org-link-beautify-audio-preview-command org-link-beautify-audio-preview-with-transcribe-list)
+          (org-link-beautify--transcribe audio-file))
+         ;; audio wave
+         ((string-equal org-link-beautify-audio-preview-command "audiowaveform")
+          (cl-assert (executable-find "audiowaveform") nil "[org-link-beautify] Please install command tool `audiowaveform'")
+          (unless (or proc (get-buffer proc-buffer))
+            (start-process
+             proc-name proc-buffer
+             "audiowaveform" "-i" audio-file "-o" thumbnail-file)))
+         ((string-equal org-link-beautify-audio-preview-command "ffmpeg")
+          (cl-assert (executable-find "ffmpeg") nil "[org-link-beautify] Please install command tool `ffmpeg'")
+          (unless (or proc (get-buffer proc-buffer))
+            (start-process
+             proc-name proc-buffer
+             "ffmpeg" "-i" audio-file
+             "-filter_complex" "[0:a]aformat=channel_layouts=mono,compand=gain=-6,showwavespic=s=600x120:colors=#9cf42f[fg];color=s=600x120:color=#44582c,drawgrid=width=iw/10:height=ih/5:color=#9cf42f@0.1[bg];[bg][fg]overlay=format=auto,drawbox=x=(iw-w)/2:y=(ih-h)/2:w=iw:h=1:color=#9cf42f"
+             "-frames:v" "1"
+             thumbnail-file)))
+         ;; audio file preview
+         ((string-equal org-link-beautify-audio-preview-command "qlmanage")
+          (cl-assert (executable-find "qlmanage") nil "[org-link-beautify] Please ensure command tool `qlmanage' on macOS")
+          (let ((qlmanage-thumbnail-file (concat thumbnails-dir (file-name-nondirectory audio-file) ".png")))
+            (unless (file-exists-p qlmanage-thumbnail-file)
+              (start-process
+               proc-name proc-buffer
+               "qlmanage" "-x" "-t" "-s" (number-to-string thumbnail-size) audio-file "-o" thumbnails-dir))
+            ;; then rename [file.extension.png] to [file.png]
+            (when (file-exists-p qlmanage-thumbnail-file)
+              (rename-file qlmanage-thumbnail-file thumbnail-file))))))
       (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
         (org-link-beautify--notify-generate-thumbnail-failed audio-file thumbnail-file))
-      ;; return the thumbnail file as result.
-      thumbnail-file)))
+      (when (file-exists-p transcribe-file)
+        (setq transcribe-result (with-temp-buffer
+                                  (insert-file-contents transcribe-file)
+                                  (buffer-substring-no-properties (point-min) (point-max)))))
+      ;; API function return the transcribe result or thumbnail file as result
+      (if transcribe-result
+          transcribe-result
+        thumbnail-file))))
 
 (defun org-link-beautify-preview-file-audio (ov path link)
   "Preview audio file of PATH over OV overlay position for LINK element."
-  (if-let* (( (display-graphic-p))
-            (org-link-beautify-audio-preview-command)
-            (thumbnail-file (org-link-beautify--generate-preview-for-file-audio path))
-            ( (file-exists-p thumbnail-file))
-            (image (create-image thumbnail-file nil nil :ascent 100))
-            (image-width (car (image-size image)))
-            (image-height (cdr (image-size image)))
-            (display-width (or (let ((org-image-actual-width nil)) (org-display-inline-image--width link))
-                               (if (> image-height image-width) 300 600))))
-      (prog1 ov
-        (setf (image-property image :width) display-width)
-        (org-link-beautify-overlay-display-image ov image))
-    (org-link-beautify-iconify ov path link)))
+  (cond
+   ;; transcribe
+   ((member org-link-beautify-audio-preview-command org-link-beautify-audio-preview-with-transcribe-list)
+    (when-let* ((transcribe-result (org-link-beautify--generate-preview-for-file-audio path))
+                (lines (take 10 (seq-remove
+                                 (lambda (s) (not (zerop (string-to-number s))))
+                                 (split-string transcribe-result
+                                               "\n" t
+                                               ;; trim timestamps 00:00:20,039 --> 00:01:03,420
+                                               (rx (repeat 2 digit) ":" (repeat 2 digit) ":" (repeat 2 digit) "," (repeat 3 digit)
+                                                   " --> "
+                                                   (repeat 2 digit) ":" (repeat 2 digit) ":" (repeat 2 digit) "," (repeat 3 digit)))))))
+      (when-let* ((transcribe (org-link-beautify--display-content-block lines)))
+        (prog1 ov
+          (overlay-put ov 'after-string (propertize transcribe 'face '(:inherit org-block :slant normal :weight normal :extend t)))
+          (overlay-put ov 'face '(:background "#FFFFE0" :foreground "dark gray" :box (:color "red")))))))
+   ;; thumbnail image
+   ((member org-link-beautify-audio-preview-command org-link-beautify-audio-preview-with-thumbnail-list)
+    (when (and org-link-beautify-audio-preview-command (display-graphic-p))
+      (let* ((thumbnail-file (org-link-beautify--generate-preview-for-file-audio path))
+             (_ (file-exists-p thumbnail-file))
+             (image (create-image thumbnail-file nil nil :ascent 100))
+             (image-width (car (image-size image)))
+             (image-height (cdr (image-size image)))
+             (display-width (or (let ((org-image-actual-width nil)) (org-display-inline-image--width link))
+                                (if (> image-height image-width) 300 600))))
+        (prog1 ov
+          (setf (image-property image :width) display-width)
+          (org-link-beautify-overlay-display-image ov image)))))
+   ;; icon
+   (t (org-link-beautify-iconify ov path link))))
 
 ;;; file: [subtitle]
 
