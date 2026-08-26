@@ -383,9 +383,13 @@ The argument INPUT-FILE should be the absolute path."
                            (kill-new output-formatted-block)
                            (message "[org-link-beautify] Finished transcribe [%s]
 Press [C-y] to paste the #+begin_transcribe block in Org buffer."
-                                    (string-truncate-left input-file (/ (window-width) 2)))
-                           ;; return the transcribe text as API function result
-                           output-formatted-block))))))))
+                                    (string-truncate-left input-file (/ (window-width) 2)))))
+                       (let* ((element (org-element-context))
+                              (begin (org-element-begin element))
+                              (end (org-element-end element)))
+                         (when (and (derived-mode-p 'org-mode)
+                                    (eq (org-element-type element) 'link))
+                           (org-link-preview-region t t begin end)))))))))
 
 (defun org-link-beautify-action-transcribe (&optional args)
   "Transcribe the input file to text output in ARGS."
