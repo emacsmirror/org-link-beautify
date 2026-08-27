@@ -1970,6 +1970,12 @@ $ pip install ffmpeg-python")
   :safe #'listp
   :group 'org-link-beautify)
 
+(defcustom org-link-beautify-subtitle-preview-lines 40
+  "The subtitle preview text lines."
+  :type 'number
+  :safe #'numberp
+  :group 'org-link-beautify)
+
 (defcustom org-link-beautify-subtitle-preview-size 600
   "The subtitle preview image size."
   :type 'number
@@ -1998,7 +2004,12 @@ $ pip install ffmpeg-python")
                             "[org-link-beautify] Please ensure package installed script %s"
                             org-link-beautify-subtitle-preview-command)
                  (org-link-beautify-thumbnailer file-path proc-name proc-buffer)))))
-        (let* ((subtitle-file-context (split-string (shell-command-to-string (format "head -n 20 '%s'" subtitle-file)) "\n"))
+        (let* ((subtitle-file-context (split-string
+                                       (shell-command-to-string
+                                        (format "head -n %d '%s'"
+                                                org-link-beautify-subtitle-preview-lines
+                                                subtitle-file))
+                                       "\n"))
                (text (concat "\n" (org-link-beautify--display-content-block subtitle-file-context))))
           ;; return the subtitle file context as result.
           text)))))
