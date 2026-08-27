@@ -332,79 +332,85 @@ The argument INPUT-FILE should be the absolute path."
   (if (file-name-absolute-p input-file)
       (let* ((transcribe-dir (org-link-beautify--get-thumbnails-dir-path input-file))
              (transcribe-file-name (format "%s.transcribe" (file-name-base input-file)))
-             (output-file (expand-file-name transcribe-file-name transcribe-dir))
-             (dir (when (derived-mode-p 'org-mode) (if (org-attach-dir) (org-attach-dir) (org-attach-dir-get-create)))))
-        (make-process
-         :name (format "org-link-beautify - transcribe - %s" (file-name-nondirectory input-file))
-         :buffer (format " *org-link-beautify - transcribe - %s*" (file-name-nondirectory input-file))
-         :command (pcase org-link-beautify-transcribe-command
-                    ("yap"
-                     (list "yap"
-                           "transcribe"  ; subcommand
-                           "--locale"
-                           (cond
-                            ((string-match-p (rx string-start (or (category chinese) (category chinese-two-byte))) transcribe-file-name)
-                             "zh_CN")
-                            ((string-match-p (rx string-start (or (category korean) (category korean-hangul-two-byte))) transcribe-file-name)
-                             "ko_KR")
-                            ((string-match-p (rx string-start (char ascii)) transcribe-file-name)
-                             "en_US")
-                            ((string-match-p (rx (or (category japanese) (category japanese-katakana) (category japanese-roman))) transcribe-file-name)
-                             "ja_JP")
-                            (t (completing-read "--locale: "
-                                                '("zh_CN" "yue_CN" "zh_TW" "zh_HK"
-                                                  "ko_KR"
-                                                  "ja_JP"
-                                                  ;; "pt_PT" "pt_BR"
-                                                  ;; "it_CH" "it_IT"
-                                                  ;; "de_AT" "de_CH" "de_DE"
-                                                  ;; "fr_CA" "fr_CH" "fr_FR" "fr_BE"
-                                                  ;; "es_CL" "es_MX" "es_ES" "es_US"
-                                                  ;; "en_CA" "en_SG" "en_GB" "en_ZA" "en_AU" "en_US" "en_IE" "en_NZ" "en_IN"
-                                                  )
-                                                nil t "zh_CN")))
-                           input-file
-                           "--srt" ; output srt subtitle format
-                           ;; line length limited to `fill-column' width for better readability
-                           "--max-length" (number-to-string (/ (* fill-column 2) 3))
-                           "--output-file"
-                           output-file))
-                    ("whisper"
-                     (start-process
-                      proc-name proc-buffer
-                      "whisper" "--model" "turbo" "--output_format" "vtt" "--task" "transcribe" audio-file) )
-                    ("whisper-cli"
-                     (start-process
-                      proc-name proc-buffer
-                      "whisper-cli" "--model" "~/.config/whisper-cpp/models/ggml-large-v3-turbo.bin" "-f" audio-file "--output-file" output-file)))
-         :filter (lambda (proc output)
-                   ;; Downloading required assets…  0%
-                   (when (string-match-p "Downloading required assets.*" output)
-                     (message "[org-link-beautify] action 'transcribe' program 'yap' is downloading model files")))
-         :sentinel (lambda (proc event)
-                     (when (string-equal event "finished\n")
-                       (with-temp-buffer
-                         (insert-file-contents output-file)
-                         (when-let* ((output (buffer-string))
-                                     (output-formatted (string-fill output fill-column))
-                                     ;; insert transcribe output into Org block
-                                     ;; (add-to-list 'org-structure-template-alist '("t" . "transcribe"))
-                                     (output-formatted-block (format "
-#+begin_transcribe :tangle \"%s.srt\"
-%s
-#+end_transcribe\n"
-                                                                     (file-name-concat dir (file-name-base input-file))
-                                                                     output)))
-                           (kill-new output-formatted-block)
-                           (message "[org-link-beautify] Finished transcribe [%s]
+             (transcribe-file (expand-file-name transcribe-file-name transcribe-dir))
+             (dir (when (derived-mode-p 'org-mode) (if (org-attach-dir) (org-attach-dir) (org-attach-dir-get-create))))
+             (proc-name (format "org-link-beautify - transcribe - %s" (file-name-nondirectory input-file)))
+             (proc-buffer (format " *org-link-beautify - transcribe - %s*" (file-name-nondirectory input-file)))
+             (proc (get-buffer-process (get-buffer proc-buffer))))
+        (if (file-exists-p transcribe-file)
+            (with-temp-buffer
+              (insert-file-contents transcribe-file)
+              (buffer-string))
+          (unless proc ; (or proc (get-buffer proc-buffer))
+            (make-process
+             :name proc-name
+             :buffer proc-buffer
+             :command (pcase org-link-beautify-transcribe-command
+                        ("yap"           ; $ yap transcribe --help
+                         (list "yap"
+                               "transcribe" ; subcommand
+                               "--locale"
+                               (let* ((file-name (file-name-base input-file)))
+                                 (cond
+                                  ;; ((string-match-p (rx string-start (or (category chinese) (category chinese-two-byte))) file-name)
+                                  ;;  "zh_CN")
+                                  ;; ((string-match-p (rx string-start (or (category japanese) (category japanese-katakana) (category japanese-roman))) file-name)
+                                  ;;  "ja_JP")
+                                  ;; ((string-match-p (rx string-start (or (category korean) (category korean-hangul-two-byte))) file-name)
+                                  ;;  "ko_KR")
+                                  ;; ((string-match-p (rx string-start (char ascii)) file-name)
+                                  ;;  "en_US")
+                                  (t (completing-read (format "set transcribe --locale option for file %S: " (file-name-base input-file))
+                                                      '("zh_CN" "yue_CN" "zh_TW" "zh_HK"
+                                                        "ko_KR"
+                                                        "ja_JP"
+                                                        ;; "pt_PT" "pt_BR"
+                                                        ;; "it_CH" "it_IT"
+                                                        ;; "de_AT" "de_CH" "de_DE"
+                                                        ;; "fr_CA" "fr_CH" "fr_FR" "fr_BE"
+                                                        ;; "es_CL" "es_MX" "es_ES" "es_US"
+                                                        ;; "en_CA" "en_SG" "en_GB" "en_ZA" "en_AU" "en_US" "en_IE" "en_NZ" "en_IN"
+                                                        )
+                                                      nil t "zh_CN"))))
+                               input-file
+                               "--srt"   ; output srt subtitle format
+                               ;; line length limited to `fill-column' width for better readability
+                               "--max-length" "40" ; default 40.
+                               "--output-file"
+                               transcribe-file))
+                        ("whisper"
+                         (start-process
+                          proc-name proc-buffer
+                          "whisper" "--model" "turbo" "--output_format" "vtt" "--task" "transcribe" audio-file) )
+                        ("whisper-cli"
+                         (start-process
+                          proc-name proc-buffer
+                          "whisper-cli" "--model" "~/.config/whisper-cpp/models/ggml-large-v3-turbo.bin" "-f" audio-file "--output-file" transcribe-file)))
+             :filter (lambda (proc output)
+                       ;; Downloading required assets…  0%
+                       (when (string-match-p "Downloading required assets.*" output)
+                         (message "[org-link-beautify] action 'transcribe' program 'yap' is downloading model files")))
+             :sentinel (lambda (proc event)
+                         (when (string-equal event "finished\n")
+                           (with-temp-buffer
+                             (insert-file-contents transcribe-file)
+                             (when-let* ((output (buffer-string))
+                                         (output-formatted (string-fill output fill-column))
+                                         ;; insert transcribe output into Org block
+                                         ;; (add-to-list 'org-structure-template-alist '("t" . "transcribe"))
+                                         (transcribe-link (format "[[file:%s][%s]]" transcribe-file transcribe-file)))
+                               (kill-new transcribe-link)
+                               (message "[org-link-beautify] Finished transcribe [%s]
 Press [C-y] to paste the #+begin_transcribe block in Org buffer."
-                                    (string-truncate-left input-file (/ (window-width) 2)))))
-                       (let* ((element (org-element-context))
-                              (begin (org-element-begin element))
-                              (end (org-element-end element)))
-                         (when (and (derived-mode-p 'org-mode)
-                                    (eq (org-element-type element) 'link))
-                           (org-link-preview-region t t begin end)))))))))
+                                        (string-truncate-left input-file (/ (window-width) 2)))))
+                           (let* ((element (org-element-context))
+                                  (begin (org-element-begin element))
+                                  (end (org-element-end element)))
+                             (when (and (derived-mode-p 'org-mode)
+                                        (eq (org-element-type element) 'link))
+                               (org-link-preview-region t t begin end))))))
+            ;; return empty string for other functions invoke this API function return not the upper process object.
+            "")))))
 
 (defun org-link-beautify-action-transcribe (&optional args)
   "Transcribe the input file to text output in ARGS."
@@ -1868,17 +1874,12 @@ $ pip install ffmpeg-python")
            (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path audio-file))
            (thumbnail-file (expand-file-name (format "%s%s.png" thumbnails-dir (file-name-base audio-file))))
            (thumbnail-size (or org-link-beautify-audio-preview-size 300))
-           (transcribe-result nil)
-           (transcribe-file (expand-file-name (format "%s.transcribe" (file-name-base audio-file)) thumbnails-dir))
            (proc-name (format "org-link-beautify audio preview - %s" audio-file-name))
            (proc-buffer (format " *org-link-beautify audio preview - %s*" audio-file-name))
            (proc (get-buffer-process (get-buffer proc-buffer))))
       (org-link-beautify--ensure-thumbnails-dir thumbnails-dir)
-      (unless (or (file-exists-p transcribe-file) (file-exists-p thumbnail-file))
+      (unless (file-exists-p thumbnail-file)
         (cond
-         ;; transcribe
-         ((member org-link-beautify-audio-preview-command org-link-beautify-audio-preview-with-transcribe-list)
-          (org-link-beautify--transcribe audio-file))
          ;; audio wave
          ((string-equal org-link-beautify-audio-preview-command "audiowaveform")
           (cl-assert (executable-find "audiowaveform") nil "[org-link-beautify] Please install command tool `audiowaveform'")
@@ -1908,21 +1909,14 @@ $ pip install ffmpeg-python")
               (rename-file qlmanage-thumbnail-file thumbnail-file))))))
       (when (and org-link-beautify-enable-debug-p (not (file-exists-p thumbnail-file)))
         (org-link-beautify--notify-generate-thumbnail-failed audio-file thumbnail-file))
-      (when (file-exists-p transcribe-file)
-        (setq transcribe-result (with-temp-buffer
-                                  (insert-file-contents transcribe-file)
-                                  (buffer-substring-no-properties (point-min) (point-max)))))
-      ;; API function return the transcribe result or thumbnail file as result
-      (if transcribe-result
-          transcribe-result
-        thumbnail-file))))
+      thumbnail-file)))
 
 (defun org-link-beautify-preview-file-audio (ov path link)
   "Preview audio file of PATH over OV overlay position for LINK element."
   (cond
    ;; transcribe
    ((member org-link-beautify-audio-preview-command org-link-beautify-audio-preview-with-transcribe-list)
-    (when-let* ((transcribe-result (org-link-beautify--generate-preview-for-file-audio path))
+    (when-let* ((transcribe-result (org-link-beautify--transcribe (expand-file-name path)))
                 (lines (take
                         org-link-beautify-transcribe-lines
                         (seq-remove
