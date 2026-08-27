@@ -340,6 +340,9 @@ The argument INPUT-FILE should be the absolute path."
         (if (file-exists-p transcribe-file)
             (with-temp-buffer
               (insert-file-contents transcribe-file)
+              (auto-fill-mode 1)
+              ;; (fill-region-as-paragraph-semlf (point-min) (point-max))
+              (fill-individual-paragraphs (point-min) (point-max))
               (buffer-string))
           (unless proc ; (or proc (get-buffer proc-buffer))
             (make-process
@@ -373,7 +376,7 @@ The argument INPUT-FILE should be the absolute path."
                                                         )
                                                       nil t "zh_CN"))))
                                input-file
-                               "--srt"   ; output srt subtitle format
+                               "--txt"   ; output subtitle format
                                ;; line length limited to `fill-column' width for better readability
                                "--max-length" "40" ; default 40.
                                "--output-file"
