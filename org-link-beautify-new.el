@@ -344,6 +344,7 @@ The argument INPUT-FILE should be the absolute path."
               ;; (fill-region-as-paragraph-semlf (point-min) (point-max))
               (fill-individual-paragraphs (point-min) (point-max))
               (buffer-string))
+          (org-link-beautify--ensure-thumbnails-dir transcribe-dir)
           (unless proc ; (or proc (get-buffer proc-buffer))
             (make-process
              :name proc-name
