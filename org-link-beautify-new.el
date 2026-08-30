@@ -452,6 +452,8 @@ Press [C-y] to paste the #+begin_transcribe block in Org buffer."
 
 ;;; helper functions
 
+;;;; thumbnails dir path etc helper functions
+
 (defun org-link-beautify--get-thumbnails-dir-path (file)
   "Return the FILE thumbnail directory's path."
   (if file
@@ -467,13 +469,15 @@ Press [C-y] to paste the #+begin_transcribe block in Org buffer."
   (if (file-exists-p (file-name-parent-directory thumbnails-dir))
       (unless (file-directory-p thumbnails-dir)
         (make-directory thumbnails-dir))
-    (if (yes-or-no-p "[org-link-beautify] thumbnails directory parent directory does not exist, create it?")
+    (if (yes-or-no-p "[org-link-beautify] thumbnails directory parent directory does not exist, create it? ")
         (make-directory thumbnails-dir t)
       (warn "[org-link-beautify] thumbnails directory parent directory does not exist"))))
 
 (defun org-link-beautify--notify-generate-thumbnail-failed (source-file &optional _thumbnail-file)
   "Notify that generating THUMBNAIL-FILE for SOURCE-FILE failed."
   (message "[org-link-beautify] Failed to generate thumbnail for file %s" source-file))
+
+;;;; display text in box block
 
 ;; 引入一个固定的目标宽度常量，确保边框一致性
 (defconst org-link-beautify-target-width fill-column
@@ -1772,7 +1776,7 @@ $ pip install ffmpeg-python")
                        (proc-filter (lambda (proc output)
                                       ;; * No thumbnail created for [FILE PATH]
                                       (when (string-match "\\* No thumbnail created for.*" output)
-                                        (message "[org-link-beautify] video preview FAILED on macOS QuickLook generating thumbnail for video %s" video-file-name)))))
+                                        (message "[org-link-beautify] video preview FAILED on macOS QuickLook generating thumbnail for video:\n %S" video-file-name)))))
                    (set-process-filter proc proc-filter)))
                ;; then rename [file.extension.png] to [file.png]
                (when (file-exists-p qlmanage-thumbnail-file)
