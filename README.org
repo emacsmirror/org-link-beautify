@@ -131,6 +131,14 @@ The new implementation is based on Org mode new ~org-link-parameter~ =:preview= 
 
 ** MELPA
 
+* Config
+
+** toggle Org descriptive link previewing
+
+#+begin_src emacs-lisp
+(setopt org-link-preview-include-descriptive t)
+#+end_src
+
 * Usage
 
 #+begin_src emacs-lisp
