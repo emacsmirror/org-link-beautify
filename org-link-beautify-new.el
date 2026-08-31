@@ -2521,7 +2521,8 @@ This is for link image previewing to get around function `org-link-preview'
       (_ (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))))
   
   ;; remove link description
-  (advice-add 'org-link-make-string :around #'org-link-beautify-remove-description))
+  (unless (and (boundp 'org-link-preview-include-descriptive) org-link-preview-include-descriptive)
+    (advice-add 'org-link-make-string :around #'org-link-beautify-remove-description)))
 
 (declare-function org-attach-preview-file "org-attach" (ov path link))
 
@@ -2533,7 +2534,8 @@ This is for link image previewing to get around function `org-link-preview'
       ("file" (org-link-set-parameters "file" :preview #'org-link-preview-file))
       ("attachment" (org-link-set-parameters "attachment" :preview #'org-attach-preview-file))
       (_ (org-link-set-parameters link-type :preview nil))))
-  (advice-remove 'org-link-make-string #'org-link-beautify-remove-description))
+  (when (advice-member-p 'org-link-beautify-remove-description 'org-link-make-string)
+    (advice-remove 'org-link-make-string #'org-link-beautify-remove-description)))
 
 (defvar org-link-beautify-mode-map
   (let ((map (make-sparse-keymap)))
