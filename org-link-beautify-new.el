@@ -967,6 +967,9 @@ This function will apply file type function based on file extension."
           (org-link-beautify-preview-file-audio ov path link))
          ((member org-link-beautify-audio-preview-command org-link-beautify-audio-preview-with-thumbnail-list)
           (and (org-link-beautify-preview-file-audio ov path link)
+               (org-link-beautify-file-attributes ov path link)))
+         ((null org-link-beautify-audio-preview-command)
+          (and (org-link-beautify-preview-file-audio ov path link)
                (org-link-beautify-file-attributes ov path link)))))
        ;; Subtitle
        ((member extension org-link-beautify-subtitle-preview-list)
