@@ -767,6 +767,7 @@ Detect previewing process generated THUMBNAIL-FILE existing, auto kill process a
       ("javascript" (nerd-icons-mdicon "nf-md-language_javascript" :face '(:inherit nerd-icons-yellow :slant normal)))
       ("js" (nerd-icons-mdicon "nf-md-language_javascript" :face '(:inherit nerd-icons-yellow :slant normal)))
       ("vscode" (nerd-icons-mdicon "nf-md-microsoft_visual_studio_code" :face '(:inherit nerd-icons-blue :slant normal))) ; Visual Studio Code
+      ("jetbrains" (nerd-icons-devicon "nf-dev-jetbrains" :face '(:inherit nerd-icons-purple :slant normal))) ; JetBrains IDEs
       ("macappstore" (nerd-icons-mdicon "nf-md-apple" :face '(:inherit nerd-icons-blue :slant normal))) ; Mac App Store
       
       ("fuzzy"
@@ -2404,7 +2405,7 @@ This is for link image previewing to get around function `org-link-preview'
               ;; speail meaning link types
               (member link-type '("geo"))
               ;; special application link types
-              (member link-type '("vscode" "macappstore")))
+              (member link-type '("vscode" "jetbrains" "macappstore")))
       (setq link-description nil)))
   (funcall orig-func link-raw link-description))
 
@@ -2519,6 +2520,7 @@ This is for link image previewing to get around function `org-link-preview'
       ("javascript" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; Org mode inline source code link
       ("js" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; Org mode inline source code link
       ("vscode" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; Visual Studio Code
+      ("jetbrains" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; JetBrains IDEs
       ("macappstore" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; Mac App Store
       ("fuzzy" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; org-mode internal raw link type
       (_ (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))))
