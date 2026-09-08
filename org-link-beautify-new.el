@@ -198,7 +198,10 @@ The argument VIDEO-FILE should be the absolute path."
                             (begin (org-element-begin element-context))
                             (end (org-element-end element-context)))
                        (save-excursion
-                         (replace-regexp-in-region ".mp4]" ".mp3]" begin end)))
+                         (replace-regexp-in-region
+                          ;; `org-link-beautify-video-preview-list'
+                          (rx "." (or "avi" "rmvb" "flv" "ogg" "ogv" "mp4" "m4v" "mkv" "mov" "mpeg" "webm" "flv" "ts" "mpg") "]")
+                          ".mp3]" begin end)))
                      (message "[org-link-beautify] converted video to audio file [%s]\nUpdated link filename extension to .mp3"
                               (string-truncate-left audio-file (/ (window-width) 2))))))))
 
