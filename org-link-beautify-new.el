@@ -81,7 +81,7 @@ set this option to 'user-home which represent to ~/.cache/thumbnails/."
 
 (defun org-link-beautify-action-goto-file-in-dired ()
   "Action of opening Dired and goto the link file position."
-  (interactive)
+  (interactive nil org-mode)
   (when (derived-mode-p 'org-mode)
     (let* ((element (org-element-context))
            (element-type (org-element-property :type element))
@@ -105,7 +105,7 @@ Package `dwim-shell-command' is missing, please install it")))))
 ;; ;; NOTE: It will override all link type handlers.
 ;; (defun org-link-beautify-action-browse-url (&optional link-str)
 ;;   "Visit the URL in LINK-STR with `browse-url'."
-;;   (interactive)
+;;   (interactive nil org-mode)
 ;;   (let ((link-type (org-element-property :type (org-element-link-parser)))
 ;;         (link-raw (or link-str (org-element-property :raw-link (org-element-link-parser)))))
 ;;     (if (member link-type '("http" "https"))
@@ -120,7 +120,7 @@ Package `dwim-shell-command' is missing, please install it")))))
 (defun org-link-beautify--copy-file-to-clipboard (file)
   "Copy the FILE on path to clipboard.
 The argument FILE must be the absolute path."
-  (interactive "P")
+  (interactive "P" org-mode)
   (if current-prefix-arg
       (let ((destination (read-file-name (format "[org-link-beautify] copy file %s to: " (file-name-nondirectory file)))))
         (copy-file file destination)
@@ -143,7 +143,7 @@ The argument FILE must be the absolute path."
 
 (defun org-link-beautify-action-copy-file (&optional args)
   "Action of copying the Org link file at point with optional ARGS."
-  (interactive "P")
+  (interactive "P" org-mode)
   (when (derived-mode-p 'org-mode)
     (if (or (region-active-p) mark-active)
         (let* ((region-text (buffer-substring-no-properties (region-beginning) (region-end))))
@@ -167,7 +167,7 @@ The argument FILE must be the absolute path."
 
 (defun org-link-beautify-action-qrcode-for-url (&optional args)
   "Action of displaying QR code for Org link at point in new buffer in ARGS."
-  (interactive)
+  (interactive nil org-mode)
   (when (derived-mode-p 'org-mode)
     (if-let* ((url (org-element-property-raw :raw-link (org-element-context))))
         (if (require 'qrencode nil t)
@@ -204,7 +204,7 @@ The argument VIDEO-FILE should be the absolute path."
 
 (defun org-link-beautify-action-convert-video-to-audio (&optional args)
   "Action of converting video file to audio file (.mp3 by default) in ARGS."
-  (interactive)
+  (interactive nil org-mode)
   (when (derived-mode-p 'org-mode)
     (let* ((element (org-element-context))
            (element-type (car element))
@@ -248,7 +248,7 @@ The argument VIDEO-FILE should be the absolute path."
 
 (defun org-link-beautify-action-convert-video-to-gif (&optional args)
   "Action of converting video file to gif file (.gif) in ARGS."
-  (interactive)
+  (interactive nil org-mode)
   (when (derived-mode-p 'org-mode)
     (let* ((element (org-element-context))
            (element-type (car element))
@@ -281,7 +281,7 @@ The argument VIDEO-FILE should be the absolute path."
 
 (defun org-link-beautify-action-play-music-repeat (&optional args)
   "Action of playing music audio file in repeated mode with ARGS."
-  (interactive)
+  (interactive nil org-mode)
   (when (derived-mode-p 'org-mode)
     (let* ((element (org-element-context))
            (element-type (car element))
@@ -418,7 +418,7 @@ Press [C-y] to paste the #+begin_transcribe block in Org buffer."
 
 (defun org-link-beautify-action-transcribe (&optional args)
   "Transcribe the input file to text output in ARGS."
-  (interactive)
+  (interactive nil org-mode)
   (when (derived-mode-p 'org-mode)
     (let* ((element (org-element-context))
            (element-type (car element))
