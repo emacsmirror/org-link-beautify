@@ -912,16 +912,18 @@ The IMAGE object is created by `create-image' from `org--create-inline-image'."
 
 (defun org-link-beautify-file-attributes (ov path link)
   "Display file attributes on overlay OV from PATH bellow element LINK."
-  (when-let* ((link-type (org-element-property :type link))
-              (file-attributes (file-attributes (pcase link-type
-                                                  ("attachment" (org-attach-expand path))
-                                                  ("file" path))))
-              (file-size (file-size-human-readable (file-attribute-size file-attributes))))
-    (overlay-put ov 'after-string (concat
-                                   (propertize "(" 'face '(:foreground "SlateGray3" :height 0.7))
-                                   (propertize file-size 'face '(:foreground "gray" :height 0.7))
-                                   (propertize ")" 'face '(:foreground "SlateGray3" :height 0.7))))
-    (overlay-put ov 'face 'font-lock-comment-face)))
+  (if (file-exists-p path)
+      (let* ((link-type (org-element-property :type link))
+             (file-attributes (file-attributes (pcase link-type
+                                                 ("attachment" (org-attach-expand path))
+                                                 ("file" path))))
+             (file-size (file-size-human-readable (file-attribute-size file-attributes))))
+        (overlay-put ov 'after-string (concat
+                                       (propertize "(" 'face '(:foreground "SlateGray3" :height 0.7))
+                                       (propertize file-size 'face '(:foreground "gray" :height 0.7))
+                                       (propertize ")" 'face '(:foreground "SlateGray3" :height 0.7))))
+        (overlay-put ov 'face 'font-lock-comment-face))
+    t))
 
 ;;; Preview file: link type
 
