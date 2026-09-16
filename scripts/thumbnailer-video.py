@@ -72,10 +72,20 @@ def main():
     parser = argparse.ArgumentParser(description='Generate video thumbnail')
     parser.add_argument('input', help='Input video file')
     parser.add_argument('output', help='Output thumbnail file')
-    parser.add_argument('-t', '--timestamp', type=float, default=0,
-                       help='Timestamp in seconds (default: 0 for first frame)')
-    parser.add_argument('-w', '--width', type=int,
-                       help='Output width in pixels (maintains aspect ratio)')
+    parser.add_argument(
+        "-t",
+        "--timestamp",
+        type=float,
+        default=0,
+        help="Timestamp in seconds (default: 0 for first frame)",
+    )
+    parser.add_argument(
+        "-w",
+        "--width",
+        type=int,
+        default=600,
+        help="Output width in pixels (maintains aspect ratio)",
+    )
     
     args = parser.parse_args()
     

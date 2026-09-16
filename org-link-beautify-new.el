@@ -1802,9 +1802,10 @@ $ pip install ffmpeg-python")
              (make-process
               :name proc-name
               :command (list org-link-beautify-video-thumbnailer-script
-                             input-file
+                             video-file
                              thumbnail-file
-                             (number-to-string thumbnail-size))
+                             ;; "--timestamp" (number-to-string 0)
+                             "--width" (number-to-string thumbnail-size))
               :buffer proc-buffer
               :stderr nil ; If STDERR is nil, standard error is mixed with standard output and sent to BUFFER or FILTER.
               :sentinel (lambda (proc event)
