@@ -1794,7 +1794,7 @@ $ pip install ffmpeg-python")
              (cl-assert (executable-find "ffmpegthumbnailer") nil "[org-link-beautify] Please install command tool `ffmpegthumbnailer'")
              (start-process
               proc-name proc-buffer
-              "ffmpegthumbnailer" "-f" "-i" video-file "-s" (number-to-string thumbnail-size) "-o" thumbnail-file))
+              "ffmpegthumbnailer" "-i" video-file "-m" "-s" (or (number-to-string thumbnail-size) "0") "-q" "10" "-o" thumbnail-file))
             ("thumbnailer-video.py"
              (cl-assert (file-exists-p org-link-beautify-video-preview-command) nil
                         "[org-link-beautify] Please ensure package installed script %s"
