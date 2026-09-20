@@ -2415,6 +2415,30 @@ This is for link image previewing to get around function `org-link-preview'
       (setq link-description nil)))
   (funcall orig-func link-raw link-description))
 
+;;; Command for re-generate previewing.
+
+(defun org-link-beautify-regenerate-previewing (&optional arg beg end)
+  "Command for re-generate previewing at point."
+  (interactive (cons current-prefix-arg
+                     (when (use-region-p)
+                       (list (region-beginning) (region-end))))
+               org-mode)
+  (when-let* ((element (org-element-context))
+              (_ (eq (org-element-type element) 'link)))
+    ;; delete existing previewing thumbnail
+    (let* ((raw-link (org-element-property :raw-link element))
+           (link-path (org-element-property :path element))
+           (link-file (file-name-nondirectory link-path))
+           (link-filename (file-name-base link-path))
+           (thumbnails-dir (org-link-beautify--get-thumbnails-dir-path link-path))
+           (thumbnail-files (directory-files thumbnails-dir :full link-filename)))
+      (mapc
+       (lambda (thumbnail-file)
+         (when (yes-or-no-p (format-prompt "Delete file %S" nil (file-name-nondirectory thumbnail-file)))
+           (delete-file thumbnail-file)))
+       thumbnail-files)))
+  ;; re-generate previewing thumbnail
+  (org-link-preview arg beg end))
 
 ;;; minor mode `org-link-beautify-mode'
 
