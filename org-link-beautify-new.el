@@ -2447,10 +2447,14 @@ This is for link image previewing to get around function `org-link-preview'
   "Enable `org-link-beautify'."
   (dolist (link-type (mapcar #'car org-link-parameters))
     (pcase link-type
-      ("file" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-file)) ; `org-link-preview-file',
+      ("file" (org-link-set-parameters link-type
+                                       :preview #'org-link-beautify-preview-file
+                                       :keymap org-link-beautify-keymap)) ; `org-link-preview-file',
       ("attachment"
        (require 'org-attach)
-       (org-link-set-parameters link-type :preview #'org-link-beautify-preview-attachment)) ; `org-attach' -> `org-attach-preview-file'
+       (org-link-set-parameters link-type
+                                :preview #'org-link-beautify-preview-attachment
+                                :keymap org-link-beautify-keymap)) ; `org-attach' -> `org-attach-preview-file'
       ("docview" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-pdf)) ; `ol-docview'
       ("pdfview" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-pdf)) ; `org-pdftools'
       ("pdf" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-pdf)) ; `org-pdftools'
