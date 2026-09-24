@@ -2468,32 +2468,72 @@ This is for link image previewing to get around function `org-link-preview'
       ;; Org mode internal link types
       ("custom-id" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
       ("id" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `org-id'
-      ("coderef" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("elisp" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `ol'
-      ("eshell" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `ol-eshell'
-      ("shell" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `ol'
-      ("man" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `ol-man'
-      ("woman" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `woman'
-      ("info" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `ol-info'
-      ("help" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `helpful'
-      ("shortdoc" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `shortdoc'
+      ("coderef" (org-link-set-parameters link-type
+                                          :preview #'org-link-beautify-iconify
+                                          :display 'full))
+      ("elisp" (org-link-set-parameters link-type
+                                        :preview #'org-link-beautify-iconify
+                                        :display 'full)) ; `ol'
+      ("eshell" (org-link-set-parameters link-type
+                                         :preview #'org-link-beautify-iconify
+                                         :display 'full)) ; `ol-eshell'
+      ("shell" (org-link-set-parameters link-type
+                                        :preview #'org-link-beautify-iconify
+                                        :display 'full)) ; `ol'
+      ("man" (org-link-set-parameters link-type
+                                      :preview #'org-link-beautify-iconify
+                                      :display 'full)) ; `ol-man'
+      ("woman" (org-link-set-parameters link-type
+                                        :preview #'org-link-beautify-iconify
+                                        :display 'full)) ; `woman'
+      ("info" (org-link-set-parameters link-type
+                                       :preview #'org-link-beautify-iconify
+                                       :display 'full)) ; `ol-info'
+      ("help" (org-link-set-parameters link-type
+                                       :preview #'org-link-beautify-iconify
+                                       :display 'full)) ; `helpful'
+      ("shortdoc" (org-link-set-parameters link-type
+                                           :preview #'org-link-beautify-iconify
+                                           :display 'full)) ; `shortdoc'
       
       ;; Org mode external link types
-      ("grep" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("occur" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("mailto" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("grep" (org-link-set-parameters link-type
+                                       :preview #'org-link-beautify-iconify
+                                       :display 'full))
+      ("occur" (org-link-set-parameters link-type
+                                        :preview #'org-link-beautify-iconify
+                                        :display 'full))
+      ("mailto" (org-link-set-parameters link-type
+                                         :preview #'org-link-beautify-iconify
+                                         :display 'full))
       ("news" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
       ("rss" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `org-extra-link-types'
-      ("elfeed" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `elfeed-link'
-      ("wikipedia" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `org-kiwix'
-      ("irc" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `ol-irc'
+      ("elfeed" (org-link-set-parameters link-type
+                                         :preview #'org-link-beautify-iconify
+                                         :display 'full)) ; `elfeed-link'
+      ("wikipedia" (org-link-set-parameters link-type
+                                            :preview #'org-link-beautify-iconify
+                                            :display 'full)) ; `org-kiwix'
+      ("irc" (org-link-set-parameters link-type
+                                      :preview #'org-link-beautify-iconify
+                                      :display 'full)) ; `ol-irc'
       ("wechat" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `org-extra-link-types'
       ("magnet" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `org-extra-link-types'
-      ("git" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git)) ; `ol-git-link'
-      ("eww" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `ol-eww'
-      ("chrome" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("about" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("edge" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
+      ("git" (org-link-set-parameters link-type
+                                      :preview #'org-link-beautify-preview-git
+                                      :display 'full)) ; `ol-git-link'
+      ("eww" (org-link-set-parameters link-type
+                                      :preview #'org-link-beautify-iconify
+                                      :display 'full)) ; `ol-eww'
+      ("chrome" (org-link-set-parameters link-type
+                                         :preview #'org-link-beautify-iconify
+                                         :display 'full))
+      ("about" (org-link-set-parameters link-type
+                                        :preview #'org-link-beautify-iconify
+                                        :display 'full))
+      ("edge" (org-link-set-parameters link-type
+                                       :preview #'org-link-beautify-iconify
+                                       :display 'full))
       ("mu4e" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `mu4e-org'
       ("web-browser" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-file-offline-webpage)) ; `org-extra-link-types'
       
@@ -2528,8 +2568,12 @@ This is for link image previewing to get around function `org-link-preview'
       ("bibliography" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `org-ref'
       
       ;; Org mode extensions link types
-      ("org-ql-search" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
-      ("org-bookmark" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-org-bookmark))
+      ("org-ql-search" (org-link-set-parameters link-type
+                                                :preview #'org-link-beautify-iconify
+                                                :display 'full))
+      ("org-bookmark" (org-link-set-parameters link-type
+                                               :preview #'org-link-beautify-preview-org-bookmark
+                                               :display 'full))
       ("orgit" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git))
       ("orgit-rev" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git))
       ("orgit-log" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-git))
@@ -2538,26 +2582,50 @@ This is for link image previewing to get around function `org-link-preview'
       ;; org-media-note link types
       ("video"
        (require 'org-media-note)
-       (org-link-set-parameters link-type :preview #'org-link-beautify-preview-video))
+       (org-link-set-parameters link-type
+                                :preview #'org-link-beautify-preview-video
+                                :display 'full))
       ("audio"
        (require 'org-media-note)
-       (org-link-set-parameters link-type :preview #'org-link-beautify-preview-audio))
+       (org-link-set-parameters link-type
+                                :preview #'org-link-beautify-preview-audio
+                                :display 'full))
       ("videocite"
        (require 'org-media-note)
-       (org-link-set-parameters link-type :preview #'org-link-beautify-preview-video))
+       (org-link-set-parameters link-type
+                                :preview #'org-link-beautify-preview-video
+                                :display 'full))
       ("audiocite"
        (require 'org-media-note)
-       (org-link-set-parameters link-type :preview #'org-link-beautify-preview-audio))
+       (org-link-set-parameters link-type
+                                :preview #'org-link-beautify-preview-audio
+                                :display 'full))
       
       ;; other link types
-      ("eaf" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; extension `emacs-application-framework'
-      ("javascript" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; Org mode inline source code link
-      ("js" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; Org mode inline source code link
-      ("vscode" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; Visual Studio Code
-      ("jetbrains" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; JetBrains IDEs
-      ("macappstore" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; Mac App Store
-      ("fuzzy" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; org-mode internal raw link type
-      (_ (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))))
+      ("eaf" (org-link-set-parameters link-type
+                                      :preview #'org-link-beautify-iconify
+                                      :display 'full)) ; extension `emacs-application-framework'
+      ("javascript" (org-link-set-parameters link-type
+                                             :preview #'org-link-beautify-iconify
+                                             :display 'full)) ; Org mode inline source code link
+      ("js" (org-link-set-parameters link-type
+                                     :preview #'org-link-beautify-iconify
+                                     :display 'full)) ; Org mode inline source code link
+      ("vscode" (org-link-set-parameters link-type
+                                         :preview #'org-link-beautify-iconify
+                                         :display 'full)) ; Visual Studio Code
+      ("jetbrains" (org-link-set-parameters link-type
+                                            :preview #'org-link-beautify-iconify
+                                            :display 'full)) ; JetBrains IDEs
+      ("macappstore" (org-link-set-parameters link-type
+                                              :preview #'org-link-beautify-iconify
+                                              :display 'full)) ; Mac App Store
+      ("fuzzy" (org-link-set-parameters link-type
+                                        :preview #'org-link-beautify-iconify
+                                        :display 'full)) ; org-mode internal raw link type
+      (_ (org-link-set-parameters link-type
+                                  :preview #'org-link-beautify-iconify
+                                  :display 'full))))
   
   ;; remove link description
   (unless (and (boundp 'org-link-preview-include-descriptive) org-link-preview-include-descriptive)
