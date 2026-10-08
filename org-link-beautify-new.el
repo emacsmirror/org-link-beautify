@@ -714,64 +714,64 @@ Detect previewing process generated THUMBNAIL-FILE existing, auto kill process a
     (pcase type
       ;; FIXME: the icon is slant. Fix with `propertize' :face '(:slant normal :weight normal)
       ;; NOTE: the icons color is not inherited, because overlay `'after-string' does not support propertized text.
-      ("file" (nerd-icons-icon-for-file path))
-      ("attachment" (nerd-icons-icon-for-file path))
-      ("http" (nerd-icons-icon-for-url (concat type ":" path) :face '(:inherit nerd-icons-dsilver :slant normal :weight normal)))
-      ("https" (nerd-icons-icon-for-url (concat type ":" path) :face '(:inherit nerd-icons-green :slant normal :weight normal)))
-      ("ftp" (nerd-icons-icon-for-url (concat type ":" path) :face '(:inherit nerd-icons-purple :slant normal :weight normal)))
+      ("file" (nerd-icons-icon-for-file path :face '(:inherit nerd-icons-blue :slant normal :weight normal :underline nil)))
+      ("attachment" (nerd-icons-icon-for-file path :face '(:inherit nerd-icons-maroon :slant normal :weight normal :underline nil)))
+      ("http" (nerd-icons-icon-for-url (concat type ":" path) :face '(:inherit nerd-icons-dsilver :slant normal :weight normal :underline nil)))
+      ("https" (nerd-icons-icon-for-url (concat type ":" path) :face '(:inherit nerd-icons-green :slant normal :weight normal :underline nil)))
+      ("ftp" (nerd-icons-icon-for-url (concat type ":" path) :face '(:inherit nerd-icons-purple :slant normal :weight normal :underline nil)))
       ;; Org mode internal link types
-      ("custom-id" (nerd-icons-mdicon "nf-md-text_box_search_outline" :face '(:inherit nerd-icons-blue :slant normal)))
-      ("id" (nerd-icons-mdicon "nf-md-text_search" :face '(:inherit nerd-icons-blue :slant normal)))
-      ("coderef" (nerd-icons-codicon "nf-cod-references" :face '(:inherit nerd-icons-cyan :slant normal)))
-      ("elisp" (nerd-icons-icon-for-file "file.el" :face '(:inherit nerd-icons-purple :slant normal)))
-      ("eshell" (nerd-icons-icon-for-mode 'eshell-mode :face '(:inherit nerd-icons-cyan :slant normal)))
-      ("shell" (nerd-icons-icon-for-mode 'shell-mode :face '(:inherit nerd-icons-cyan :slant normal)))
-      ("man" (nerd-icons-mdicon "nf-md-file_document_outline" :face '(:inherit nerd-icons-lblue :slant normal)))
-      ("woman" (nerd-icons-mdicon "nf-md-file_document_outline" :face '(:inherit nerd-icons-blue :slant normal)))
-      ("info" (nerd-icons-icon-for-mode 'Info-mode))
-      ("help" (nerd-icons-icon-for-mode 'help-mode))
-      ("shortdoc" (nerd-icons-mdicon "nf-md-file_link" :face '(:inherit nerd-icons-blue :slant normal)))
+      ("custom-id" (nerd-icons-mdicon "nf-md-text_box_search_outline" :face '(:inherit nerd-icons-blue :slant normal :weight normal :underline nil)))
+      ("id" (nerd-icons-mdicon "nf-md-text_search" :face '(:inherit nerd-icons-blue :slant normal :weight normal :underline nil)))
+      ("coderef" (nerd-icons-codicon "nf-cod-references" :face '(:inherit nerd-icons-cyan :slant normal :weight normal :underline nil)))
+      ("elisp" (nerd-icons-icon-for-file "file.el" :face '(:inherit nerd-icons-purple :slant normal :weight normal :underline nil)))
+      ("eshell" (nerd-icons-icon-for-mode 'eshell-mode :face '(:inherit nerd-icons-cyan :slant normal :weight normal :underline nil)))
+      ("shell" (nerd-icons-icon-for-mode 'shell-mode :face '(:inherit nerd-icons-cyan :slant normal :weight normal :underline nil)))
+      ("man" (nerd-icons-mdicon "nf-md-file_document_outline" :face '(:inherit nerd-icons-blue :slant normal :weight normal :underline nil)))
+      ("woman" (nerd-icons-mdicon "nf-md-file_document_outline" :face '(:inherit nerd-icons-pink :slant normal :weight normal :underline nil)))
+      ("info" (nerd-icons-icon-for-mode 'Info-mode :face '(:inherit nerd-icons-blue :slant normal :weight normal :underline nil)))
+      ("help" (nerd-icons-icon-for-mode 'help-mode :face '(:inherit nerd-icons-blue :slant normal :weight normal :underline nil)))
+      ("shortdoc" (nerd-icons-mdicon "nf-md-file_link" :face '(:inherit nerd-icons-blue :slant normal :weight normal :underline nil)))
       ;; org-ref link types
-      ("cite" (nerd-icons-codicon "nf-cod-references" :face '(:inherit nerd-icons-cyan :slant normal)))
+      ("cite" (nerd-icons-codicon "nf-cod-references" :face '(:inherit nerd-icons-cyan :slant normal :weight normal :underline nil)))
       ;; Org mode external link types
-      ("eaf" (nerd-icons-mdicon "nf-md-apps" :face '(:inherit nerd-icons-blue :slant normal))) ; emacs-application-framework (eaf)
-      ("eww" (nerd-icons-icon-for-mode 'eww-mode :face '(:inherit nerd-icons-lgreen :slant normal))) ; EWW
-      ("chrome" (nerd-icons-mdicon "nf-md-google_chrome" :face '(:inherit nerd-icons-lorange :slant normal))) ; Google Chrome / Chromium
-      ("about" (nerd-icons-mdicon "nf-md-firefox" :face '(:inherit nerd-icons-lorange :slant normal))) ; Firefox
-      ("edge" (nerd-icons-mdicon "nf-md-microsoft_edge" :face '(:inherit nerd-icons-green :slant normal))) ; Microsoft Edge
-      ("mu4e" (nerd-icons-mdicon "nf-md-email_search_outline" :face '(:inherit nerd-icons-blue :slant normal)))
-      ("news" (nerd-icons-mdicon "nf-md-newspaper_variant_outline" :face '(:inherit nerd-icons-dgreen :slant normal)))
-      ("git" (nerd-icons-mdicon "nf-md-git" :face '(:inherit nerd-icons-lred :slant normal)))
-      ("orgit" (nerd-icons-faicon "nf-fa-git" :face '(:inherit nerd-icons-red :slant normal)))
-      ("orgit-rev" (nerd-icons-devicon "nf-dev-git_commit" :face '(:inherit nerd-icons-silver :slant normal)))
-      ("orgit-log" (nerd-icons-octicon "nf-oct-diff" :face '(:inherit nerd-icons-silver :slant normal)))
-      ("pdf" (nerd-icons-faicon "nf-fa-file_pdf" :face '(:inherit nerd-icons-red :slant normal)))
-      ("epub" (nerd-icons-mdicon "nf-md-book_open_page_variant_outline" :face '(:inherit nerd-icons-green :slant normal)))
-      ("nov" (nerd-icons-icon-for-file "file.epub" :face '(:inherit nerd-icons-green :slant normal))) ; for Emacs package "nov.el" link type `nov:'
-      ("grep" (nerd-icons-mdicon "nf-md-selection_search" :face '(:inherit nerd-icons-green :slant normal)))
-      ("occur" (nerd-icons-mdicon "nf-md-selection_multiple" :face '(:inherit nerd-icons-green :slant normal)))
-      ("rss" (nerd-icons-mdicon "nf-md-rss" :face '(:inherit nerd-icons-lorange :slant normal)))
-      ("elfeed" (nerd-icons-mdicon "nf-md-rss" :face '(:inherit nerd-icons-green :slant normal)))
-      ("wikipedia" (nerd-icons-mdicon "nf-md-wikipedia" :face '(:inherit nerd-icons-dsilver :slant normal)))
-      ("mailto" (nerd-icons-mdicon "nf-md-email_send_outline" :face '(:inherit nerd-icons-lblue :slant normal)))
-      ("irc" (nerd-icons-mdicon "nf-md-chat" :face '(:inherit nerd-icons-blue :slant normal)))
-      ("wechat" (nerd-icons-mdicon "nf-md-wechat" :face '(:inherit nerd-icons-green :slant normal)))
-      ("magnet" (nerd-icons-mdicon "nf-md-magnet" :face '(:inherit nerd-icons-blue :slant normal)))
-      ("ref" (nerd-icons-codicon "nf-cod-references" :face '(:inherit nerd-icons-blue :slant normal)))
-      ("doi" (nerd-icons-mdicon "nf-md-file_document_plus_outline" :face '(:inherit nerd-icons-green :slant normal)))
-      ("org-contact" (nerd-icons-mdicon "nf-md-contacts_outline" :face '(:inherit nerd-icons-purple :slant normal)))
-      ("org-bookmark" (nerd-icons-mdicon "nf-md-bookmark_check_outline" :face '(:inherit nerd-icons-blue :slant normal)))
-      ("org-ql-search" (nerd-icons-mdicon "nf-md-text_box_search_outline" :face '(:inherit nerd-icons-blue :slant normal)))
+      ("eaf" (nerd-icons-mdicon "nf-md-apps" :face '(:inherit nerd-icons-blue :slant normal :weight normal :underline nil))) ; emacs-application-framework (eaf)
+      ("eww" (nerd-icons-icon-for-mode 'eww-mode :face '(:inherit nerd-icons-lgreen :slant normal :weight normal :underline nil))) ; EWW
+      ("chrome" (nerd-icons-mdicon "nf-md-google_chrome" :face '(:inherit nerd-icons-lorange :slant normal :weight normal :underline nil))) ; Google Chrome / Chromium
+      ("about" (nerd-icons-mdicon "nf-md-firefox" :face '(:inherit nerd-icons-lorange :slant normal :weight normal))) ; Firefox
+      ("edge" (nerd-icons-mdicon "nf-md-microsoft_edge" :face '(:inherit nerd-icons-green :slant normal :weight normal :underline nil))) ; Microsoft Edge
+      ("mu4e" (nerd-icons-mdicon "nf-md-email_search_outline" :face '(:inherit nerd-icons-blue :slant normal :weight normal :underline nil)))
+      ("news" (nerd-icons-mdicon "nf-md-newspaper_variant_outline" :face '(:inherit nerd-icons-dgreen :slant normal :weight normal :underline nil)))
+      ("git" (nerd-icons-mdicon "nf-md-git" :face '(:inherit nerd-icons-lred :slant normal :weight normal :underline nil)))
+      ("orgit" (nerd-icons-faicon "nf-fa-git" :face '(:inherit nerd-icons-red :slant normal :weight normal :underline nil)))
+      ("orgit-rev" (nerd-icons-devicon "nf-dev-git_commit" :face '(:inherit nerd-icons-silver :slant normal :weight normal :underline nil)))
+      ("orgit-log" (nerd-icons-octicon "nf-oct-diff" :face '(:inherit nerd-icons-silver :slant normal :weight normal :underline nil)))
+      ("pdf" (nerd-icons-faicon "nf-fa-file_pdf" :face '(:inherit nerd-icons-red :slant normal :weight normal :underline nil)))
+      ("epub" (nerd-icons-mdicon "nf-md-book_open_page_variant_outline" :face '(:inherit nerd-icons-green :slant normal :weight normal :underline nil)))
+      ("nov" (nerd-icons-icon-for-file "file.epub" :face '(:inherit nerd-icons-green :slant normal :weight normal :underline nil))) ; for Emacs package "nov.el" link type `nov:'
+      ("grep" (nerd-icons-mdicon "nf-md-selection_search" :face '(:inherit nerd-icons-green :slant normal :weight normal :underline nil)))
+      ("occur" (nerd-icons-mdicon "nf-md-selection_multiple" :face '(:inherit nerd-icons-green :slant normal :weight normal :underline nil)))
+      ("rss" (nerd-icons-mdicon "nf-md-rss" :face '(:inherit nerd-icons-lorange :slant normal :weight normal :underline nil)))
+      ("elfeed" (nerd-icons-mdicon "nf-md-rss" :face '(:inherit nerd-icons-green :slant normal :weight normal :underline nil)))
+      ("wikipedia" (nerd-icons-mdicon "nf-md-wikipedia" :face '(:inherit nerd-icons-dsilver :slant normal :weight normal :underline nil)))
+      ("mailto" (nerd-icons-mdicon "nf-md-email_send_outline" :face '(:inherit nerd-icons-lblue :slant normal :weight normal :underline nil)))
+      ("irc" (nerd-icons-mdicon "nf-md-chat" :face '(:inherit nerd-icons-blue :slant normal :weight normal :underline nil)))
+      ("wechat" (nerd-icons-mdicon "nf-md-wechat" :face '(:inherit nerd-icons-green :slant normal :weight normal :underline nil)))
+      ("magnet" (nerd-icons-mdicon "nf-md-magnet" :face '(:inherit nerd-icons-blue :slant normal :weight normal :underline nil)))
+      ("ref" (nerd-icons-codicon "nf-cod-references" :face '(:inherit nerd-icons-blue :slant normal :weight normal :underline nil)))
+      ("doi" (nerd-icons-mdicon "nf-md-file_document_plus_outline" :face '(:inherit nerd-icons-green :slant normal :weight normal :underline nil)))
+      ("org-contact" (nerd-icons-mdicon "nf-md-contacts_outline" :face '(:inherit nerd-icons-purple :slant normal :weight normal :underline nil)))
+      ("org-bookmark" (nerd-icons-mdicon "nf-md-bookmark_check_outline" :face '(:inherit nerd-icons-blue :slant normal :weight normal :underline nil)))
+      ("org-ql-search" (nerd-icons-mdicon "nf-md-text_box_search_outline" :face '(:inherit nerd-icons-blue :slant normal :weight normal :underline nil)))
       ;; org-media-note link types
-      ("video" (nerd-icons-faicon "nf-fa-file_video_o" :face '(:inherit nerd-icons-blue :slant normal)))
-      ("audio" (nerd-icons-faicon "nf-fa-file_audio_o" :face '(:inherit nerd-icons-blue :slant normal)))
-      ("videocite" (nerd-icons-faicon "nf-fa-file_video_o" :face '(:inherit nerd-icons-blue :slant normal)))
-      ("audiocite" (nerd-icons-faicon "nf-fa-file_audio_o" :face '(:inherit nerd-icons-blue :slant normal)))
-      ("javascript" (nerd-icons-mdicon "nf-md-language_javascript" :face '(:inherit nerd-icons-yellow :slant normal)))
-      ("js" (nerd-icons-mdicon "nf-md-language_javascript" :face '(:inherit nerd-icons-yellow :slant normal)))
-      ("vscode" (nerd-icons-mdicon "nf-md-microsoft_visual_studio_code" :face '(:inherit nerd-icons-blue :slant normal))) ; Visual Studio Code
-      ("jetbrains" (nerd-icons-devicon "nf-dev-jetbrains" :face '(:inherit nerd-icons-purple :slant normal))) ; JetBrains IDEs
-      ("macappstore" (nerd-icons-mdicon "nf-md-apple" :face '(:inherit nerd-icons-blue :slant normal))) ; Mac App Store
+      ("video" (nerd-icons-faicon "nf-fa-file_video_o" :face '(:inherit nerd-icons-blue :slant normal :weight normal :underline nil)))
+      ("audio" (nerd-icons-faicon "nf-fa-file_audio_o" :face '(:inherit nerd-icons-blue :slant normal :weight normal :underline nil)))
+      ("videocite" (nerd-icons-faicon "nf-fa-file_video_o" :face '(:inherit nerd-icons-blue :slant normal :weight normal :underline nil)))
+      ("audiocite" (nerd-icons-faicon "nf-fa-file_audio_o" :face '(:inherit nerd-icons-blue :slant normal :weight normal :underline nil)))
+      ("javascript" (nerd-icons-mdicon "nf-md-language_javascript" :face '(:inherit nerd-icons-yellow :slant normal :weight normal :underline nil)))
+      ("js" (nerd-icons-mdicon "nf-md-language_javascript" :face '(:inherit nerd-icons-yellow :slant normal :weight normal :underline nil)))
+      ("vscode" (nerd-icons-mdicon "nf-md-microsoft_visual_studio_code" :face '(:inherit nerd-icons-blue :slant normal :weight normal :underline nil))) ; Visual Studio Code
+      ("jetbrains" (nerd-icons-devicon "nf-dev-jetbrains" :face '(:inherit nerd-icons-purple :slant normal :weight normal :underline nil))) ; JetBrains IDEs
+      ("macappstore" (nerd-icons-mdicon "nf-md-apple" :face '(:inherit nerd-icons-blue :slant normal :weight normal :underline nil))) ; Mac App Store
       
       ("fuzzy"
        ;; Org internal [[reference][reference]] -> NOT supported by:
@@ -785,12 +785,12 @@ Detect previewing process generated THUMBNAIL-FILE existing, auto kill process a
           (t
            (message "[org-link-beautify] DEBUG: link type not supported, add PR for this link type.
 type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
-           (nerd-icons-mdicon "nf-md-progress_question" :face '(:inherit nerd-icons-lyellow :slant normal))))))
+           (nerd-icons-mdicon "nf-md-progress_question" :face '(:inherit nerd-icons-lyellow :slant normal :weight normal :underline nil))))))
       (_
        (message "[org-link-beautify] DEBUG: link type not supported, add PR for this link type.
 type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
        ;; handle when returned link type is `nil'.
-       (nerd-icons-mdicon "nf-md-progress_question" :face '(:inherit nerd-icons-lyellow :slant normal))))))
+       (nerd-icons-mdicon "nf-md-progress_question" :face '(:inherit nerd-icons-lyellow :slant normal :weight normal :underline nil))))))
 
 (defun org-link-beautify-iconify (ov path link)
   "Iconify PATH over OV overlay position for LINK element."
@@ -802,14 +802,15 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
       (overlay-put ov
                    'before-string (concat
                                    (propertize "[" 'face '(:inherit default :foreground "orange"))
-                                   ;; (propertize icon 'face '(:inherit nil :slant normal :weight normal))
+                                   ;; (propertize icon 'face '(:inherit nil :slant normal :weight normal :underline nil))
                                    icon
                                    (propertize "]" 'face '(:inherit default :foreground "orange"))))
       (overlay-put ov
                    'display (concat
                              (propertize "["
                                          'face `( :inherit default
-                                                  :underline t
+                                                  :slant normal :weight normal
+                                                  :underline nil
                                                   :foreground ,(if (face-foreground 'shadow)
                                                                    (color-lighten-name (face-foreground 'shadow) 2)
                                                                  "gray40")))
@@ -818,7 +819,8 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
                                          'read-only t 'intangible t 'inhibit-isearch nil)
                              (propertize "]"
                                          'face `( :inherit default
-                                                  :underline t
+                                                  :slant normal :weight normal
+                                                  :underline nil
                                                   :foreground ,(if (face-foreground 'shadow)
                                                                    (color-lighten-name (face-foreground 'shadow) 2)
                                                                  "gray40")))))
