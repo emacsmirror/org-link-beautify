@@ -2665,7 +2665,7 @@ This is for link image previewing to get around function `org-link-preview'
   :group 'org-link-beautify
   :global t
   :init-value nil
-  :lighter " ߷"
+  :lighter " ⧉"
   :keymap org-link-beautify-mode-map ; avoid to enable `org-link-beautify-keymap' globally everywhere.
   (if org-link-beautify-mode
       (org-link-beautify-enable)
