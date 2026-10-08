@@ -25,7 +25,7 @@ Supports video file link preview with thumbnail.
 #+ATTR_HTML: :width 600px
 [[file:video-thumbnail.png]]
 
-* Features [20/24]
+* Features [22/23]
 
 - [X] Only display org-link-beautify preview images (and icons) when headline
   expanded. This will reduce Emacs memory and improve performance!!!
@@ -68,9 +68,9 @@ Supports video file link preview with thumbnail.
 - =[c]= :: =org-link-beautify-copy-file-to-clipboard=, copy the file at point link to system clipboard for pasting.
 - [X] preview text files like .org, .markdown (.md), .txt, and source code files etc (customized with ~org-link-beautify-text-preview-list~).
 - [X] preview archive files like .zip, .rar, .tar.gz, .tar.bz2, .7z etc.
-- [ ] preview URL with screenshot on web page (Still considering whether should add this feature.)
+- [X] preview URL with screenshot on web page (Still considering whether should add this feature.)
 - [ ] preview FictionBook2 (.fb2, .fb2.zip) covert image
-- [ ] preview subtitle file with limited lines
+- [X] preview subtitle file with limited lines
 - [X] display link filename over thumbnail to display more link information through Emacs overlay
 
 * Install
@@ -82,7 +82,7 @@ The new implementation is based on Org mode new ~org-link-parameter~ =:preview= 
 
 ** Requirements
 
-- nerd-icons :: 
+- nerd-icons ::
 
 - video thumbnail feature needs package "=ffmpegthumbnailer="
 
