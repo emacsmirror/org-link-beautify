@@ -815,7 +815,7 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
                                    (propertize "]" 'face '(:inherit default :foreground "orange"))))
       (overlay-put ov
                    'display (concat
-                             (propertize "["
+                             (propertize "｢"
                                          'face `( :inherit default
                                                   :slant normal :weight normal
                                                   :underline nil
@@ -825,7 +825,7 @@ type: %s, path: %s, extension: %s, link-element: %s" type path extension link)
                              (propertize description
                                          'face (org-link-beautify--return-warning-face ov path link)
                                          'read-only t 'intangible t 'inhibit-isearch nil)
-                             (propertize "]"
+                             (propertize "｣"
                                          'face `( :inherit default
                                                   :slant normal :weight normal
                                                   :underline nil
