@@ -701,11 +701,19 @@ Detect previewing process generated THUMBNAIL-FILE existing, auto kill process a
 
 (defun org-link-beautify--return-warning-face (ov path link)
   "Return warning face if PATH does not exist on OV overlay at LINK element."
-  (when (string-equal (org-element-property :type link) "file")
-    (if (and (not (file-remote-p path))
-             (file-exists-p (expand-file-name path)))
-        'org-link
-      'error)))
+  
+  (pcase (org-element-property :type link)
+    ("file"
+     (if (and (not (file-remote-p path))
+              (file-exists-p (expand-file-name path)))
+         '(:inherit org-link :slant normal)
+       'error))
+    ("attachment"
+     (let* ((path (org-attach-expand path)))
+       (if (and (not (file-remote-p path))
+                (file-exists-p (expand-file-name path)))
+           '(:inherit org-link :slant normal)
+         'error)))))
 
 (defun org-link-beautify--return-icon (ov path link)
   "Return icon for PATH on OV overlay at LINK element."
