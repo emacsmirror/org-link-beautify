@@ -720,8 +720,6 @@ Detect previewing process generated THUMBNAIL-FILE existing, auto kill process a
   (let ((type (org-element-property :type link))
         (extension (file-name-extension path)))
     (pcase type
-      ;; FIXME: the icon is slant. Fix with `propertize' :face '(:slant normal :weight normal)
-      ;; NOTE: the icons color is not inherited, because overlay `'after-string' does not support propertized text.
       ("file" (nerd-icons-icon-for-file path :face '(:inherit nerd-icons-blue :slant normal :weight normal :underline nil)))
       ("attachment" (nerd-icons-icon-for-file path :face '(:inherit nerd-icons-maroon :slant normal :weight normal :underline nil)))
       ("http" (nerd-icons-icon-for-url (concat type ":" path) :face '(:inherit nerd-icons-dsilver :slant normal :weight normal :underline nil)))
