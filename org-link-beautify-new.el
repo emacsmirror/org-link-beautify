@@ -2473,8 +2473,6 @@ This is for link image previewing to get around function `org-link-preview'
       ("https" (org-link-set-parameters link-type :preview #'org-link-beautify-preview-url))
       ("ftp" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
       
-      ;; Org mode internal link types
-      ("custom-id" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify))
       ("id" (org-link-set-parameters link-type :preview #'org-link-beautify-iconify)) ; `org-id'
       ("coderef" (org-link-set-parameters link-type
                                           :preview #'org-link-beautify-iconify
@@ -2628,12 +2626,16 @@ This is for link image previewing to get around function `org-link-preview'
       ("macappstore" (org-link-set-parameters link-type
                                               :preview #'org-link-beautify-iconify
                                               :display 'full)) ; Mac App Store
-      ("fuzzy" (org-link-set-parameters link-type
-                                        :preview #'org-link-beautify-iconify
-                                        :display 'full)) ; org-mode internal raw link type
       (_ (org-link-set-parameters link-type
                                   :preview #'org-link-beautify-iconify
                                   :display 'full))))
+
+  ;; org-mode internal raw link type
+  (dolist (org-internal-link-type '("coderef" "custom-id" "radio")) ; "fuzzy"
+    ;; copy from `org-link-set-parameters'
+    ;; (when (member org-internal-link-type '("coderef" "custom-id" "fuzzy" "radio"))
+    ;;   (error "Cannot override reserved link type: %S" org-internal-link-type))
+    (org-link-set-parameters org-internal-link-type :preview #'org-link-beautify-iconify))
   
   ;; remove link description
   (unless (and (boundp 'org-link-preview-include-descriptive) org-link-preview-include-descriptive)
